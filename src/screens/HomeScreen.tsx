@@ -37,10 +37,11 @@ import { searchEntries, searchCivilizations } from '../utils/arabicSearch';
 import { getCivImageUrl } from '../utils/assets';
 import { getEstimatedReadingTime, formatReadingTime } from '../utils/readingTime';
 import { useTheme } from '../theme/ThemeContext';
-import { ar } from '../i18n/ar';
+import { legacyAr as ar } from '../i18n/legacyAr';
 import anqaBannerImg from '../assets/images/anqa_oasis_banner_1793094389649.jpg';
 import { SurpriseMeButton } from '../components/primitives/SurpriseMeButton';
 
+import { useI18n } from '../i18n/i18n';
 const RunnerIcon = ({ size = 20, className = '' }: { size?: number; className?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <circle cx="15" cy="4" r="2" />
@@ -79,6 +80,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   onSelectCivilization,
   onExploreCivilizations,
 }) => {
+  const { t } = useI18n();
   const { tokens, isDark } = useTheme();
 
   const allCivilizations = useMemo(() => getAllCivilizations(), []);
@@ -169,7 +171,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             style={{ color: tokens.deepAccent }}
             className="font-['Aref_Ruqaa',serif] text-2xl sm:text-3xl font-bold leading-tight tracking-wide"
           >
-            {ar.home.greeting}
+            {t('home.greeting')}
           </h1>
           <p
             style={{ color: tokens.textSecondary }}
@@ -401,7 +403,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                   }}
                   className="flex-1 py-1 rounded-lg font-bold text-center transition-all cursor-pointer min-h-[32px]"
                 >
-                  الكل
+                  {t('map.all')}
                 </button>
                 <button
                   type="button"
@@ -585,7 +587,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       {/* 3. Section "التصنيفات": 2x2 + 1 grid of category tiles */}
       <div>
         <SectionTitle
-          title={ar.home.categoriesTitle}
+          title={t('home.categories')}
           subtitle={ar.home.categoriesSubtitle}
         />
 
@@ -626,7 +628,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 style={{ color: tokens.textPrimary }}
                 className="font-['Aref_Ruqaa',serif] text-lg font-bold block leading-tight"
               >
-                {ar.categories.creatures}
+                {t('cat.creatures')}
               </span>
               <span
                 style={{ color: tokens.textSecondary }}
@@ -673,7 +675,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 style={{ color: tokens.textPrimary }}
                 className="font-['Aref_Ruqaa',serif] text-lg font-bold block leading-tight"
               >
-                {ar.categories.gods}
+                {t('cat.gods')}
               </span>
               <span
                 style={{ color: tokens.textSecondary }}
@@ -720,7 +722,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 style={{ color: tokens.textPrimary }}
                 className="font-['Aref_Ruqaa',serif] text-lg font-bold block leading-tight"
               >
-                {ar.categories.rituals}
+                {t('cat.rituals')}
               </span>
               <span
                 style={{ color: tokens.textSecondary }}
@@ -767,7 +769,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 style={{ color: tokens.textPrimary }}
                 className="font-['Aref_Ruqaa',serif] text-lg font-bold block leading-tight"
               >
-                {ar.categories.places}
+                {t('cat.places')}
               </span>
               <span
                 style={{ color: tokens.textSecondary }}
@@ -814,7 +816,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 style={{ color: tokens.textPrimary }}
                 className="font-['Aref_Ruqaa',serif] text-lg font-bold block leading-tight"
               >
-                {ar.categories.personalities}
+                {t('cat.personalities')}
               </span>
               <span
                 style={{ color: tokens.textSecondary }}
@@ -853,7 +855,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 }}
                 className="text-[11px] font-bold px-2 py-0.5 rounded-full"
               >
-                الصعاليك
+                {t('cat.sa3aleek')}
               </span>
             </div>
             <div>
@@ -861,7 +863,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 style={{ color: tokens.textPrimary }}
                 className="font-['Aref_Ruqaa',serif] text-lg font-bold block leading-tight"
               >
-                {ar.categories.sa3aleek}
+                {t('cat.sa3aleek')}
               </span>
               <span
                 style={{ color: tokens.textSecondary }}
@@ -908,7 +910,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 style={{ color: tokens.textPrimary }}
                 className="font-['Aref_Ruqaa',serif] text-lg font-bold block leading-tight"
               >
-                {ar.categories.kings}
+                {t('cat.kings')}
               </span>
               <span
                 style={{ color: tokens.textSecondary }}
@@ -955,7 +957,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 style={{ color: tokens.textPrimary }}
                 className="font-['Aref_Ruqaa',serif] text-lg font-bold block leading-tight"
               >
-                {ar.categories.seers}
+                {t('cat.seers')}
               </span>
               <span
                 style={{ color: tokens.textSecondary }}
@@ -1030,7 +1032,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                   }}
                   className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold shadow-md transition-all duration-200 cursor-pointer min-h-[44px]"
                 >
-                  <span>{ar.home.readStory}</span>
+                  <span>{t('article.readStory')}</span>
                   <ChevronLeft size={16} />
                 </button>
 
@@ -1212,7 +1214,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       {/* 5. Section "الأكثر قراءة" */}
       <div>
         <SectionTitle
-          title={ar.home.mostReadTitle}
+          title={t('home.mostRead')}
           subtitle={ar.home.mostReadSubtitle}
           action={
             <button

@@ -17,7 +17,7 @@ import {
   themeTokens,
 } from '../src/theme/tokens';
 import { storage } from '../src/data/storage';
-import { ar } from '../src/i18n/ar';
+import { legacyAr as ar } from '../src/i18n/legacyAr';
 
 test('STEP 1: Dark theme tokens match exact user-specified hex values', () => {
   // background: #0B2420

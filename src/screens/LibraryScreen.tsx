@@ -32,7 +32,7 @@ import { MythEntry } from '../data/types';
 import mythsData from '../data/myths.json';
 import { hasDeepStory } from '../data/storyTypes';
 import { getEstimatedReadingTime, formatReadingTime } from '../utils/readingTime';
-import { ar } from '../i18n/ar';
+import { legacyAr as ar } from '../i18n/legacyAr';
 import { normalizeArabic } from '../utils/arabicSearch';
 import { useTheme } from '../theme/ThemeContext';
 import { storage } from '../data/storage';
@@ -47,6 +47,7 @@ import {
 import { SurpriseMeButton } from '../components/primitives/SurpriseMeButton';
 import { useDebounce } from '../hooks/useDebounce';
 
+import { useI18n } from '../i18n/i18n';
 export interface LibraryScreenProps {
   onSelectEntry: (entry: MythEntry) => void;
   savedIds?: string[];
@@ -59,6 +60,7 @@ export interface LibraryScreenProps {
 export const LibraryScreen: React.FC<LibraryScreenProps> = ({
   onSelectEntry,
 }) => {
+  const { t } = useI18n();
   const { tokens, isDark } = useTheme();
 
   // Segmented control: 'myths' | 'studio'
@@ -227,7 +229,7 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
           className="flex-1 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all text-center flex items-center justify-center gap-2 cursor-pointer shadow-xs"
         >
           <BookOpen size={15} />
-          <span>الأساطير</span>
+          <span>{t('library.myths')}</span>
         </button>
         <button
           type="button"
@@ -241,7 +243,7 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
           className="flex-1 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all text-center flex items-center justify-center gap-2 cursor-pointer shadow-xs"
         >
           <Wand2 size={15} />
-          <span>أدوات المبدع</span>
+          <span>{t('library.creatorTools')}</span>
         </button>
       </div>
 
@@ -317,7 +319,7 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
             }}
             className="shrink-0 px-3 py-1.5 rounded-2xl text-xs font-bold border transition-all cursor-pointer hover:opacity-90 active:scale-95"
           >
-            <span>الكل</span>
+            <span>{t('map.all')}</span>
             <span className="text-[10px] mr-1 opacity-80">({statusCounts.all})</span>
           </button>
 
@@ -405,9 +407,9 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
               className="text-xs font-bold focus:outline-none cursor-pointer font-['Cairo',sans-serif]"
               aria-label="خيارات الترتيب"
             >
-              <option value="latest">الأحدث</option>
-              <option value="mostRead">الأكثر قراءة</option>
-              <option value="alphabetical">أبجدي</option>
+              <option value="latest">{t('library.newest')}</option>
+              <option value="mostRead">{t('library.mostRead')}</option>
+              <option value="alphabetical">{t('library.alphabetical')}</option>
             </select>
           </div>
 
@@ -627,7 +629,7 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
                     style={{ color: tokens.coolBlueAccent }}
                     className="flex items-center gap-1 group-hover:translate-x-[-2px] transition-transform font-bold shrink-0"
                   >
-                    <span>اقرأ القصة</span>
+                    <span>{t('article.readStory')}</span>
                     <ChevronLeft size={14} />
                   </div>
                 </div>

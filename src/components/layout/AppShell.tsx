@@ -7,6 +7,7 @@ import React from 'react';
 import { TabBar, TabId } from './TabBar';
 import { Logo } from '../primitives/Logo';
 import { useTheme } from '../../theme/ThemeContext';
+import { useI18n } from '../../i18n/i18n';
 
 export interface AppShellProps {
   activeTab: TabId;
@@ -32,11 +33,12 @@ export const AppShell: React.FC<AppShellProps> = ({
   children,
 }) => {
   const { tokens, isDark } = useTheme();
+  const { lang, dir, flag } = useI18n();
 
   return (
     <div
-      dir="rtl"
-      lang="ar"
+      dir={dir}
+      lang={lang}
       style={{
         backgroundColor: tokens.background,
         color: tokens.textPrimary,
@@ -76,7 +78,7 @@ export const AppShell: React.FC<AppShellProps> = ({
                     <Logo size={24} />
                   </div>
                 )}
-                <div className="text-right">
+                <div className="text-start">
                   <h1
                     style={{ color: tokens.deepAccent }}
                     className="font-['Aref_Ruqaa',serif] text-2xl font-bold leading-none tracking-wide"
@@ -95,11 +97,18 @@ export const AppShell: React.FC<AppShellProps> = ({
               </div>
 
               {/* Left side in RTL: Trailing actions */}
-              {headerTrailing && (
-                <div className="flex items-center gap-1.5">
-                  {headerTrailing}
-                </div>
-              )}
+              <div className="flex items-center gap-1.5">
+                <span
+                  role="img"
+                  aria-label={lang}
+                  title={lang}
+                  style={{ backgroundColor: tokens.card, borderColor: tokens.border }}
+                  className="w-8 h-8 rounded-full border flex items-center justify-center text-base leading-none shadow-xs"
+                >
+                  {flag}
+                </span>
+                {headerTrailing}
+              </div>
             </div>
           </header>
         )}

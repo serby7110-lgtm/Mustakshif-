@@ -20,11 +20,13 @@ import {
 import { Card } from '../components/primitives/Card';
 import { useTheme } from '../theme/ThemeContext';
 
+import { useI18n } from '../i18n/i18n';
 export interface MethodologyScreenProps {
   onBack?: () => void;
 }
 
 export const MethodologyScreen: React.FC<MethodologyScreenProps> = ({ onBack }) => {
+  const { t } = useI18n();
   const { tokens, isDark } = useTheme();
 
   return (
@@ -69,7 +71,7 @@ export const MethodologyScreen: React.FC<MethodologyScreenProps> = ({ onBack }) 
           style={{ color: tokens.deepAccent }}
           className="font-['Aref_Ruqaa',serif] text-2xl sm:text-3xl font-bold leading-tight"
         >
-          عن المنهج
+          {t('method.title')}
         </h1>
         <p
           style={{
@@ -203,7 +205,7 @@ export const MethodologyScreen: React.FC<MethodologyScreenProps> = ({ onBack }) 
                 className="px-3 py-1 rounded-full text-xs font-bold border inline-flex items-center gap-1.5 font-['Cairo',sans-serif]"
               >
                 <Sparkles size={13} />
-                <span>الرواية الشعبية</span>
+                <span>{t('method.folk')}</span>
               </span>
               <span
                 style={{ color: tokens.textSecondary }}
@@ -217,7 +219,7 @@ export const MethodologyScreen: React.FC<MethodologyScreenProps> = ({ onBack }) 
               style={{ color: tokens.textPrimary }}
               className="font-['Aref_Ruqaa',serif] text-lg font-bold"
             >
-              الرواية الشعبية
+              {t('method.folk')}
             </h3>
 
             <p
@@ -248,7 +250,7 @@ export const MethodologyScreen: React.FC<MethodologyScreenProps> = ({ onBack }) 
                 className="px-3 py-1 rounded-full text-xs font-bold border inline-flex items-center gap-1.5 font-['Cairo',sans-serif]"
               >
                 <Landmark size={13} />
-                <span>التحليل التاريخي</span>
+                <span>{t('method.analysis')}</span>
               </span>
               <span
                 style={{ color: tokens.textSecondary }}
@@ -262,7 +264,7 @@ export const MethodologyScreen: React.FC<MethodologyScreenProps> = ({ onBack }) 
               style={{ color: tokens.textPrimary }}
               className="font-['Aref_Ruqaa',serif] text-lg font-bold"
             >
-              التحليل التاريخي
+              {t('method.analysis')}
             </h3>
 
             <p

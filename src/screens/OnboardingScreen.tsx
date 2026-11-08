@@ -9,7 +9,7 @@
 
 import React, { useState, useRef } from 'react';
 import { ChevronLeft, ChevronRight, Sparkles, BookOpen, Compass } from 'lucide-react';
-import { ar } from '../i18n/ar';
+import { legacyAr as ar } from '../i18n/legacyAr';
 import { Logo } from '../components/primitives/Logo';
 import { useTheme } from '../theme/ThemeContext';
 

@@ -32,6 +32,7 @@ import { normalizeArabic } from '../utils/arabicSearch';
 import { getCivImageUrl } from '../utils/assets';
 import { storage } from '../data/storage';
 
+import { useI18n } from '../i18n/i18n';
 export interface CivilizationsScreenProps {
   onSelectMythId?: (mythId: string) => void;
   selectedCivId?: string | null;
@@ -45,6 +46,7 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
   onClearSelectedCiv,
   onOpenMethodology,
 }) => {
+  const { t } = useI18n();
   const { tokens, isDark } = useTheme();
 
   // Selected civilization for detail view
@@ -419,7 +421,7 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
           className="flex-1 py-2 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs"
         >
           <List size={15} />
-          <span>القائمة</span>
+          <span>{t('timeline.list')}</span>
         </button>
 
         <button
@@ -435,7 +437,7 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
           className="flex-1 py-2 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs"
         >
           <Clock size={15} />
-          <span>خط الزمن</span>
+          <span>{t('timeline.timeline')}</span>
         </button>
       </div>
 
@@ -462,7 +464,7 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
                 <div>
                   <div className="flex items-center gap-2">
                     <span style={{ color: tokens.textPrimary }} className="text-xs sm:text-sm font-bold font-['Aref_Ruqaa',serif]">
-                      رحلة عبر الزمن
+                      {t('timeline.journey')}
                     </span>
                     <span
                       style={{
@@ -936,7 +938,7 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
                 }}
                 className="shrink-0 px-3.5 py-1.5 rounded-2xl text-xs font-bold border transition-all cursor-pointer hover:opacity-90 active:scale-95"
               >
-                <span>الكل</span>
+                <span>{t('map.all')}</span>
                 <span className="text-[10px] mr-1 opacity-80">({allCivilizations.length})</span>
               </button>
 
@@ -1203,8 +1205,8 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
         <button
           type="button"
           onClick={handleStartTour}
-          title="رحلة عبر الزمن"
-          aria-label="رحلة عبر الزمن"
+          title={t('timeline.journey')}
+          aria-label={t('timeline.journey')}
           style={{
             backgroundColor: '#0E5C4D',
             width: '52px',
