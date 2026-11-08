@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" />
+    <title>مستكشف | Mustakshif - موسوعة الأساطير والكائنات والرموز الفولكلورية العربية</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0E5C4D">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="مستكشف">
+    <link rel="apple-touch-icon" href="/icons/icon.svg">
+    <link rel="icon" type="image/svg+xml" href="/icons/icon.svg">
+    <meta name="description" content="موسوعة الأساطير والكائنات والرموز الفولكلورية العربية بتصميم عربي حديث وقارئ هادئ للطلاب والعائلات." />
+    <meta property="og:title" content="مستكشف | Mustakshif" />
+    <meta property="og:description" content="موسوعة الأساطير والكائنات والرموز الفولكلورية العربية بتصميم عربي حديث وقارئ هادئ للطلاب والعائلات." />
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+    <!-- Google Fonts: Cairo, Tajawal, Aref Ruqaa, Amiri, Reem Kufi -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=Aref+Ruqaa:wght@400;700&family=Cairo:wght@400;500;600;700;800&family=Reem+Kufi:wght@400;500;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+  </head>
+  <body class="bg-theme-surface text-theme-text-primary antialiased selection:bg-[#7FD1AE]/30">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js');
+        });
+      }
+    </script>
+  </body>
+</html>

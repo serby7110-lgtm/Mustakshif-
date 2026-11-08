@@ -1,0 +1,6 @@
+{
+  "name": "مستكشف | Mustakshif",
+  "description": "موسوعة الأساطير والكائنات والرموز الفولكلورية العربية بتصميم عربي حديث وقارئ هادئ للطلاب والعائلات.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
