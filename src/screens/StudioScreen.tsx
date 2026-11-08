@@ -28,7 +28,7 @@ import {
 } from 'lucide-react';
 
 import { useTheme } from '../theme/ThemeContext';
-import { ar } from '../i18n/ar';
+import { legacyAr as ar } from '../i18n/legacyAr';
 import { storage } from '../data/storage';
 import { getAllEntries } from '../data/seed';
 import { MythEntry } from '../data/types';
@@ -49,11 +49,13 @@ import {
   resolveMythForStoryKey,
 } from '../utils/studioHooks';
 
+import { useI18n } from '../i18n/i18n';
 export interface StudioScreenProps {
   onSelectEntry: (entry: MythEntry) => void;
 }
 
 export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => {
+  const { t } = useI18n();
   const { tokens, isDark } = useTheme();
 
   // All myth entries and deep stories
@@ -613,7 +615,7 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
                     style={{ color: tokens.textPrimary }}
                     className="font-['Aref_Ruqaa',serif] text-lg font-bold"
                   >
-                    {ar.studio.gameHooks}
+                    {t('article.gameHooks')}
                   </h3>
                 </div>
                 <span
@@ -733,7 +735,7 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
                     style={{ color: tokens.textPrimary }}
                     className="font-['Aref_Ruqaa',serif] text-lg font-bold"
                   >
-                    {ar.studio.writingHooks}
+                    {t('article.writingHooks')}
                   </h3>
                 </div>
                 <span
@@ -922,7 +924,7 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
           {/* Type Filter Chips: الكل / نص حرفي / بأسلوب المصدر */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
             {[
-              { id: 'all', label: ar.studio.quotesFilterAll, isAdaptive: false },
+              { id: 'all', label: t('map.all'), isAdaptive: false },
               { id: 'نص حرفي', label: ar.studio.quotesFilterLiteral, isAdaptive: false },
               { id: 'بأسلوب المصدر', label: ar.studio.quotesFilterAdaptive, isAdaptive: true },
             ].map((chip) => {

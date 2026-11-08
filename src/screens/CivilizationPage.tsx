@@ -32,6 +32,7 @@ import { getCivImageUrl } from '../utils/assets';
 import { storage } from '../data/storage';
 import { MethodologyScreen } from './MethodologyScreen';
 
+import { useI18n } from '../i18n/i18n';
 export interface CivilizationPageProps {
   civilization: Civilization;
   onBack: () => void;
@@ -45,6 +46,7 @@ export const CivilizationPage: React.FC<CivilizationPageProps> = ({
   onSelectMythId,
   onOpenMethodology,
 }) => {
+  const { t } = useI18n();
   const { tokens, isDark } = useTheme();
 
   const [isMethodologyOpen, setIsMethodologyOpen] = useState(false);
@@ -251,7 +253,7 @@ export const CivilizationPage: React.FC<CivilizationPageProps> = ({
               style={{ color: tokens.deepAccent }}
               className="font-['Aref_Ruqaa',serif] text-xl font-bold"
             >
-              القصة
+              {t('civ.story')}
             </h2>
           </div>
 
@@ -340,7 +342,7 @@ export const CivilizationPage: React.FC<CivilizationPageProps> = ({
             style={{ color: tokens.deepAccent }}
             className="font-['Aref_Ruqaa',serif] text-lg font-bold"
           >
-            الاقتصاد والمجتمع
+            {t('civ.economy')}
           </h2>
           <Card variant="white" elevation="subtle" className="p-4 sm:p-5 space-y-3 rounded-2xl">
             {civilization.economy && (
@@ -396,7 +398,7 @@ export const CivilizationPage: React.FC<CivilizationPageProps> = ({
             style={{ color: tokens.deepAccent }}
             className="font-['Aref_Ruqaa',serif] text-lg font-bold"
           >
-            النبي المرسل
+            {t('civ.prophet')}
           </h2>
           <div
             style={{
@@ -452,7 +454,7 @@ export const CivilizationPage: React.FC<CivilizationPageProps> = ({
             style={{ color: tokens.deepAccent }}
             className="font-['Aref_Ruqaa',serif] text-lg font-bold"
           >
-            الآثار اليوم
+            {t('civ.archaeology')}
           </h2>
           <Card variant="white" elevation="subtle" className="p-4 sm:p-5 rounded-2xl">
             <ul className="space-y-2.5">
@@ -498,8 +500,8 @@ export const CivilizationPage: React.FC<CivilizationPageProps> = ({
                     setIsMethodologyOpen(true);
                   }
                 }}
-                title="عن المنهج"
-                aria-label="عن المنهج"
+                title={t('method.title')}
+                aria-label={t('method.title')}
                 style={{
                   backgroundColor: tokens.surface,
                   borderColor: tokens.border,
@@ -552,7 +554,7 @@ export const CivilizationPage: React.FC<CivilizationPageProps> = ({
                 }`}
               >
                 <Scroll size={14} />
-                <span>رواية التراث</span>
+                <span>{t('civ.tradition')}</span>
               </button>
 
               <button
@@ -576,7 +578,7 @@ export const CivilizationPage: React.FC<CivilizationPageProps> = ({
                 }`}
               >
                 <Landmark size={14} />
-                <span>رواية الآثار</span>
+                <span>{t('civ.archaeologyView')}</span>
               </button>
             </div>
           )}
@@ -630,7 +632,7 @@ export const CivilizationPage: React.FC<CivilizationPageProps> = ({
             style={{ color: tokens.deepAccent }}
             className="font-['Aref_Ruqaa',serif] text-lg font-bold"
           >
-            ملاحظة المؤرخ
+            {t('civ.historian')}
           </h2>
           <div
             style={{
@@ -684,7 +686,7 @@ export const CivilizationPage: React.FC<CivilizationPageProps> = ({
               title="نسخ ملف الحضارة كـ JSON"
             >
               <FileCode size={16} />
-              <span>انسخ كـ JSON</span>
+              <span>{t('article.copyJson')}</span>
             </button>
 
             <button
@@ -713,7 +715,7 @@ export const CivilizationPage: React.FC<CivilizationPageProps> = ({
             style={{ color: tokens.deepAccent }}
             className="font-['Aref_Ruqaa',serif] text-lg font-bold"
           >
-            صلة بالأساطير
+            {t('civ.relatedMyths')}
           </h2>
           <p style={{ color: tokens.textSecondary }} className="text-xs">
             أساطير وشخصيات فولكلورية ترتبط بسيرة هذه الحضارة (اضغط لقراءة تفاصيل الأسطورة):

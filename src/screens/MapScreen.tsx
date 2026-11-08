@@ -39,6 +39,7 @@ import { normalizeArabic } from '../utils/arabicSearch';
 import { getCivImageUrl } from '../utils/assets';
 import { useDebounce } from '../hooks/useDebounce';
 
+import { useI18n } from '../i18n/i18n';
 export interface MapScreenProps {
   onSelectEntry: (entry: MythEntry) => void;
   onSelectCivilization?: (civId: string) => void;
@@ -151,6 +152,7 @@ export const MapScreen: React.FC<MapScreenProps> = ({
   onSelectEntry,
   onSelectCivilization,
 }) => {
+  const { t } = useI18n();
   const { tokens, isDark } = useTheme();
 
   // Top Bar Search & Filter states (with 300ms debounce)
@@ -659,7 +661,7 @@ export const MapScreen: React.FC<MapScreenProps> = ({
         {/* Scrollable Filter Chips: الكل، آلهة، كائنات، أماكن، أبطال، شخصيات، طقوس، حضارات */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar -mx-1 px-1">
           {[
-            { id: 'all' as MapFilterCategory, label: 'الكل' },
+            { id: 'all' as MapFilterCategory, label: t('map.all') },
             { id: 'gods' as MapFilterCategory, label: 'آلهة' },
             { id: 'creatures' as MapFilterCategory, label: 'كائنات' },
             { id: 'places' as MapFilterCategory, label: 'أماكن' },
@@ -749,7 +751,7 @@ export const MapScreen: React.FC<MapScreenProps> = ({
             style={{ color: isDark ? '#7FD1AE' : '#0E5C4D' }}
             className="font-['Aref_Ruqaa',serif] text-xs font-bold border-b border-[#7FD1AE]/30 pb-1"
           >
-            دليل الخريطة
+            {t('map.legend')}
           </h4>
 
           <div className="space-y-1 text-[10px] font-['Cairo',sans-serif] font-medium leading-tight text-[#14312B] dark:text-[#E2F7ED]">
@@ -1277,7 +1279,7 @@ export const MapScreen: React.FC<MapScreenProps> = ({
                 }}
                 className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold shadow-md hover:opacity-90 active:scale-98 transition-all cursor-pointer font-['Cairo',sans-serif]"
               >
-                <span>اقرأ القصة</span>
+                <span>{t('article.readStory')}</span>
                 <ChevronLeft size={16} className="transform scale-x-[-1]" />
               </button>
             </div>

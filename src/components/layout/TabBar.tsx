@@ -6,21 +6,24 @@
 import React from 'react';
 import { Home, Landmark, Map, BookOpen, User } from 'lucide-react';
 import { useTheme } from '../../theme/ThemeContext';
+import { useI18n } from '../../i18n/i18n';
+import type { TranslationKey } from '../../i18n';
 
 export type TabId = 'home' | 'civilizations' | 'map' | 'library' | 'profile';
 
 export interface TabItem {
   id: TabId;
   label: string;
+  labelKey: TranslationKey;
   icon: React.ComponentType<{ className?: string; size?: number }>;
 }
 
 export const TABS: readonly TabItem[] = [
-  { id: 'home', label: 'الرئيسية', icon: Home },
-  { id: 'civilizations', label: 'الحضارات', icon: Landmark },
-  { id: 'map', label: 'الخريطة', icon: Map },
-  { id: 'library', label: 'المكتبة', icon: BookOpen },
-  { id: 'profile', label: 'حسابي', icon: User },
+  { id: 'home', label: 'الرئيسية', labelKey: 'nav.home', icon: Home },
+  { id: 'civilizations', label: 'الحضارات', labelKey: 'nav.civilizations', icon: Landmark },
+  { id: 'map', label: 'الخريطة', labelKey: 'nav.map', icon: Map },
+  { id: 'library', label: 'المكتبة', labelKey: 'nav.library', icon: BookOpen },
+  { id: 'profile', label: 'حسابي', labelKey: 'nav.profile', icon: User },
 ] as const;
 
 export interface TabBarProps {
@@ -35,6 +38,7 @@ export const TabBar: React.FC<TabBarProps> = ({
   className = '',
 }) => {
   const { tokens, isDark } = useTheme();
+  const { t } = useI18n();
 
   return (
     <nav
@@ -56,7 +60,7 @@ export const TabBar: React.FC<TabBarProps> = ({
               key={tab.id}
               type="button"
               onClick={() => onTabChange(tab.id)}
-              aria-label={tab.label}
+              aria-label={t(tab.labelKey)}
               aria-selected={isActive}
               role="tab"
               className="flex-1 flex flex-col items-center justify-center py-1.5 px-2 rounded-2xl transition-all duration-200 cursor-pointer group"
@@ -90,7 +94,7 @@ export const TabBar: React.FC<TabBarProps> = ({
                 }}
                 className="text-[11px] font-['Cairo',sans-serif] mt-1 transition-all leading-none"
               >
-                {tab.label}
+                {t(tab.labelKey)}
               </span>
             </button>
           );

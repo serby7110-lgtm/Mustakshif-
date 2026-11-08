@@ -45,10 +45,11 @@ import { storage, FontSize } from '../data/storage';
 import { getEstimatedReadingTime, formatReadingTime } from '../utils/readingTime';
 import { useTheme } from '../theme/ThemeContext';
 import { useArabicTTS, TTSState } from '../hooks/useArabicTTS';
-import { ar } from '../i18n/ar';
+import { legacyAr as ar } from '../i18n/legacyAr';
 import { getCivByRelatedMythId } from '../data/civTypes';
 import { MethodologyScreen } from './MethodologyScreen';
 
+import { useI18n } from '../i18n/i18n';
 export interface ArticleScreenProps {
   entryId: string;
   onBack: () => void;
@@ -72,6 +73,7 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
   onSelectCivilization,
   onOpenMethodology,
 }) => {
+  const { t } = useI18n();
   const { tokens, isDark } = useTheme();
 
   const [isMethodologyOpen, setIsMethodologyOpen] = useState(false);
@@ -166,8 +168,8 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                   setIsMethodologyOpen(true);
                 }
               }}
-              title="عن المنهج"
-              aria-label="عن المنهج"
+              title={t('method.title')}
+              aria-label={t('method.title')}
               style={{
                 backgroundColor: tokens.surface,
                 borderColor: tokens.border,
@@ -220,7 +222,7 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
               }`}
             >
               <Scroll size={14} />
-              <span>الرواية الشعبية</span>
+              <span>{t('method.folk')}</span>
             </button>
 
             <button
@@ -244,7 +246,7 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
               }`}
             >
               <BookOpen size={14} />
-              <span>التحليل التاريخي</span>
+              <span>{t('method.analysis')}</span>
             </button>
           </div>
         )}
@@ -277,12 +279,12 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
               {effectiveMythNarrativeView === 'tradition' ? (
                 <>
                   <Scroll size={12} />
-                  <span>الرواية الشعبية</span>
+                  <span>{t('method.folk')}</span>
                 </>
               ) : (
                 <>
                   <BookOpen size={12} />
-                  <span>التحليل التاريخي</span>
+                  <span>{t('method.analysis')}</span>
                 </>
               )}
             </span>
@@ -1135,7 +1137,7 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                   className="font-['Aref_Ruqaa',serif] text-xl font-bold flex items-center gap-2"
                 >
                   <BookOpen size={20} style={{ color: tokens.primaryMint }} />
-                  <span>الحكاية الكاملة</span>
+                  <span>{t('article.chapters')}</span>
                 </h3>
                 <span
                   style={{
@@ -1221,7 +1223,7 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                   className="font-['Aref_Ruqaa',serif] text-xl font-bold flex items-center gap-2"
                 >
                   <Scroll size={20} style={{ color: tokens.coolBlueAccent }} />
-                  <span>من المصادر</span>
+                  <span>{t('article.quotes')}</span>
                 </h3>
                 <span
                   style={{ color: tokens.textSecondary }}
@@ -1276,7 +1278,7 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                           ) : (
                             <>
                               <Copy size={13} />
-                              <span className="text-[11px]">نسخ</span>
+                              <span className="text-[11px]">{t('common.copy')}</span>
                             </>
                           )}
                         </button>
@@ -1321,7 +1323,7 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                 className="font-['Aref_Ruqaa',serif] text-xl font-bold flex items-center gap-2"
               >
                 <Sparkles size={20} style={{ color: tokens.deepAccent }} />
-                <span>عدّة المبدع</span>
+                <span>{t('article.creatorKit')}</span>
               </h3>
               <span
                 style={{
@@ -1497,7 +1499,7 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                     style={{ color: tokens.deepAccent }}
                     className="font-['Aref_Ruqaa',serif] text-lg font-bold"
                   >
-                    لكتّاب القصص
+                    {t('article.writingHooks')}
                   </h4>
                 </div>
 
@@ -1595,7 +1597,7 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                   className="font-['Aref_Ruqaa',serif] text-lg font-bold flex items-center gap-2"
                 >
                   <Sparkles size={18} style={{ color: tokens.primaryMint }} />
-                  <span>مشاهد مقترحة</span>
+                  <span>{t('article.scenes')}</span>
                 </h4>
 
                 <div className="relative pr-5 space-y-4 border-r-2" style={{ borderColor: tokens.primaryMint }}>
@@ -1641,7 +1643,7 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                     className="flex items-center gap-2 font-['Aref_Ruqaa',serif] text-base font-bold"
                   >
                     <Scale size={18} />
-                    <span>قرار اللاعب</span>
+                    <span>{t('article.decision')}</span>
                   </div>
                   <button
                     type="button"
@@ -1715,7 +1717,7 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
             className="font-['Aref_Ruqaa',serif] text-lg font-bold flex items-center gap-2"
           >
             <Clock size={18} style={{ color: tokens.coolBlueAccent }} />
-            <span>{ar.article.timelineTitle}</span>
+            <span>{t('article.timeline')}</span>
           </h3>
           <span style={{ color: tokens.textSecondary }} className="text-[11px]">
             {ar.article.timelineSubtitle}
@@ -1809,7 +1811,7 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
           className="font-['Aref_Ruqaa',serif] text-lg font-bold flex items-center gap-2"
         >
           <BookOpen size={18} style={{ color: tokens.coolBlueAccent }} />
-          <span>{ar.article.sourcesTitle}</span>
+          <span>{t('article.sources')}</span>
         </h3>
 
         <div className="space-y-2.5">
@@ -1873,7 +1875,7 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
               className="font-['Aref_Ruqaa',serif] text-lg font-bold flex items-center gap-2"
             >
               <Compass size={18} style={{ color: tokens.deepAccent }} />
-              <span>{ar.article.relatedTitle}</span>
+              <span>{t('article.related')}</span>
             </h3>
             <span style={{ color: tokens.textSecondary }} className="text-[11px]">
               {ar.article.relatedSubtitle}
@@ -2076,12 +2078,12 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                 {copiedHook ? (
                   <>
                     <Check size={16} />
-                    <span>تم النسخ!</span>
+                    <span>{t('common.copied')}</span>
                   </>
                 ) : (
                   <>
                     <Copy size={16} />
-                    <span>نسخ</span>
+                    <span>{t('common.copy')}</span>
                   </>
                 )}
               </button>

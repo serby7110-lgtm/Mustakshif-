@@ -18,7 +18,8 @@ import { MYTH_ENTRIES, getEntriesByCategory, getEntryById } from './data/seed';
 import { MythEntry, MythCategory, CATEGORY_LABELS } from './data/types';
 import { storage, FontSize } from './data/storage';
 import { ThemeProvider, useTheme } from './theme/ThemeContext';
-import { ar } from './i18n/ar';
+import { legacyAr as ar } from './i18n/legacyAr';
+import { I18nProvider, useI18n } from './i18n/i18n';
 
 import { HomeScreen } from './screens/HomeScreen';
 import { ArticleScreen } from './screens/ArticleScreen';
@@ -33,6 +34,7 @@ import { ErrorBoundary } from './components/common/ErrorBoundary';
 
 function AppContent() {
   const { theme, isDark, toggleTheme, tokens } = useTheme();
+  const { t } = useI18n();
 
   // Splash Screen shown for ~1.5s on app start
   const [showSplash, setShowSplash] = useState<boolean>(() => {
@@ -173,7 +175,7 @@ function AppContent() {
           <div className="flex items-center gap-1.5">
             <IconButton
               icon={<Bookmark size={18} className={savedIds.length > 0 ? 'fill-current' : ''} />}
-              label={ar.tabs.library}
+              label={t('nav.library')}
               variant="surface"
               size="md"
               onClick={() => {
@@ -384,8 +386,10 @@ function AppContent() {
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <AppContent />
-    </ThemeProvider>
+    <I18nProvider>
+      <ThemeProvider>
+        <AppContent />
+      </ThemeProvider>
+    </I18nProvider>
   );
 }

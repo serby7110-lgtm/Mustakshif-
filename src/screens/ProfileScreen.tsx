@@ -47,7 +47,7 @@ import {
 import { Card } from '../components/primitives/Card';
 import { ThemeMode, FontSize, storage } from '../data/storage';
 import { useTheme } from '../theme/ThemeContext';
-import { ar } from '../i18n/ar';
+import { legacyAr as ar } from '../i18n/legacyAr';
 import mythsData from '../data/myths.json';
 import { MythEntry } from '../data/types';
 import {
@@ -57,6 +57,7 @@ import {
 } from '../utils/libraryAndProfile';
 import { MethodologyScreen } from './MethodologyScreen';
 
+import { useI18n } from '../i18n/i18n';
 export interface ProfileScreenProps {
   themeMode?: ThemeMode;
   onToggleTheme?: () => void;
@@ -77,6 +78,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
   onReplayOnboarding,
   onOpenMethodology,
 }) => {
+  const { t } = useI18n();
   const { tokens, isDark, toggleTheme } = useTheme();
 
   const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
@@ -669,7 +671,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                   style={{ color: tokens.textPrimary }}
                   className="font-bold text-sm font-['Cairo',sans-serif]"
                 >
-                  {ar.profile.darkMode}
+                  {t('profile.darkMode')}
                 </h4>
                 <p
                   style={{ color: tokens.textSecondary }}
@@ -685,7 +687,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
               type="button"
               role="switch"
               aria-checked={isDark}
-              aria-label="الوضع الليلي"
+              aria-label={t('profile.darkMode')}
               onClick={handleToggle}
               style={{
                 backgroundColor: isDark ? tokens.primaryMint : tokens.coolBlueTint,
@@ -765,7 +767,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                   style={{ color: tokens.textPrimary }}
                   className="font-bold text-sm font-['Cairo',sans-serif]"
                 >
-                  {ar.profile.language}
+                  {t('profile.language')}
                 </h4>
                 <p
                   style={{ color: tokens.textSecondary }}
@@ -850,7 +852,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                   style={{ color: tokens.textPrimary }}
                   className="font-bold text-sm font-['Cairo',sans-serif]"
                 >
-                  عن المنهج
+                  {t('profile.aboutMethod')}
                 </h4>
                 <p
                   style={{ color: tokens.textSecondary }}
@@ -921,7 +923,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                   style={{ color: tokens.textPrimary }}
                   className="font-bold text-sm font-['Cairo',sans-serif]"
                 >
-                  {ar.profile.contact}
+                  {t('profile.contact')}
                 </h4>
                 <p
                   style={{ color: tokens.textSecondary }}
@@ -956,7 +958,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                   style={{ color: tokens.textPrimary }}
                   className="font-bold text-sm font-['Cairo',sans-serif]"
                 >
-                  تصدير المفضلة
+                  {t('profile.export')}
                 </h4>
                 <p
                   style={{ color: tokens.textSecondary }}
@@ -1001,7 +1003,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                     style={{ color: tokens.textPrimary }}
                     className="font-bold text-sm font-['Cairo',sans-serif]"
                   >
-                    تثبيت التطبيق
+                    {t('profile.install')}
                   </h4>
                   <p
                     style={{ color: tokens.textSecondary }}
