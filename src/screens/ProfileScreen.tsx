@@ -47,7 +47,7 @@ import {
 import { Card } from '../components/primitives/Card';
 import { ThemeMode, FontSize, storage } from '../data/storage';
 import { useTheme } from '../theme/ThemeContext';
-import { legacyAr as ar } from '../i18n/legacyAr';
+import { ar } from '../i18n/ar';
 import mythsData from '../data/myths.json';
 import { MythEntry } from '../data/types';
 import {
@@ -56,8 +56,10 @@ import {
   BadgeItem,
 } from '../utils/libraryAndProfile';
 import { MethodologyScreen } from './MethodologyScreen';
+import { ContactScreen } from './ContactScreen';
+import { useAuth } from '../context/AuthContext';
+import { LANGUAGES, Language } from '../i18n/i18n';
 
-import { useI18n } from '../i18n/i18n';
 export interface ProfileScreenProps {
   themeMode?: ThemeMode;
   onToggleTheme?: () => void;
@@ -78,15 +80,28 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
   onReplayOnboarding,
   onOpenMethodology,
 }) => {
-  const { t } = useI18n();
   const { tokens, isDark, toggleTheme } = useTheme();
+  const { user, signIn, logOut, syncBookmarksToCloud } = useAuth();
+  const [syncing, setSyncing] = useState(false);
 
   const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
-  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+  const [isContactScreenOpen, setIsContactScreenOpen] = useState(false);
+  const [sentMessagesCount, setSentMessagesCount] = useState<number>(() => storage.getSentMessagesCount());
   const [isFontModalOpen, setIsFontModalOpen] = useState(false);
   const [isMethodologyOpen, setIsMethodologyOpen] = useState(false);
-  const [feedbackSent, setFeedbackSent] = useState(false);
-  const [feedbackText, setFeedbackText] = useState('');
+  const [isLangModalOpen, setIsLangModalOpen] = useState(false);
+  const [currentLang, setCurrentLang] = useState<Language>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('lang');
+      if (saved === 'ar' || saved === 'id' || saved === 'th') return saved;
+    }
+    return 'ar';
+  });
+
+  const activeLanguage = useMemo(
+    () => LANGUAGES.find((l) => l.lang === currentLang) || LANGUAGES[0],
+    [currentLang]
+  );
 
   const handleToggle = propOnToggleTheme || toggleTheme;
 
@@ -119,16 +134,6 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
       ),
     [allMyths, progressMap, bookmarks, starredHooks, mapSheetsCount, darkMinutes]
   );
-
-  const handleSendFeedback = (e: React.FormEvent) => {
-    e.preventDefault();
-    setFeedbackSent(true);
-    setTimeout(() => {
-      setFeedbackSent(false);
-      setFeedbackText('');
-      setIsContactModalOpen(false);
-    }, 1800);
-  };
 
   // Toast Notification state
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -245,6 +250,20 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
     }
   };
 
+  if (isContactScreenOpen) {
+    return (
+      <ContactScreen
+        onBack={() => {
+          setIsContactScreenOpen(false);
+          setSentMessagesCount(storage.getSentMessagesCount());
+        }}
+        onMessageSent={() => {
+          setSentMessagesCount(storage.getSentMessagesCount());
+        }}
+      />
+    );
+  }
+
   if (isMethodologyOpen) {
     return <MethodologyScreen onBack={() => setIsMethodologyOpen(false)} />;
   }
@@ -273,53 +292,139 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
         </div>
       )}
 
-      {/* 1. Header with Avatar + Name */}
+      {/* 1. Header with Avatar + Name & Firebase Auth */}
       <Card variant="white" className="p-5 shadow-xs">
-        <div className="flex items-center gap-4">
-          {/* Avatar with Arabesque geometric pattern */}
-          <div
-            style={{
-              background: `linear-gradient(135deg, ${isDark ? tokens.deepAccent : '#0E5C4D'}, ${tokens.primaryMint})`,
-              color: isDark ? tokens.background : '#FFFFFF',
-            }}
-            className="relative w-16 h-16 rounded-2xl flex items-center justify-center font-['Aref_Ruqaa',serif] text-3xl font-bold shadow-md shrink-0"
-          >
-            <span>م</span>
-            <span
-              style={{
-                backgroundColor: tokens.primaryMint,
-                borderColor: tokens.card,
-              }}
-              className="absolute -bottom-1 -left-1 w-4 h-4 rounded-full border-2 flex items-center justify-center"
-            >
-              <Sparkles size={8} style={{ color: isDark ? tokens.background : '#0E5C4D' }} />
-            </span>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            {/* Avatar with Arabesque geometric pattern or user photo */}
+            {user?.photoURL ? (
+              <img
+                src={user.photoURL}
+                alt={user.displayName || 'المستخدم'}
+                className="w-16 h-16 rounded-2xl object-cover border-2 shadow-md shrink-0"
+                style={{ borderColor: tokens.primaryMint }}
+              />
+            ) : (
+              <div
+                style={{
+                  background: `linear-gradient(135deg, ${isDark ? tokens.deepAccent : '#0E5C4D'}, ${tokens.primaryMint})`,
+                  color: isDark ? tokens.background : '#FFFFFF',
+                }}
+                className="relative w-16 h-16 rounded-2xl flex items-center justify-center font-['Aref_Ruqaa',serif] text-3xl font-bold shadow-md shrink-0"
+              >
+                <span>{user?.displayName ? user.displayName.charAt(0) : 'م'}</span>
+                <span
+                  style={{
+                    backgroundColor: tokens.primaryMint,
+                    borderColor: tokens.card,
+                  }}
+                  className="absolute -bottom-1 -left-1 w-4 h-4 rounded-full border-2 flex items-center justify-center"
+                >
+                  <Sparkles size={8} style={{ color: isDark ? tokens.background : '#0E5C4D' }} />
+                </span>
+              </div>
+            )}
+
+            <div className="flex-1 min-w-0">
+              <h2
+                style={{ color: tokens.deepAccent }}
+                className="font-['Aref_Ruqaa',serif] text-2xl font-bold leading-tight truncate"
+              >
+                {user?.displayName || ar.profile.userName}
+              </h2>
+              <p
+                style={{ color: tokens.textSecondary }}
+                className="text-xs font-['Cairo',sans-serif] mt-0.5 truncate"
+              >
+                {user?.email || ar.profile.userRole}
+              </p>
+              <div className="mt-2 flex items-center gap-1.5 flex-wrap">
+                {user ? (
+                  <span
+                    style={{
+                      color: tokens.deepAccent,
+                      backgroundColor: isDark ? 'rgba(127, 209, 174, 0.25)' : 'rgba(127, 209, 174, 0.35)',
+                    }}
+                    className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full"
+                  >
+                    <CheckCircle2 size={10} />
+                    <span>سحابة Firebase متصلة</span>
+                  </span>
+                ) : (
+                  <span
+                    style={{
+                      color: tokens.deepAccent,
+                      backgroundColor: isDark ? 'rgba(127, 209, 174, 0.2)' : 'rgba(127, 209, 174, 0.25)',
+                    }}
+                    className="inline-block text-[10px] font-bold px-2 py-0.5 rounded-full"
+                  >
+                    {ar.app.offlineBadge}
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
 
-          <div className="flex-1 min-w-0">
-            <h2
-              style={{ color: tokens.deepAccent }}
-              className="font-['Aref_Ruqaa',serif] text-2xl font-bold leading-tight"
-            >
-              {ar.profile.userName}
-            </h2>
-            <p
-              style={{ color: tokens.textSecondary }}
-              className="text-xs font-['Cairo',sans-serif] mt-0.5"
-            >
-              {ar.profile.userRole}
-            </p>
-            <div className="mt-2 flex items-center gap-1.5 flex-wrap">
-              <span
-                style={{
-                  color: tokens.deepAccent,
-                  backgroundColor: isDark ? 'rgba(127, 209, 174, 0.2)' : 'rgba(127, 209, 174, 0.25)',
+          {/* Auth Action Button */}
+          <div className="flex items-center gap-2 self-start sm:self-center shrink-0">
+            {user ? (
+              <>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    setSyncing(true);
+                    try {
+                      await syncBookmarksToCloud(bookmarks);
+                      setToastMessage('تمت مزامنة المفضلة مع سحابة Firebase بنجاح ☁️');
+                    } catch {
+                      setToastMessage('تعذرت المزامنة، يرجى المحاولة لاحقاً');
+                    } finally {
+                      setSyncing(false);
+                    }
+                  }}
+                  disabled={syncing}
+                  style={{
+                    backgroundColor: tokens.primaryMint,
+                    color: '#0E5C4D',
+                  }}
+                  className="px-3 py-1.5 rounded-xl text-xs font-bold hover:opacity-90 transition-opacity cursor-pointer flex items-center gap-1.5"
+                >
+                  <Sparkles size={13} />
+                  <span>{syncing ? 'جارٍ المزامنة...' : 'مزامنة السحابة'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => logOut()}
+                  style={{
+                    borderColor: tokens.border,
+                    color: tokens.textSecondary,
+                  }}
+                  className="px-3 py-1.5 rounded-xl text-xs font-bold border hover:opacity-80 transition-opacity cursor-pointer"
+                >
+                  خروج
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    await signIn();
+                    setToastMessage('تم تسجيل الدخول بنجاح عبر Google ✨');
+                  } catch {
+                    setToastMessage('تعذر تسجيل الدخول، يرجى المحاولة لاحقاً');
+                  }
                 }}
-                className="inline-block text-[10px] font-bold px-2 py-0.5 rounded-full"
+                style={{
+                  backgroundColor: tokens.primaryMint,
+                  color: '#0E5C4D',
+                }}
+                className="px-3.5 py-2 rounded-xl text-xs font-bold hover:opacity-90 transition-opacity cursor-pointer flex items-center gap-2 shadow-xs"
               >
-                {ar.app.offlineBadge}
-              </span>
-            </div>
+                <Sparkles size={14} />
+                <span>تسجيل الدخول عبر Google</span>
+              </button>
+            )}
           </div>
         </div>
       </Card>
@@ -671,7 +776,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                   style={{ color: tokens.textPrimary }}
                   className="font-bold text-sm font-['Cairo',sans-serif]"
                 >
-                  {t('profile.darkMode')}
+                  {ar.profile.darkMode}
                 </h4>
                 <p
                   style={{ color: tokens.textSecondary }}
@@ -687,7 +792,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
               type="button"
               role="switch"
               aria-checked={isDark}
-              aria-label={t('profile.darkMode')}
+              aria-label="الوضع الليلي"
               onClick={handleToggle}
               style={{
                 backgroundColor: isDark ? tokens.primaryMint : tokens.coolBlueTint,
@@ -748,9 +853,11 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
           </button>
 
           {/* Row 3: لغة التطبيق */}
-          <div
+          <button
+            type="button"
+            onClick={() => setIsLangModalOpen(true)}
             style={{ borderColor: tokens.borderSubtle }}
-            className="p-4 flex items-center justify-between gap-3 text-right min-h-[56px]"
+            className="w-full p-4 flex items-center justify-between gap-3 hover:opacity-90 transition-colors text-right cursor-pointer min-h-[56px]"
           >
             <div className="flex items-center gap-3">
               <div
@@ -767,26 +874,30 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                   style={{ color: tokens.textPrimary }}
                   className="font-bold text-sm font-['Cairo',sans-serif]"
                 >
-                  {t('profile.language')}
+                  {ar.profile.language}
                 </h4>
                 <p
                   style={{ color: tokens.textSecondary }}
                   className="text-xs mt-0.5"
                 >
-                  {ar.profile.languageSub}
+                  {activeLanguage?.label || 'العربية'} ({activeLanguage?.flag || '🇹🇳'})
                 </p>
               </div>
             </div>
-            <span
-              style={{
-                color: tokens.deepAccent,
-                backgroundColor: isDark ? 'rgba(127, 209, 174, 0.2)' : 'rgba(127, 209, 174, 0.25)',
-              }}
-              className="text-xs font-bold px-2.5 py-1 rounded-lg"
-            >
-              {ar.profile.languageBadge}
-            </span>
-          </div>
+            <div className="flex items-center gap-2">
+              <span
+                style={{
+                  color: tokens.deepAccent,
+                  backgroundColor: isDark ? 'rgba(127, 209, 174, 0.2)' : 'rgba(127, 209, 174, 0.25)',
+                }}
+                className="text-xs font-bold px-2.5 py-1 rounded-lg flex items-center gap-1.5"
+              >
+                <span>{activeLanguage?.flag || '🇹🇳'}</span>
+                <span>{activeLanguage?.label || 'العربية'}</span>
+              </span>
+              <ChevronLeft size={16} style={{ color: tokens.textSecondary }} />
+            </div>
+          </button>
 
           {/* Row 4: جولة تعريفية بالتطبيق (Onboarding Replay) */}
           <button
@@ -852,7 +963,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                   style={{ color: tokens.textPrimary }}
                   className="font-bold text-sm font-['Cairo',sans-serif]"
                 >
-                  {t('profile.aboutMethod')}
+                  عن المنهج
                 </h4>
                 <p
                   style={{ color: tokens.textSecondary }}
@@ -904,7 +1015,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
           {/* Row 6: تواصل معنا */}
           <button
             type="button"
-            onClick={() => setIsContactModalOpen(true)}
+            onClick={() => setIsContactScreenOpen(true)}
             style={{ borderColor: tokens.borderSubtle }}
             className="w-full p-4 flex items-center justify-between gap-3 hover:opacity-90 transition-colors text-right cursor-pointer min-h-[56px]"
           >
@@ -919,17 +1030,34 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                 <Mail size={20} />
               </div>
               <div>
-                <h4
-                  style={{ color: tokens.textPrimary }}
-                  className="font-bold text-sm font-['Cairo',sans-serif]"
-                >
-                  {t('profile.contact')}
-                </h4>
+                <div className="flex items-center gap-2">
+                  <h4
+                    style={{ color: tokens.textPrimary }}
+                    className="font-bold text-sm font-['Cairo',sans-serif]"
+                  >
+                    تواصل معنا
+                  </h4>
+                  <span
+                    style={{
+                      backgroundColor: isDark ? 'rgba(74, 144, 217, 0.2)' : 'rgba(74, 144, 217, 0.12)',
+                      color: isDark ? '#7EB5F0' : '#2A70B8',
+                    }}
+                    className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                  >
+                    {sentMessagesCount > 0 ? `المرسل: ${sentMessagesCount}` : 'مباشر'}
+                  </span>
+                </div>
                 <p
                   style={{ color: tokens.textSecondary }}
                   className="text-xs mt-0.5"
                 >
-                  {ar.profile.contactSub}
+                  شكواك، اقتراحك، أو اكتشافك لخطأ — صوتك يصلنا
+                </p>
+                <p
+                  style={{ color: isDark ? '#7EB5F0' : '#2A70B8' }}
+                  className="text-[11px] font-medium mt-1"
+                >
+                  عدد الرسائل المرسلة من هذا الجهاز: {sentMessagesCount}
                 </p>
               </div>
             </div>
@@ -958,7 +1086,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                   style={{ color: tokens.textPrimary }}
                   className="font-bold text-sm font-['Cairo',sans-serif]"
                 >
-                  {t('profile.export')}
+                  تصدير المفضلة
                 </h4>
                 <p
                   style={{ color: tokens.textSecondary }}
@@ -1003,7 +1131,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                     style={{ color: tokens.textPrimary }}
                     className="font-bold text-sm font-['Cairo',sans-serif]"
                   >
-                    {t('profile.install')}
+                    تثبيت التطبيق
                   </h4>
                   <p
                     style={{ color: tokens.textSecondary }}
@@ -1191,8 +1319,8 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
         </div>
       )}
 
-      {/* Modal: تواصل معنا */}
-      {isContactModalOpen && (
+      {/* Modal: اختيار لغة التطبيق */}
+      {isLangModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div
             style={{
@@ -1209,11 +1337,11 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                 style={{ color: tokens.deepAccent }}
                 className="font-['Aref_Ruqaa',serif] text-xl font-bold"
               >
-                تواصل مع فريق مستكشف
+                اختيار لغة التطبيق
               </h3>
               <button
                 type="button"
-                onClick={() => setIsContactModalOpen(false)}
+                onClick={() => setIsLangModalOpen(false)}
                 style={{ color: tokens.textSecondary }}
                 className="p-2 rounded-xl hover:opacity-80 cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
               >
@@ -1221,86 +1349,53 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
               </button>
             </div>
 
-            {feedbackSent ? (
-              <div className="p-6 text-center space-y-2">
-                <div
-                  style={{
-                    backgroundColor: isDark ? 'rgba(127, 209, 174, 0.2)' : 'rgba(127, 209, 174, 0.25)',
-                    color: tokens.deepAccent,
-                  }}
-                  className="w-12 h-12 mx-auto rounded-full flex items-center justify-center"
-                >
-                  <Check size={24} />
-                </div>
-                <h4
-                  style={{ color: tokens.deepAccent }}
-                  className="font-bold text-base"
-                >
-                  شكراً لمشاركتك!
-                </h4>
-                <p
-                  style={{ color: tokens.textSecondary }}
-                  className="text-xs"
-                >
-                  تم استلام مقترحك وسيقوم الباحثون بمراجعته وإضافته للموسوعة.
-                </p>
-              </div>
-            ) : (
-              <form onSubmit={handleSendFeedback} className="space-y-3">
-                <div>
-                  <label
-                    style={{ color: tokens.textPrimary }}
-                    className="block text-xs font-bold mb-1"
-                  >
-                    اسم الأسطورة أو الكائن المقترح
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="مثال: أسطورة جبل ثهلان أو كائن السعلاة..."
-                    style={{
-                      backgroundColor: tokens.surface,
-                      borderColor: tokens.border,
-                      color: tokens.textPrimary,
+            <div className="space-y-2">
+              {LANGUAGES.map((item) => {
+                const isSelected = currentLang === item.lang;
+                return (
+                  <button
+                    key={item.lang}
+                    type="button"
+                    onClick={() => {
+                      setCurrentLang(item.lang);
+                      try {
+                        localStorage.setItem('lang', item.lang);
+                        document.documentElement.setAttribute('dir', item.dir);
+                        document.documentElement.setAttribute('lang', item.lang);
+                      } catch {}
+                      setIsLangModalOpen(false);
+                      setToastMessage(`تم اختيار اللغة: ${item.flag} ${item.label}`);
                     }}
-                    className="w-full p-3 rounded-xl border text-xs focus:outline-none focus:ring-2 focus:ring-[#7FD1AE] min-h-[44px]"
-                  />
-                </div>
-
-                <div>
-                  <label
-                    style={{ color: tokens.textPrimary }}
-                    className="block text-xs font-bold mb-1"
-                  >
-                    الملاحظة أو المصدر التراثي
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={feedbackText}
-                    onChange={(e) => setFeedbackText(e.target.value)}
-                    required
-                    placeholder="أخبرنا عن تفاصيل الرواية أو المصدر الكلاسيكي..."
                     style={{
-                      backgroundColor: tokens.surface,
-                      borderColor: tokens.border,
-                      color: tokens.textPrimary,
+                      backgroundColor: isSelected ? tokens.surface : tokens.card,
+                      borderColor: isSelected ? tokens.deepAccent : tokens.borderSubtle,
                     }}
-                    className="w-full p-3 rounded-xl border text-xs focus:outline-none focus:ring-2 focus:ring-[#7FD1AE]"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  style={{
-                    backgroundColor: tokens.deepAccent,
-                    color: isDark ? tokens.background : '#FFFFFF',
-                  }}
-                  className="w-full py-3 rounded-2xl text-xs font-bold shadow-md transition-all cursor-pointer min-h-[44px]"
-                >
-                  إرسال المقترح
-                </button>
-              </form>
-            )}
+                    className="w-full p-3.5 rounded-2xl border text-right transition-all flex items-center justify-between cursor-pointer min-h-[52px]"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">{item.flag}</span>
+                      <div>
+                        <h4
+                          style={{ color: tokens.textPrimary }}
+                          className="font-bold text-sm font-['Cairo',sans-serif]"
+                        >
+                          {item.label}
+                        </h4>
+                        <p
+                          style={{ color: tokens.textSecondary }}
+                          className="text-xs mt-0.5"
+                        >
+                          {item.dir === 'rtl' ? 'اتجاه من اليمين إلى اليسار (RTL)' : 'اتجاه من اليسار إلى اليمين (LTR)'}
+                        </p>
+                      </div>
+                    </div>
+                    {isSelected && (
+                      <Check size={18} style={{ color: tokens.deepAccent }} />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}

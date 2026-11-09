@@ -1,0 +1,73 @@
+{
+  "entities": {
+    "userProfile": {
+      "title": "UserProfile",
+      "description": "User profile information synchronized upon sign in.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128 },
+        "displayName": { "type": "string", "maxLength": 100 },
+        "email": { "type": "string", "maxLength": 150 },
+        "photoURL": { "type": "string", "maxLength": 500 },
+        "createdAt": { "type": "string", "maxLength": 64 },
+        "updatedAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["uid", "email", "createdAt"]
+    },
+    "userBookmark": {
+      "title": "UserBookmark",
+      "description": "A saved/bookmarked myth or article by the user.",
+      "type": "object",
+      "properties": {
+        "mythId": { "type": "string", "maxLength": 64 },
+        "savedAt": { "type": "string", "maxLength": 64 },
+        "category": { "type": "string", "maxLength": 32 }
+      },
+      "required": ["mythId", "savedAt"]
+    },
+    "userReadingProgress": {
+      "title": "UserReadingProgress",
+      "description": "Tracks the user's progress through chapters of a myth or deep story.",
+      "type": "object",
+      "properties": {
+        "mythId": { "type": "string", "maxLength": 64 },
+        "chapterIndex": { "type": "integer" },
+        "chapterTitle": { "type": "string", "maxLength": 100 },
+        "progressPercent": { "type": "integer" },
+        "updatedAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["mythId", "chapterIndex", "progressPercent", "updatedAt"]
+    },
+    "userCreativeNote": {
+      "title": "UserCreativeNote",
+      "description": "Story hooks and creative notes created in the Creator Studio.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 64 },
+        "title": { "type": "string", "maxLength": 100 },
+        "content": { "type": "string", "maxLength": 2000 },
+        "createdAt": { "type": "string", "maxLength": 64 },
+        "updatedAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "title", "content", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/userProfile" },
+      "description": "Stores private user account information and preferences."
+    },
+    "/users/{userId}/bookmarks/{bookmarkId}": {
+      "schema": { "$ref": "#/entities/userBookmark" },
+      "description": "Subcollection containing user bookmarked myths and stories."
+    },
+    "/users/{userId}/progress/{progressId}": {
+      "schema": { "$ref": "#/entities/userReadingProgress" },
+      "description": "Subcollection storing reading progress per myth."
+    },
+    "/users/{userId}/notes/{noteId}": {
+      "schema": { "$ref": "#/entities/userCreativeNote" },
+      "description": "Subcollection storing user-created story ideas and notes."
+    }
+  }
+}

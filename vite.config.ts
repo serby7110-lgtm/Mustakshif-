@@ -5,7 +5,7 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
-    plugins: [react(), tailwindcss()],
+    plugins: [react({ include: /\.(jsx|js|tsx|ts)$/ }), tailwindcss()],
     resolve: {
       alias: {
         '@': path.resolve(import.meta.dirname ?? '.', '.'),
@@ -24,6 +24,9 @@ export default defineConfig(() => {
         output: {
           manualChunks(id: string) {
             if (id.includes('node_modules')) {
+              if (id.includes('firebase')) {
+                return 'vendor-firebase';
+              }
               if (id.includes('lucide-react')) {
                 return 'vendor-lucide';
               }

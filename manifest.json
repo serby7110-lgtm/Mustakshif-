@@ -1,0 +1,23 @@
+{
+  "name": "مستكشف — موسوعة الأساطير والحضارات العربية",
+  "short_name": "مستكشف",
+  "description": "موسوعة تفاعلية تضم 62 أسطورة و10 حضارات عربية، برواية التراث والآثار معاً.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#0E5C4D",
+  "background_color": "#FFFFFF",
+  "lang": "ar",
+  "dir": "rtl",
+  "categories": ["education", "books"],
+  "icons": [
+    { "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "أسطورة اليوم", "short_name": "اليوم", "url": "/?daily=1" },
+    { "name": "المكتبة", "short_name": "المكتبة", "url": "/library" },
+    { "name": "الخريطة", "short_name": "الخريطة", "url": "/map" }
+  ]
+}

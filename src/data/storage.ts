@@ -24,6 +24,7 @@ const STORAGE_KEYS = {
   CIV_SEGMENT: 'mustakshif_civ_segment_v1',
   DUAL_NARRATIVE_VIEW: 'mustakshif_dual_narrative_view_v1',
   MYTH_DUAL_NARRATIVE_VIEW: 'mustakshif_myth_dual_narrative_view_v1',
+  SENT_MESSAGES_COUNT: 'mustakshif_sent_messages_count',
 } as const;
 
 export type ThemeMode = 'light' | 'dark' | 'darkTeal';
@@ -346,6 +347,32 @@ export const storage = {
   setMythDualNarrativeView: (view: 'tradition' | 'analysis') => {
     try {
       safeStorage.setItem(STORAGE_KEYS.MYTH_DUAL_NARRATIVE_VIEW, view);
+    } catch {}
+  },
+
+  getSentMessagesCount: (): number => {
+    try {
+      const val = safeStorage.getItem(STORAGE_KEYS.SENT_MESSAGES_COUNT);
+      return val ? parseInt(val, 10) || 0 : 0;
+    } catch {
+      return 0;
+    }
+  },
+
+  incrementSentMessagesCount: (): number => {
+    try {
+      const current = storage.getSentMessagesCount();
+      const next = current + 1;
+      safeStorage.setItem(STORAGE_KEYS.SENT_MESSAGES_COUNT, String(next));
+      return next;
+    } catch {
+      return 1;
+    }
+  },
+
+  setSentMessagesCount: (count: number): void => {
+    try {
+      safeStorage.setItem(STORAGE_KEYS.SENT_MESSAGES_COUNT, String(Math.max(0, count)));
     } catch {}
   },
 };
