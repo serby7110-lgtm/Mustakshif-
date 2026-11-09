@@ -3,8 +3,60 @@
  * SPDX-License-Identifier: Apache-2.0
  * 
  * Mustakshif Indonesian Translation Dictionary (Bahasa Indonesia)
- * Placeholder file for Indonesian translations.
  */
 
-export const id = {};
+export const id: Record<string, string> = {
+  'nav.home': 'Beranda',
+  'nav.civilizations': 'Peradaban',
+  'nav.map': 'Peta',
+  'nav.library': 'Perpustakaan',
+  'nav.profile': 'Profil',
+  'home.greeting': 'Halo, Penjelajah',
+  'home.categories': 'Kategori',
+  'home.mostRead': 'Paling Banyak Dibaca',
+  'map.all': 'Semua',
+  'map.legend': 'Legenda Peta',
+  'cat.creatures': 'Makhluk Mitos',
+  'cat.gods': 'Dewa-Dewa Kuno',
+  'cat.rituals': 'Ritual & Pusaka',
+  'cat.places': 'Tempat & Kerajaan',
+  'cat.personalities': 'Tokoh Terkenal',
+  'cat.sa3aleek': 'Penyair Pengembara',
+  'cat.kings': 'Raja & Ratu',
+  'cat.seers': 'Peramal & Cenayang',
+  'article.readStory': 'Baca Cerita',
+  'article.chapters': 'Kisah Lengkap',
+  'article.quotes': 'Dari Sumber Kuno',
+  'article.creatorKit': 'Perangkat Kreator',
+  'article.writingHooks': 'Untuk Penulis Cerita',
+  'article.gameHooks': 'Ide Game',
+  'article.scenes': 'Adegan Pilihan',
+  'article.decision': 'Pilihan Pemain',
+  'article.timeline': 'Garis Waktu',
+  'article.sources': 'Sumber & Referensi',
+  'article.related': 'Terkait',
+  'article.copyJson': 'Salin JSON',
+  'common.copy': 'Salin',
+  'common.copied': 'Disalin!',
+  'method.title': 'Metodologi',
+  'method.folk': 'Kisah Rakyat',
+  'method.analysis': 'Analisis Sejarah',
+  'library.myths': 'Mitos',
+  'library.creatorTools': 'Alat Kreator',
+  'library.newest': 'Terbaru',
+  'library.mostRead': 'Terpopuler',
+  'library.alphabetical': 'Abjad',
+  'civ.story': 'Kisah',
+  'civ.economy': 'Ekonomi & Masyarakat',
+  'civ.prophet': 'Nabi yang Diutus',
+  'civ.archaeology': 'Arkeologi Hari Ini',
+  'civ.tradition': 'Narasi Tradisi',
+  'civ.archaeologyView': 'Temuan Arkeologi',
+  'civ.historian': 'Catatan Sejarawan',
+  'civ.relatedMyths': 'Mitos Terkait',
+  'timeline.list': 'Daftar',
+  'timeline.timeline': 'Garis Waktu',
+  'timeline.journey': 'Perjalanan Melalui Waktu',
+};
+
 export default id;

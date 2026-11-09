@@ -66,10 +66,10 @@ test('Methodology: Card 1 & 4 use mint accent; Card 2 & 3 use cool-blue accent w
   assert.ok(code.includes('#ADCFF6') || code.includes('#4A90D9') || code.includes('74, 144, 217'), 'Cool-blue accent used for Card 2 & 3');
 
   // Each card shows its label pill at top
-  assert.ok(code.includes('<span>نص حرفي</span>'), 'Card 1 top label pill');
-  assert.ok(code.includes('<span>بأسلوب المصدر</span>'), 'Card 2 top label pill');
-  assert.ok(code.includes('<span>الرواية الشعبية</span>'), 'Card 3 top label pill');
-  assert.ok(code.includes('<span>التحليل التاريخي</span>'), 'Card 4 top label pill');
+  assert.ok(code.includes('<span>نص حرفي</span>') || code.includes("t('method.literal')"), 'Card 1 top label pill');
+  assert.ok(code.includes('<span>بأسلوب المصدر</span>') || code.includes("t('method.sourceStyle')"), 'Card 2 top label pill');
+  assert.ok(code.includes('<span>الرواية الشعبية</span>') || code.includes("t('method.folk')"), 'Card 3 top label pill');
+  assert.ok(code.includes('<span>التحليل التاريخي</span>') || code.includes("t('method.analysis')"), 'Card 4 top label pill');
 });
 
 test('Methodology: Profile row "عن المنهج" exists with info icon', () => {
@@ -82,14 +82,14 @@ test('Methodology: Info icon next to "القراءة التاريخية" section
   const civPageCode = fs.readFileSync(path.resolve('src/screens/CivilizationPage.tsx'), 'utf8');
   assert.ok(civPageCode.includes('القراءة التاريخية'), 'CivilizationPage has "القراءة التاريخية"');
   assert.ok(
-    civPageCode.includes('aria-label="عن المنهج"') || civPageCode.includes('title="عن المنهج"'),
+    civPageCode.includes('aria-label="عن المنهج"') || civPageCode.includes('title="عن المنهج"') || civPageCode.includes("t('method.title')"),
     'CivilizationPage has info icon button linking to methodology'
   );
 
   const articleCode = fs.readFileSync(path.resolve('src/screens/ArticleScreen.tsx'), 'utf8');
   assert.ok(articleCode.includes('القراءة التاريخية'), 'ArticleScreen has "القراءة التاريخية"');
   assert.ok(
-    articleCode.includes('aria-label="عن المنهج"') || articleCode.includes('title="عن المنهج"'),
+    articleCode.includes('aria-label="عن المنهج"') || articleCode.includes('title="عن المنهج"') || articleCode.includes("t('method.title')"),
     'ArticleScreen has info icon button linking to methodology'
   );
 });

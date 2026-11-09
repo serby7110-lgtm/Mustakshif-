@@ -2,12 +2,23 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 import { translations, TranslationKey } from './index';
 
 export type Lang = keyof typeof translations;
+export type Language = Lang;
 
-export const LANGS: { code: Lang; label: string; flag: string; dir: 'rtl' | 'ltr' }[] = [
-  { code: 'ar', label: 'العربية', flag: '🇹🇳', dir: 'rtl' },
-  { code: 'id', label: 'Bahasa Indonesia', flag: '🇮🇩', dir: 'ltr' },
-  { code: 'th', label: 'ไทย', flag: '🇹🇭', dir: 'ltr' },
+export interface LanguageMeta {
+  code: Lang;
+  lang: Lang;
+  label: string;
+  flag: string;
+  dir: 'rtl' | 'ltr';
+}
+
+export const LANGS: LanguageMeta[] = [
+  { code: 'ar', lang: 'ar', label: 'العربية', flag: '🇹🇳', dir: 'rtl' },
+  { code: 'id', lang: 'id', label: 'Bahasa Indonesia', flag: '🇮🇩', dir: 'ltr' },
+  { code: 'th', lang: 'th', label: 'ไทย', flag: '🇹🇭', dir: 'ltr' },
 ];
+
+export const LANGUAGES = LANGS;
 
 const STORAGE_KEY = 'mustakshif:lang';
 
@@ -24,7 +35,7 @@ const readStoredLang = (): Lang => {
   return 'ar';
 };
 
-interface I18nContextValue {
+export interface I18nContextValue {
   lang: Lang;
   dir: 'rtl' | 'ltr';
   flag: string;
@@ -76,3 +87,5 @@ export const useI18n = (): I18nContextValue => {
 };
 
 export const useT = () => useI18n().t;
+export const useTranslation = useI18n;
+export default useI18n;

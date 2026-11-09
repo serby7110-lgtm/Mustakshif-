@@ -1,0 +1,39 @@
+{
+  "background_color": "#110101",
+  "description": "موسوعة الأساطير والكائنات والرموز الفولكلورية العربية بتصميم عربي حديث وقارئ هادئ للطلاب والعائلات.",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "مستكشف",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "مستكشف",
+  "start_url": "/",
+  "theme_color": "#0007ff",
+  "icons": [
+    {
+      "src": "https://mustakshif.netlify.app/icons/icon.svg",
+      "type": "image/svg+xml",
+      "isSquare": false,
+      "isPng": false,
+      "isWebp": false,
+      "isJpg": false,
+      "width": 0,
+      "is512x512": false,
+      "is256x256": false,
+      "is192x192": false
+    },
+    {
+      "src": "https://mustakshif.netlify.app/favicon.ico",
+      "type": "image/x-icon",
+      "isSquare": false,
+      "isPng": false,
+      "isWebp": false,
+      "isJpg": false,
+      "width": 0,
+      "is512x512": false,
+      "is256x256": false,
+      "is192x192": false
+    }
+  ],
+  "id": "1534"
+}

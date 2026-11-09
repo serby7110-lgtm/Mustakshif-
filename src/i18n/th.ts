@@ -3,8 +3,60 @@
  * SPDX-License-Identifier: Apache-2.0
  * 
  * Mustakshif Thai Translation Dictionary (ไทย)
- * Placeholder file for Thai translations.
  */
 
-export const th = {};
+export const th: Record<string, string> = {
+  'nav.home': 'หน้าแรก',
+  'nav.civilizations': 'อารยธรรม',
+  'nav.map': 'แผนที่',
+  'nav.library': 'คลังตำนาน',
+  'nav.profile': 'โปรไฟล์',
+  'home.greeting': 'ยินดีต้อนรับ ผู้สำรวจ',
+  'home.categories': 'หมวดหมู่',
+  'home.mostRead': 'อ่านมากที่สุด',
+  'map.all': 'ทั้งหมด',
+  'map.legend': 'คำอธิบายแผนที่',
+  'cat.creatures': 'สัตว์ในตำนาน',
+  'cat.gods': 'เทพเจ้าโบราณ',
+  'cat.rituals': 'พิธีกรรมและสิ่งศักดิ์สิทธิ์',
+  'cat.places': 'สถานที่และอาณาจักร',
+  'cat.personalities': 'บุคคลสำคัญ',
+  'cat.sa3aleek': 'นักกวีพเนจร',
+  'cat.kings': 'กษัตริย์และราชินี',
+  'cat.seers': 'ผู้พยากรณ์',
+  'article.readStory': 'อ่านเรื่องราว',
+  'article.chapters': 'เรื่องราวฉบับเต็ม',
+  'article.quotes': 'จากคัมภีร์และเอกสารโบราณ',
+  'article.creatorKit': 'ชุดเครื่องมือสำหรับนักสร้างสรรค์',
+  'article.writingHooks': 'สำหรับนักเขียน',
+  'article.gameHooks': 'ไอเดียสำหรับเกม',
+  'article.scenes': 'ฉากที่แนะนำ',
+  'article.decision': 'การตัดสินใจของผู้เล่น',
+  'article.timeline': 'เส้นเวลา',
+  'article.sources': 'แหล่งอ้างอิงโบราณ',
+  'article.related': 'สิ่งที่เกี่ยวข้อง',
+  'article.copyJson': 'คัดลอก JSON',
+  'common.copy': 'คัดลอก',
+  'common.copied': 'คัดลอกแล้ว!',
+  'method.title': 'ระเบียบวิธี',
+  'method.folk': 'ตำนานพื้นบ้าน',
+  'method.analysis': 'การวิเคราะห์เชิงประวัติศาสตร์',
+  'library.myths': 'ตำนาน',
+  'library.creatorTools': 'เครื่องมือสำหรับผู้สร้าง',
+  'library.newest': 'ใหม่ล่าสุด',
+  'library.mostRead': 'ยอดนิยม',
+  'library.alphabetical': 'ตามตัวอักษร',
+  'civ.story': 'เรื่องราว',
+  'civ.economy': 'เศรษฐกิจและสังคม',
+  'civ.prophet': 'ศาสนทูต',
+  'civ.archaeology': 'โบราณคดีในปัจจุบัน',
+  'civ.tradition': 'คำบอกเล่าตามประเพณี',
+  'civ.archaeologyView': 'หลักฐานทางโบราณคดี',
+  'civ.historian': 'บันทึกของนักประวัติศาสตร์',
+  'civ.relatedMyths': 'ตำนานที่เกี่ยวข้อง',
+  'timeline.list': 'รายการ',
+  'timeline.timeline': 'เส้นเวลา',
+  'timeline.journey': 'การเดินทางข้ามกาลเวลา',
+};
+
 export default th;

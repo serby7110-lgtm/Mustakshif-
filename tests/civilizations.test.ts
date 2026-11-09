@@ -133,7 +133,7 @@ test('Civilizations: creator export buttons and narrative formatting', async () 
 
   const code = fs.readFileSync(path.resolve('src/screens/CivilizationPage.tsx'), 'utf8');
   // Check buttons
-  assert.ok(code.includes('انسخ كـ JSON'), 'Button "انسخ كـ JSON" exists');
+  assert.ok(code.includes('انسخ كـ JSON') || code.includes("t('article.copyJson')"), 'Button "انسخ كـ JSON" exists');
   assert.ok(code.includes('انسخ كنص سردي'), 'Button "انسخ كنص سردي" exists');
   // Check toasts
   assert.ok(code.includes('نُسخ ملف الحضارة'), 'Toast "نُسخ ملف الحضارة" exists');
@@ -192,7 +192,7 @@ test('Civilizations: cinematic auto-tour on Timeline view', () => {
   const code = fs.readFileSync(path.resolve('src/screens/CivilizationsScreen.tsx'), 'utf8');
 
   // STEP 1: Floating play button on Timeline titled "رحلة عبر الزمن", deep teal #0E5C4D, 52px
-  assert.ok(code.includes('title="رحلة عبر الزمن"'), 'Floating button titled "رحلة عبر الزمن"');
+  assert.ok(code.includes('title="رحلة عبر الزمن"') || code.includes("t('timeline.journey')"), 'Floating button titled "رحلة عبر الزمن"');
   assert.ok(code.includes('#0E5C4D'), 'Ember-free deep teal #0E5C4D fill is used');
   assert.ok(code.includes("width: '52px'"), '52px width for floating button');
   assert.ok(code.includes("height: '52px'"), '52px height for floating button');

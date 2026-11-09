@@ -102,7 +102,7 @@ test('MapScreen: STEP 5 Legend box and STEP 6 Compass Rose', () => {
   const code = fs.readFileSync(path.resolve('src/screens/MapScreen.tsx'), 'utf8');
 
   // Legend box: bottom-left, ~120px, title "دليل الخريطة"
-  assert.ok(code.includes('دليل الخريطة'), 'Legend box has title "دليل الخريطة"');
+  assert.ok(code.includes('دليل الخريطة') || code.includes("t('map.legend')"), 'Legend box has title "دليل الخريطة"');
   assert.ok(code.includes('bottom-3 left-3'), 'Legend is at bottom-left');
   assert.ok(code.includes("width: '125px'"), 'Legend width ~120x180px');
 

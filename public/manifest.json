@@ -1,23 +1,39 @@
 {
-  "name": "مستكشف — موسوعة الأساطير والحضارات العربية",
-  "short_name": "مستكشف",
-  "description": "موسوعة تفاعلية تضم 62 أسطورة و10 حضارات عربية، برواية التراث والآثار معاً.",
-  "start_url": "/",
-  "scope": "/",
+  "background_color": "#110101",
+  "description": "موسوعة الأساطير والكائنات والرموز الفولكلورية العربية بتصميم عربي حديث وقارئ هادئ للطلاب والعائلات.",
+  "dir": "ltr",
   "display": "standalone",
-  "orientation": "portrait-primary",
-  "theme_color": "#0E5C4D",
-  "background_color": "#FFFFFF",
-  "lang": "ar",
-  "dir": "rtl",
-  "categories": ["education", "books"],
+  "name": "مستكشف",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "مستكشف",
+  "start_url": "/",
+  "theme_color": "#0007ff",
   "icons": [
-    { "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
-    { "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+    {
+      "src": "https://mustakshif.netlify.app/icons/icon.svg",
+      "type": "image/svg+xml",
+      "isSquare": false,
+      "isPng": false,
+      "isWebp": false,
+      "isJpg": false,
+      "width": 0,
+      "is512x512": false,
+      "is256x256": false,
+      "is192x192": false
+    },
+    {
+      "src": "https://mustakshif.netlify.app/favicon.ico",
+      "type": "image/x-icon",
+      "isSquare": false,
+      "isPng": false,
+      "isWebp": false,
+      "isJpg": false,
+      "width": 0,
+      "is512x512": false,
+      "is256x256": false,
+      "is192x192": false
+    }
   ],
-  "shortcuts": [
-    { "name": "أسطورة اليوم", "short_name": "اليوم", "url": "/?daily=1" },
-    { "name": "المكتبة", "short_name": "المكتبة", "url": "/library" },
-    { "name": "الخريطة", "short_name": "الخريطة", "url": "/map" }
-  ]
+  "id": "1534"
 }
