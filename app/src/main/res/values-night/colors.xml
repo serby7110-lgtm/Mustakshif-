@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Mustakshif Exact Dark Palette — Strict Teal and Mint Identity -->
+    <color name="colorBackground">#0B2420</color>
+    <color name="colorSurface">#12332D</color>
+    <color name="colorPrimary">#7FD1AE</color>
+    <color name="colorPrimaryMint">#9FE8CC</color>
+    <color name="colorSecondary">#7FB2E8</color>
+    <color name="colorCoolBlueTint">#183E36</color>
+
+    <!-- Typography Text Colors -->
+    <color name="colorTextPrimary">#E8F6F0</color>
+    <color name="colorTextSecondary">#9DB8B0</color>
+
+    <!-- Categorical Myth Tags -->
+    <color name="colorTagHorror">#F08A8A</color>
+    <color name="colorTagHistory">#7FB2E8</color>
+    <color name="colorTagSupernatural">#B79CE8</color>
+
+    <!-- Borders & Dividers -->
+    <color name="colorBorder">#1C443C</color>
+    <color name="colorBorderSubtle">#153932</color>
+</resources>

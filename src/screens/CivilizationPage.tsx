@@ -46,7 +46,7 @@ export const CivilizationPage: React.FC<CivilizationPageProps> = ({
   onSelectMythId,
   onOpenMethodology,
 }) => {
-  const { t } = useI18n();
+  const { t, lang, dir } = useI18n();
   const { tokens, isDark } = useTheme();
 
   const [isMethodologyOpen, setIsMethodologyOpen] = useState(false);
@@ -119,7 +119,21 @@ export const CivilizationPage: React.FC<CivilizationPageProps> = ({
   }
 
   return (
-    <article className="space-y-6 pb-12 animate-in fade-in duration-200 relative" dir="rtl">
+    <article className="space-y-6 pb-12 animate-in fade-in duration-200 relative" dir={dir}>
+      {/* STEP 4: Banner when lang !== 'ar' */}
+      {lang !== 'ar' && (
+        <div
+          style={{
+            backgroundColor: isDark ? 'rgba(127, 209, 174, 0.12)' : '#E8F7F0',
+            borderColor: tokens.primaryMint,
+            color: tokens.deepAccent,
+          }}
+          className="p-2.5 px-4 rounded-xl border text-xs font-semibold flex items-center justify-between gap-2 shadow-2xs"
+        >
+          <span>{t('article.originalArabic')}</span>
+          <span className="text-sm">🇹🇳</span>
+        </div>
+      )}
       {/* Toast Notification */}
       {toastMessage && (
         <div
@@ -314,7 +328,8 @@ export const CivilizationPage: React.FC<CivilizationPageProps> = ({
             style={{ color: tokens.deepAccent }}
             className="font-['Aref_Ruqaa',serif] text-lg font-bold"
           >
-            المدن والحواضر
+            {/* المدن */}
+            {t('civ.cities') || 'المدن والحواضر'}
           </h2>
           <div className="flex flex-wrap items-center gap-2">
             {civilization.cities.map((city, idx) => (
@@ -381,7 +396,8 @@ export const CivilizationPage: React.FC<CivilizationPageProps> = ({
             style={{ color: tokens.deepAccent }}
             className="font-['Aref_Ruqaa',serif] text-lg font-bold"
           >
-            الدين والمعتقدات
+            {/* الدين */}
+            {t('civ.religion') || 'الدين والمعتقدات'}
           </h2>
           <Card variant="white" elevation="subtle" className="p-4 sm:p-5 rounded-2xl">
             <p style={{ color: tokens.textPrimary }} className="text-sm font-['Cairo',sans-serif] leading-relaxed">
@@ -426,7 +442,8 @@ export const CivilizationPage: React.FC<CivilizationPageProps> = ({
             style={{ color: tokens.deepAccent }}
             className="font-['Aref_Ruqaa',serif] text-lg font-bold"
           >
-            في القرآن الكريم
+            {/* في القرآن */}
+            {t('civ.quran') || 'في القرآن الكريم'}
           </h2>
           <div className="flex flex-wrap items-center gap-2">
             {civilization.quranRefs.map((ref, idx) => (
@@ -654,7 +671,8 @@ export const CivilizationPage: React.FC<CivilizationPageProps> = ({
             style={{ color: tokens.deepAccent }}
             className="font-['Aref_Ruqaa',serif] text-lg font-bold"
           >
-            الإرث الحضاري
+            {/* الإرث */}
+            {t('civ.legacy') || 'الإرث الحضاري'}
           </h2>
           <div
             style={{
@@ -702,7 +720,8 @@ export const CivilizationPage: React.FC<CivilizationPageProps> = ({
               title="نسخ السرد التاريخي كنص"
             >
               <FileText size={16} />
-              <span>انسخ كنص سردي</span>
+              {/* انسخ كنص سردي */}
+              <span>{t('article.copyText') || 'انسخ كنص سردي'}</span>
             </button>
           </div>
         </section>

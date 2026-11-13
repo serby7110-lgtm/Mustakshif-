@@ -31,5 +31,69 @@
         });
       }
     </script>
+
+    <!-- Error Logging: saves last 20 errors in localStorage under "app_errors" (الرسالة، الوقت، الصفحة) -->
+    <script>
+      (function () {
+        var STORAGE_KEY = 'app_errors';
+        var MAX_ERRORS = 20;
+
+        function recordError(msg, extra) {
+          try {
+            var errors = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            var record = {
+              message: String(msg || 'Unknown Error'),
+              time: new Date().toISOString(),
+              page: window.location.href,
+              الرسالة: String(msg || 'Unknown Error'),
+              الوقت: new Date().toISOString(),
+              الصفحة: window.location.href
+            };
+            if (extra) record.extra = extra;
+            errors.push(record);
+            if (errors.length > MAX_ERRORS) {
+              errors = errors.slice(errors.length - MAX_ERRORS);
+            }
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(errors));
+          } catch (e) {
+            // Ignore storage failures
+          }
+        }
+
+        window.onerror = function (msg, url, line, col, error) {
+          recordError(msg, { url: url, line: line, col: col, stack: error ? error.stack : undefined });
+          return false;
+        };
+
+        window.addEventListener('unhandledrejection', function (event) {
+          var reason = event.reason;
+          var msg = (reason && (reason.message || reason.stack)) || String(reason || 'Unhandled Promise Rejection');
+          recordError(msg);
+        });
+      })();
+    </script>
+
+    <!-- Diagnostic Mode: Loads and initializes eruda when ?debug=1 is in URL -->
+    <script>
+      (function () {
+        try {
+          var params = new URLSearchParams(window.location.search);
+          if (params.get('debug') === '1') {
+            var script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/eruda';
+            script.onload = function () {
+              if (window.eruda) {
+                window.eruda.init();
+                console.log('[Mustakshif] Eruda diagnostic tools initialized');
+              }
+            };
+            document.head.appendChild(script);
+          }
+        } catch (e) {
+          // Ignore query param error
+        }
+      })();
+    </script>
+
   </body>
 </html>

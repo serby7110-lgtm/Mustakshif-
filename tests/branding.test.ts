@@ -72,8 +72,10 @@ test('Onboarding: 3-slide RTL intro contains exact verbatim copies and buttons',
   // Star motif illustration
   assert.ok(content.includes('<Logo'), 'Must use Logo star motif for illustration placeholder');
 
-  // Exact verbatim copies in ar.ts
-  const arPath = path.resolve('src', 'i18n', 'ar.ts');
+  // Exact verbatim copies in legacyAr.ts or ar.ts
+  const arPath = fs.existsSync(path.resolve('src', 'i18n', 'legacyAr.ts'))
+    ? path.resolve('src', 'i18n', 'legacyAr.ts')
+    : path.resolve('src', 'i18n', 'ar.ts');
   const arContent = fs.readFileSync(arPath, 'utf8');
   assert.ok(arContent.includes('اكتشف أساطير العرب'), 'Slide 1 Title');
   assert.ok(arContent.includes('رحلة بين الآلهة القديمة والكائنات الخرافية والأماكن المفقودة، في موسوعة عربية تفاعلية.'), 'Slide 1 Body');

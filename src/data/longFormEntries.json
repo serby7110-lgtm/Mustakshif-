@@ -1,0 +1,527 @@
+[
+  {
+    "id": "dhul-qarnayn",
+    "name": "ذو القرنين",
+    "latinName": "Dhul-Qarnayn",
+    "category": "الشخصيات",
+    "categoryKey": "personalities",
+    "entryType": "شخصية قرآنية",
+    "typeLabel": "شخصية قرآنية",
+    "isLongForm": true,
+    "isPremium": true,
+    "isHistorical": false,
+    "requiredSubscription": "premium_monthly",
+    "heroImage": "images/dhul-qarnayn.jpg",
+    "evidenceLabels": [
+      "نص قرآني",
+      "أقوال المفسرين",
+      "إعادة تخيل أدبي"
+    ],
+    "targetWords": 8000,
+    "region": "المشرق والمغرب وما بين السدّين",
+    "approxYear": -330,
+    "tags": [
+      "تاريخ",
+      "خرافي"
+    ],
+    "related": [
+      "khidr",
+      "irm",
+      "suleiman"
+    ],
+    "summary": "الملك الممكّن الذي طاف بين مطلع الشمس ومغربها وبنى ردم الحديد والنحاس المذاب بين السدّين.",
+    "body": [
+      "تقف شخصية ذي القرنين في منطقة فريدة بين النص القرآني الصريح والموروث الملحمي الذي نسجته كتب الأخبار والتاريخ العام، بوصفه نموذجاً للملك العادل الذي أُعطي من كل شيء سبباً.",
+      "يمتد هذا العمل الطويل عبر ثمانية فصول تستعرض الرحلات الثلاث في سورة الكهف، وتقارن بين تأويلات المفسرين القدامى ومرويات سيرة الإسكندر المنسوبة في الأدب العربي والسرياني."
+    ],
+    "sources": [
+      {
+        "title": "القرآن الكريم — سورة الكهف (الآيات 83–98)",
+        "author": "المصدر النصي الأول",
+        "year": "النص التأسيسي"
+      },
+      {
+        "title": "تاريخ الرسل والملوك",
+        "author": "محمد بن جرير الطبري",
+        "year": "القرن 4 هـ"
+      },
+      {
+        "title": "مروج الذهب ومعادن الجوهر",
+        "author": "علي بن الحسين المسعودي",
+        "year": "القرن 4 هـ"
+      }
+    ],
+    "timeline": [
+      {
+        "era": "جاهلية",
+        "note": "تداول أخبار الملوك الفاتحين وسيرهم الشفوية في بوادي الشام واليمن."
+      },
+      {
+        "era": "صدر الإسلام",
+        "note": "نزول قصة ذي القرنين في سورة الكهف بوصفها عبرة للتمكين والعدل."
+      },
+      {
+        "era": "العصر العباسي",
+        "note": "مقارنة المفسرين والمؤرخين بين ذي القرنين والإسكندر وكورش وملوك حمير."
+      }
+    ],
+    "chapters": [
+      {
+        "id": "dq-ch-1",
+        "index": 0,
+        "title": "الفصل الأول: الممكّن في الأرض وأسباب المشرق والمغرب",
+        "evidenceLabel": "نص قرآني",
+        "isAppendix": false,
+        "isFree": true,
+        "estimatedWords": 1000,
+        "contentPending": false,
+        "paragraphs": [
+          "لا تبدأ حكاية ذي القرنين في المدونة العربية من سؤال النسب أو سنة الميلاد، بل من قاعدة التمكين: «إنّا مكّنّا له في الأرض وآتيناه من كل شيء سبباً». في هذا الإيجاز المحكم يتقدّم الفعل على الاسم، وتتحول الرحلة من مغامرة ملكية إلى اختبار أخلاقي لسلطة لا تعرف الحدود.",
+          "جعل المفسرون وعلماء الأخبار من لقب «ذي القرنين» مفتاحاً لتأويلات متشعبة: فمنهم من رأى فيه إشارة إلى بلوغه قرني الشمس شرقاً وغرباً، ومنهم من رده إلى تاج ذي قرنين، وآخرون رأوا فيه رمزاً للقوة المزدوجة بين الحكمة والسيف.",
+          "في هذا الفصل التمهيدي المجاني نقف على العتبة الأولى قبل انطلاق المسير في فصول الموسوعة الطويلة: كيف تحضر الجغرافيا الرمزية في القصة؟ ولماذا يفصل النص القرآني بوضوح بين الحدث الموحى به وبين أقوال المفسرين ومساحة إعادة التخيل الأدبي؟"
+        ]
+      },
+      {
+        "id": "dq-ch-2",
+        "index": 1,
+        "title": "الفصل الثاني: في مدارج المفسّرين — بين الإسكندر والمنذر وكورش",
+        "evidenceLabel": "أقوال المفسرين",
+        "isAppendix": false,
+        "isFree": false,
+        "estimatedWords": 1000,
+        "contentPending": true,
+        "paragraphs": []
+      },
+      {
+        "id": "dq-ch-3",
+        "index": 2,
+        "title": "الفصل الثالث: رحلة المغيب — العين الحمئة وأهل الشفق الأقصى",
+        "evidenceLabel": "نص قرآني",
+        "isAppendix": false,
+        "isFree": false,
+        "estimatedWords": 1000,
+        "contentPending": true,
+        "paragraphs": []
+      },
+      {
+        "id": "dq-ch-4",
+        "index": 3,
+        "title": "الفصل الرابع: مطلع الشمس — قومٌ لم نجعل لهم من دونها ستراً",
+        "evidenceLabel": "نص قرآني",
+        "isAppendix": false,
+        "isFree": false,
+        "estimatedWords": 1000,
+        "contentPending": true,
+        "paragraphs": []
+      },
+      {
+        "id": "dq-ch-5",
+        "index": 4,
+        "title": "الفصل الخامس: بين السدّين — استغاثة القوم وعمارة زبر الحديد",
+        "evidenceLabel": "نص قرآني",
+        "isAppendix": false,
+        "isFree": false,
+        "estimatedWords": 1000,
+        "contentPending": true,
+        "paragraphs": []
+      },
+      {
+        "id": "dq-ch-6",
+        "index": 5,
+        "title": "الفصل السادس: القطر المذاب — هندسة الردم ومعضلة يأجوج ومأجوج",
+        "evidenceLabel": "أقوال المفسرين",
+        "isAppendix": false,
+        "isFree": false,
+        "estimatedWords": 1000,
+        "contentPending": true,
+        "paragraphs": []
+      },
+      {
+        "id": "dq-ch-7",
+        "index": 6,
+        "title": "الفصل السابع: على أسوار الجبلين — إعادة تخيل ليلة الصبّ والنار",
+        "evidenceLabel": "إعادة تخيل أدبي",
+        "isAppendix": false,
+        "isFree": false,
+        "estimatedWords": 1000,
+        "contentPending": true,
+        "paragraphs": []
+      },
+      {
+        "id": "dq-ch-8",
+        "index": 7,
+        "title": "الفصل الثامن: الخاتمة الرمزية — «هذا رحمةٌ من ربي» وحدود السلطان",
+        "evidenceLabel": "نص قرآني",
+        "isAppendix": false,
+        "isFree": false,
+        "estimatedWords": 1000,
+        "contentPending": true,
+        "paragraphs": []
+      }
+    ]
+  },
+  {
+    "id": "sinbad",
+    "name": "السندباد البحري",
+    "latinName": "Sinbad the Sailor",
+    "category": "الشخصيات",
+    "categoryKey": "personalities",
+    "entryType": "بطل خيالي",
+    "typeLabel": "بطل خيالي",
+    "isLongForm": true,
+    "isPremium": true,
+    "isHistorical": false,
+    "requiredSubscription": "premium_monthly",
+    "heroImage": "images/sinbad.jpg",
+    "evidenceLabels": [
+      "خيال أدبي"
+    ],
+    "targetWords": 10000,
+    "region": "البصرة وبحار الهند وسرنديب",
+    "approxYear": 850,
+    "tags": [
+      "خرافي",
+      "تاريخ"
+    ],
+    "related": [
+      "anqa",
+      "ibn-battuta",
+      "irm"
+    ],
+    "summary": "رحّالة ألف ليلة وليلة الذي عبر أهوال البحر الهندي في سبع رحلات خالدة من بغداد إلى أقاصي الجزر.",
+    "body": [
+      "تُعدّ حكايات السندباد البحري ذروة الأدب البحري العربي في العصر العباسي؛ إذ تلتقي فيها ملامح الرحلات التجارية من البصرة وسيراف بخيال العجائب الشرقية.",
+      "تنقسم هذه الموسوعة الطويلة إلى الرحلات السبع الكاملة، بدءاً من الجزيرة التي ظنها البحارة يابسة فإذا هي ظهر حوت عظيم."
+    ],
+    "sources": [
+      {
+        "title": "ألف ليلة وليلة — الليالي 536–566",
+        "author": "التراث السردي العربي",
+        "year": "العصر العباسي – المملوكي"
+      },
+      {
+        "title": "أخبار الصين والهند",
+        "author": "سليمان التاجر وأبو زيد السيرافي",
+        "year": "القرن 3–4 هـ"
+      },
+      {
+        "title": "عجائب الهند برّه وبحره وجزائره",
+        "author": "بزرك بن شهريار",
+        "year": "القرن 4 هـ"
+      }
+    ],
+    "timeline": [
+      {
+        "era": "العصر العباسي",
+        "note": "تدوين حكايات البحارة العرب في المحيط الهندي وبلورة دورة الرحلات السبع."
+      },
+      {
+        "era": "العصر العباسي",
+        "note": "انصهار دورة السندباد في متن ألف ليلة وليلة بوصفها ملحمة التاجر المغامر."
+      }
+    ],
+    "chapters": [
+      {
+        "id": "sinbad-v1",
+        "index": 0,
+        "title": "الرحلة الأولى: الجزيرة الحوت ومملكة المهرجان",
+        "evidenceLabel": "خيال أدبي",
+        "isAppendix": false,
+        "isFree": true,
+        "estimatedWords": 1400,
+        "contentPending": false,
+        "paragraphs": [
+          "في مجلس بغداد الهادئ، يبدأ السندباد البحري حديثه إلى السندباد البرّي لا بالتفاخر بالذهب، بل بوصف أول غلطة قادته إلى قلب المحيط: سفينة راسية قرب جزيرة خضراء هادئة، وما إن أوقد البحارة نارهم عليها حتى ارتجّت الأرض وغاصت بهم؛ لم تكن جزيرة بل حوتاً هائلاً نبتت على ظهره الرمال والأشجار عبر السنين.",
+          "ينجو السندباد وحيداً على حوض خشبي تهادى به الموج نحو سواحل مملكة «المهرجان»، حيث يكشف خيال ألف ليلة وليلة عن لقاء مدهش بين التجارة العربية ودهشة الجزر الأسطورية وأساطيل الخيل البحرية.",
+          "يمهد هذا الفصل الأول المجاني للهيكل المتكرر للرحلات السبع: الأمان الكاذب، الانفصال عن الرفاق، النجاة بالحيلة، ثم العودة المظفّرة التي لا تطفئ نداء البحر من جديد."
+        ]
+      },
+      {
+        "id": "sinbad-v2",
+        "index": 1,
+        "title": "الرحلة الثانية: وادي الألماس ومخالب طائر الرخ",
+        "evidenceLabel": "خيال أدبي",
+        "isAppendix": false,
+        "isFree": false,
+        "estimatedWords": 1430,
+        "contentPending": true,
+        "paragraphs": []
+      },
+      {
+        "id": "sinbad-v3",
+        "index": 2,
+        "title": "الرحلة الثالثة: جزيرة القردة وقلعة العملاق الأسود",
+        "evidenceLabel": "خيال أدبي",
+        "isAppendix": false,
+        "isFree": false,
+        "estimatedWords": 1430,
+        "contentPending": true,
+        "paragraphs": []
+      },
+      {
+        "id": "sinbad-v4",
+        "index": 3,
+        "title": "الرحلة الرابعة: وليمة القوم الغريبة وبئر الأحياء والأموات",
+        "evidenceLabel": "خيال أدبي",
+        "isAppendix": false,
+        "isFree": false,
+        "estimatedWords": 1430,
+        "contentPending": true,
+        "paragraphs": []
+      },
+      {
+        "id": "sinbad-v5",
+        "index": 4,
+        "title": "الرحلة الخامسة: شيخ البحر العنيد وجزيرة الجوز",
+        "evidenceLabel": "خيال أدبي",
+        "isAppendix": false,
+        "isFree": false,
+        "estimatedWords": 1430,
+        "contentPending": true,
+        "paragraphs": []
+      },
+      {
+        "id": "sinbad-v6",
+        "index": 5,
+        "title": "الرحلة السادسة: النهر الجوفي ورسالة ملك سرنديب",
+        "evidenceLabel": "خيال أدبي",
+        "isAppendix": false,
+        "isFree": false,
+        "estimatedWords": 1430,
+        "contentPending": true,
+        "paragraphs": []
+      },
+      {
+        "id": "sinbad-v7",
+        "index": 6,
+        "title": "الرحلة السابعة: مقبرة الفيلة ونهاية الأسفار السبع",
+        "evidenceLabel": "خيال أدبي",
+        "isAppendix": false,
+        "isFree": false,
+        "estimatedWords": 1450,
+        "contentPending": true,
+        "paragraphs": []
+      }
+    ]
+  },
+  {
+    "id": "ibn-battuta",
+    "name": "ابن بطوطة",
+    "latinName": "Ibn Battuta",
+    "category": "الشخصيات",
+    "categoryKey": "personalities",
+    "entryType": "رحّالة تاريخي",
+    "typeLabel": "رحّالة تاريخي",
+    "isLongForm": true,
+    "isPremium": true,
+    "isHistorical": true,
+    "requiredSubscription": "premium_monthly",
+    "heroImage": "images/ibn-battuta.jpg",
+    "evidenceLabels": [
+      "موثق تاريخياً",
+      "من عجائب روايته",
+      "إعادة تخيل أدبي"
+    ],
+    "targetWords": 11000,
+    "region": "طنجة إلى الصين ومالي والأندلس",
+    "approxYear": 1325,
+    "tags": [
+      "تاريخ"
+    ],
+    "related": [
+      "sinbad",
+      "dhul-qarnayn"
+    ],
+    "summary": "أمير الرحّالين الذي قطع قرابة ثلاثين عاماً بين أفريقيا وآسيا وأوروبا الشرقية، وأملى «تحفة النظار في غرائب الأمصار».",
+    "body": [
+      "في الثاني من رجب سنة ٧٢٥هـ (١٣٢٥م)، غادر الشاب الطنجي محمد بن عبد الله اللواتي، المعروف بابن بطوطة، مسقط رأسه قاصداً الحج وحيداً، ولم يكن يدري أن الغياب سيمتد تسعاً وعشرين سنة متصلة.",
+      "يرسم هذا العمل الطويل خط سير الرحلة التاريخية في ١٢ فصلاً وملحقين، مع تمييز دقيق بين الوقائع الموثقة تاريخياً، وعجائب الرواية التي استمع إليها أو سجلها، ومساحة إعادة التخيل الأدبي."
+    ],
+    "sources": [
+      {
+        "title": "تحفة النظار في غرائب الأمصار وعجائب الأسفار",
+        "author": "ابن بطوطة (بتدوين ابن جزي الكلبي)",
+        "year": "٧٥٦ هـ / ١٣٥٥م"
+      },
+      {
+        "title": "الدرر الكامنة في أعيان المائة الثامنة",
+        "author": "ابن حجر العسقلاني",
+        "year": "القرن 9 هـ"
+      }
+    ],
+    "timeline": [
+      {
+        "era": "القرن 8 هـ (١٣٢٥م)",
+        "note": "الخروج من طنجة عبر المغرب الأوسط وإفريقية نحو مصر والشام والحجاز."
+      },
+      {
+        "era": "القرن 8 هـ (١٣٣٣–١٣٤٧م)",
+        "note": "القضاء في سلطنة دلهي ثم الإبحار إلى المالديف وسرنديب وموانئ الصين."
+      },
+      {
+        "era": "القرن 8 هـ (١٣٥٥م)",
+        "note": "الاستقرار في فاس وإملاء الرحلة على ابن جزي الكلبي بأمر السلطان أبي عنان."
+      }
+    ],
+    "chapters": [
+      {
+        "id": "ib-ch-1",
+        "index": 0,
+        "title": "الفصل الأول: طنجة ١٣٢٥م — عهد الفراق وبداية الحج الوحيد",
+        "evidenceLabel": "موثق تاريخياً",
+        "isAppendix": false,
+        "isFree": true,
+        "estimatedWords": 850,
+        "contentPending": false,
+        "paragraphs": [
+          "«خرجت من طنجة مسقط رأسي يوم الخميس الثاني من شهر الله رجب الفرد عام خمسة وعشرين وسبعمائة معتمداً حج بيت الله الحرام». بهذه الكلمات الهادئة يفتتح ابن بطوطة أضخم مدونة سفر عربية في العصور الوسطى، وهو ابن اثنتين وعشرين سنة.",
+          "لم يصحبه رفيق ولا قافلة في خطواته الأولى؛ يصف وحشة الفراق عن أبيه وأمه وهو يعبر بوادي المغرب إلى تلمسان وبجاية وتونس. ومع اشتداد الحمّى عليه في أوائل الطريق، يتجلّى إصرار طالب الفقه الشاب على مواصلة المسير نحو المشرق.",
+          "يفصل هذا الفصل الأول المجاني خيوط البداية الموثقة لرحلة ستغطي أكثر من مئة وعشرين ألف كيلومتر، قبل أن ننتقل في الفصول الأحد عشر التالية والملحقين إلى مدن الإسكندرية ودمشق والقسطنطينية ودلهي وجزر المالديف والصين ومالي."
+        ]
+      },
+      {
+        "id": "ib-ch-2",
+        "index": 1,
+        "title": "الفصل الثاني: الإسكندرية والقاهرة — نبوءة القطب وباب البحر الأحمر",
+        "evidenceLabel": "موثق تاريخياً",
+        "isAppendix": false,
+        "isFree": false,
+        "estimatedWords": 800,
+        "contentPending": true,
+        "paragraphs": []
+      },
+      {
+        "id": "ib-ch-3",
+        "index": 2,
+        "title": "الفصل الثالث: دمشق ومكة — ركب المحمل وأسرار القباب",
+        "evidenceLabel": "موثق تاريخياً",
+        "isAppendix": false,
+        "isFree": false,
+        "estimatedWords": 800,
+        "contentPending": true,
+        "paragraphs": []
+      },
+      {
+        "id": "ib-ch-4",
+        "index": 3,
+        "title": "الفصل الرابع: فارس والعراق — شيراز والبصرة ومجالس الأتابكة",
+        "evidenceLabel": "موثق تاريخياً",
+        "isAppendix": false,
+        "isFree": false,
+        "estimatedWords": 800,
+        "contentPending": true,
+        "paragraphs": []
+      },
+      {
+        "id": "ib-ch-5",
+        "index": 4,
+        "title": "الفصل الخامس: ساحل الزنج وظفار — مراكب الهند وموانئ اللبان",
+        "evidenceLabel": "من عجائب روايته",
+        "isAppendix": false,
+        "isFree": false,
+        "estimatedWords": 800,
+        "contentPending": true,
+        "paragraphs": []
+      },
+      {
+        "id": "ib-ch-6",
+        "index": 5,
+        "title": "الفصل السادس: الأناضول والقبجاق — العربة المتجولة وبرد الشمال",
+        "evidenceLabel": "موثق تاريخياً",
+        "isAppendix": false,
+        "isFree": false,
+        "estimatedWords": 800,
+        "contentPending": true,
+        "paragraphs": []
+      },
+      {
+        "id": "ib-ch-7",
+        "index": 6,
+        "title": "الفصل السابع: القسطنطينية — في بلاط الإمبراطور وصدى الأجراس",
+        "evidenceLabel": "موثق تاريخياً",
+        "isAppendix": false,
+        "isFree": false,
+        "estimatedWords": 800,
+        "contentPending": true,
+        "paragraphs": []
+      },
+      {
+        "id": "ib-ch-8",
+        "index": 7,
+        "title": "الفصل الثامن: خوارزم وخراسان — طريق الحرير ومزالق السهوب",
+        "evidenceLabel": "موثق تاريخياً",
+        "isAppendix": false,
+        "isFree": false,
+        "estimatedWords": 800,
+        "contentPending": true,
+        "paragraphs": []
+      },
+      {
+        "id": "ib-ch-9",
+        "index": 8,
+        "title": "الفصل التاسع: دلهي في بلاط محمد بن تغلق — القضاء والرهبة",
+        "evidenceLabel": "موثق تاريخياً",
+        "isAppendix": false,
+        "isFree": false,
+        "estimatedWords": 800,
+        "contentPending": true,
+        "paragraphs": []
+      },
+      {
+        "id": "ib-ch-10",
+        "index": 9,
+        "title": "الفصل العاشر: جزر المالديف — قاضي الأرخبيل وألواح القوقع",
+        "evidenceLabel": "من عجائب روايته",
+        "isAppendix": false,
+        "isFree": false,
+        "estimatedWords": 800,
+        "contentPending": true,
+        "paragraphs": []
+      },
+      {
+        "id": "ib-ch-11",
+        "index": 10,
+        "title": "الفصل الحادي عشر: سرنديب والصين — جبل آدم ومرافئ الزيتون",
+        "evidenceLabel": "من عجائب روايته",
+        "isAppendix": false,
+        "isFree": false,
+        "estimatedWords": 800,
+        "contentPending": true,
+        "paragraphs": []
+      },
+      {
+        "id": "ib-ch-12",
+        "index": 11,
+        "title": "الفصل الثاني عشر: الأندلس ومالي — ختام الطواف وإملاء التحفة في فاس",
+        "evidenceLabel": "موثق تاريخياً",
+        "isAppendix": false,
+        "isFree": false,
+        "estimatedWords": 800,
+        "contentPending": true,
+        "paragraphs": []
+      },
+      {
+        "id": "ib-app-1",
+        "index": 12,
+        "title": "ملحق ١: خريطة المسارات وتحقيق التواريخ والانقطاعات",
+        "evidenceLabel": "موثق تاريخياً",
+        "isAppendix": true,
+        "isFree": false,
+        "estimatedWords": 675,
+        "contentPending": true,
+        "paragraphs": []
+      },
+      {
+        "id": "ib-app-2",
+        "index": 13,
+        "title": "ملحق ٢: شخصيات على الهامش ومختارات لإعادة التخيل",
+        "evidenceLabel": "إعادة تخيل أدبي",
+        "isAppendix": true,
+        "isFree": false,
+        "estimatedWords": 675,
+        "contentPending": true,
+        "paragraphs": []
+      }
+    ]
+  }
+]

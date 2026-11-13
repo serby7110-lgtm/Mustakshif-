@@ -20,10 +20,14 @@ import {
   AlertCircle,
   Clock,
   Sparkles,
+  X,
+  Check,
 } from 'lucide-react';
 import { Card } from '../components/primitives/Card';
 import { useTheme } from '../theme/ThemeContext';
 import { storage } from '../data/storage';
+import { useI18n } from '../i18n/i18n';
+import { useAuth } from '../context/AuthContext';
 
 export const FORMSPREE_ID = "meaawdjn";
 
@@ -36,6 +40,8 @@ export interface ContactScreenProps {
 
 export const ContactScreen: React.FC<ContactScreenProps> = ({ onBack, onMessageSent }) => {
   const { tokens, isDark } = useTheme();
+  const { t, dir } = useI18n();
+  const { user, signIn, sendEmailWithGmail } = useAuth();
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -46,6 +52,16 @@ export const ContactScreen: React.FC<ContactScreenProps> = ({ onBack, onMessageS
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [toast, setToast] = useState<{ message: string; isError?: boolean } | null>(null);
+  const [isGmailConfirmOpen, setIsGmailConfirmOpen] = useState(false);
+  const [isGmailSending, setIsGmailSending] = useState(false);
+
+  // Pre-fill user data if authenticated
+  React.useEffect(() => {
+    if (user) {
+      if (!name && user.displayName) setName(user.displayName);
+      if (!email && user.email) setEmail(user.email);
+    }
+  }, [user]);
 
   // Email regex allowing international and all standard domain extensions
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -130,20 +146,90 @@ export const ContactScreen: React.FC<ContactScreenProps> = ({ onBack, onMessageS
         setSubject('');
         setMessage('');
         setTouched({});
-        showToast('✓ وصلت رسالتك، شكراً لك', false);
+        /* ✓ وصلت رسالتك، شكراً لك */
+        showToast(t('contact.success') || '✓ وصلت رسالتك، شكراً لك', false);
         onMessageSent?.();
       } else {
-        showToast('فشل الإرسال، حاول لاحقاً', true);
+        /* فشل الإرسال، حاول لاحقاً */
+        showToast(t('contact.error') || 'فشل الإرسال، حاول لاحقاً', true);
       }
     } catch {
-      showToast('فشل الإرسال، حاول لاحقاً', true);
+      /* فشل الإرسال، حاول لاحقاً */
+      showToast(t('contact.error') || 'فشل الإرسال، حاول لاحقاً', true);
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const handlePromptGmailSend = async () => {
+    setTouched({
+      name: true,
+      email: true,
+      subject: true,
+      message: true,
+    });
+    if (!isValid) return;
+
+    if (!user) {
+      try {
+        await signIn();
+      } catch {
+        showToast('يرجى تسجيل الدخول بحساب Google أولاً لاستخدام Gmail', true);
+        return;
+      }
+    }
+    setIsGmailConfirmOpen(true);
+  };
+
+  const handleConfirmGmailSend = async () => {
+    setIsGmailSending(true);
+    try {
+      const emailContent = `
+        <div dir="rtl" style="font-family: Arial, sans-serif; line-height: 1.6; color: #12332D; padding: 16px;">
+          <h2 style="color: #0E5C4D; margin-bottom: 8px;">رسالة تواصل من تطبيق مستكشف</h2>
+          <div style="background-color: #F0FDF8; border: 1px solid #7FD1AE; border-radius: 12px; padding: 12px; margin-bottom: 16px;">
+            <p style="margin: 4px 0;"><strong>المرسل:</strong> ${name.trim()}</p>
+            <p style="margin: 4px 0;"><strong>البريد:</strong> ${email.trim()}</p>
+            <p style="margin: 4px 0;"><strong>نوع الرسالة:</strong> ${type}</p>
+          </div>
+          <h3 style="color: #245A4E; margin-bottom: 6px;">الموضوع: ${subject.trim()}</h3>
+          <div style="background-color: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px; padding: 12px; white-space: pre-wrap;">
+            ${message.trim()}
+          </div>
+          <p style="font-size: 11px; color: #718096; margin-top: 16px;">تم الإرسال عبر تكامل Gmail في تطبيق مستكشف الأساطير العربية.</p>
+        </div>
+      `;
+
+      const result = await sendEmailWithGmail({
+        to: 'serby7110@gmail.com',
+        subject: `مستكشف: ${type} - ${subject.trim()}`,
+        bodyText: `الاسم: ${name.trim()}\nالبريد: ${email.trim()}\nالنوع: ${type}\nالموضوع: ${subject.trim()}\n\n${message.trim()}`,
+        bodyHtml: emailContent,
+      });
+
+      if (result.success) {
+        storage.incrementSentMessagesCount();
+        setName('');
+        setEmail('');
+        setType('شكوى');
+        setSubject('');
+        setMessage('');
+        setTouched({});
+        setIsGmailConfirmOpen(false);
+        showToast('✓ تم إرسال رسالتك مباشرة عبر Gmail بنجاح ✉️', false);
+        onMessageSent?.();
+      } else {
+        showToast(result.error || 'فشل إرسال البريد عبر Gmail', true);
+      }
+    } catch {
+      showToast('تعذر الإرسال عبر Gmail، حاول لاحقاً', true);
+    } finally {
+      setIsGmailSending(false);
+    }
+  };
+
   return (
-    <div className="space-y-6 pb-12 animate-in fade-in duration-200" dir="rtl">
+    <div className="space-y-6 pb-12 animate-in fade-in duration-200" dir={dir}>
       {/* Top Navigation Bar with Back Button */}
       <div className="flex items-center justify-between pt-1">
         {onBack ? (
@@ -204,14 +290,16 @@ export const ContactScreen: React.FC<ContactScreenProps> = ({ onBack, onMessageS
               style={{ color: tokens.deepAccent }}
               className="font-['Aref_Ruqaa',serif] text-2xl sm:text-3xl font-bold"
             >
-              تواصل معنا
+              {/* تواصل معنا */}
+              {t('contact.title') || 'تواصل معنا'}
             </h1>
           </div>
           <p
             style={{ color: tokens.textSecondary }}
             className="text-sm font-['Cairo',sans-serif] leading-relaxed"
           >
-            شكواك، اقتراحك، أو اكتشافك لخطأ — صوتك يصلنا
+            {/* شكواك، اقتراحك، أو اكتشافك لخطأ — صوتك يصلنا */}
+            {t('contact.subtitle') || 'شكواك، اقتراحك، أو اكتشافك لخطأ — صوتك يصلنا'}
           </p>
         </div>
       </Card>
@@ -255,7 +343,7 @@ export const ContactScreen: React.FC<ContactScreenProps> = ({ onBack, onMessageS
               className="block text-xs font-bold mb-1.5 flex items-center gap-1.5"
             >
               <User size={14} style={{ color: tokens.deepAccent }} />
-              <span>الاسم <span className="text-red-500">*</span></span>
+              <span>{t('contact.name') || 'الاسم'} <span className="text-red-500">*</span></span>
             </label>
             <input
               id="contact-name"
@@ -264,7 +352,8 @@ export const ContactScreen: React.FC<ContactScreenProps> = ({ onBack, onMessageS
               value={name}
               onChange={(e) => setName(e.target.value)}
               onBlur={() => handleBlur('name')}
-              placeholder="الاسم"
+              /* placeholder="الاسم" */
+              placeholder={t('contact.name') || 'الاسم'}
               style={{
                 backgroundColor: tokens.surface,
                 borderColor: touched.name && errors.name ? '#EF4444' : tokens.border,
@@ -288,7 +377,7 @@ export const ContactScreen: React.FC<ContactScreenProps> = ({ onBack, onMessageS
               className="block text-xs font-bold mb-1.5 flex items-center gap-1.5"
             >
               <Mail size={14} style={{ color: tokens.deepAccent }} />
-              <span>بريدك الإلكتروني <span className="text-red-500">*</span></span>
+              <span>{t('contact.email') || 'بريدك الإلكتروني'} <span className="text-red-500">*</span></span>
             </label>
             <input
               id="contact-email"
@@ -298,7 +387,8 @@ export const ContactScreen: React.FC<ContactScreenProps> = ({ onBack, onMessageS
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               onBlur={() => handleBlur('email')}
-              placeholder="بريدك الإلكتروني"
+              /* placeholder="بريدك الإلكتروني" */
+              placeholder={t('contact.email') || 'بريدك الإلكتروني'}
               style={{
                 backgroundColor: tokens.surface,
                 borderColor: touched.email && errors.email ? '#EF4444' : tokens.border,
@@ -322,7 +412,7 @@ export const ContactScreen: React.FC<ContactScreenProps> = ({ onBack, onMessageS
               className="block text-xs font-bold mb-1.5 flex items-center gap-1.5"
             >
               <Tag size={14} style={{ color: tokens.deepAccent }} />
-              <span>نوع الرسالة <span className="text-red-500">*</span></span>
+              <span>{t('contact.type') || 'نوع الرسالة'} <span className="text-red-500">*</span></span>
             </label>
             <select
               id="contact-type"
@@ -335,10 +425,14 @@ export const ContactScreen: React.FC<ContactScreenProps> = ({ onBack, onMessageS
               }}
               className="w-full px-4 py-3 rounded-2xl border text-sm font-['Cairo',sans-serif] outline-none transition-colors focus:ring-2 focus:ring-[#4A90D9]/40 min-h-[48px] cursor-pointer"
             >
-              <option value="شكوى">شكوى</option>
-              <option value="اقتراح">اقتراح</option>
-              <option value="خطأ في المحتوى">خطأ في المحتوى</option>
-              <option value="سؤال عام">سؤال عام</option>
+              {/* شكوى */}
+              <option value="شكوى">{t('contact.typeComplaint') || 'شكوى'}</option>
+              {/* اقتراح */}
+              <option value="اقتراح">{t('contact.typeSuggestion') || 'اقتراح'}</option>
+              {/* خطأ في المحتوى */}
+              <option value="خطأ في المحتوى">{t('contact.typeError') || 'خطأ في المحتوى'}</option>
+              {/* سؤال عام */}
+              <option value="سؤال عام">{t('contact.typeQuestion') || 'سؤال عام'}</option>
             </select>
           </div>
 
@@ -350,7 +444,7 @@ export const ContactScreen: React.FC<ContactScreenProps> = ({ onBack, onMessageS
               className="block text-xs font-bold mb-1.5 flex items-center gap-1.5"
             >
               <FileText size={14} style={{ color: tokens.deepAccent }} />
-              <span>عنوان الرسالة <span className="text-red-500">*</span></span>
+              <span>{t('contact.subject') || 'عنوان الرسالة'} <span className="text-red-500">*</span></span>
             </label>
             <input
               id="contact-subject"
@@ -359,7 +453,8 @@ export const ContactScreen: React.FC<ContactScreenProps> = ({ onBack, onMessageS
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
               onBlur={() => handleBlur('subject')}
-              placeholder="عنوان الرسالة"
+              /* placeholder="عنوان الرسالة" */
+              placeholder={t('contact.subject') || 'عنوان الرسالة'}
               style={{
                 backgroundColor: tokens.surface,
                 borderColor: touched.subject && errors.subject ? '#EF4444' : tokens.border,
@@ -383,7 +478,7 @@ export const ContactScreen: React.FC<ContactScreenProps> = ({ onBack, onMessageS
               className="block text-xs font-bold mb-1.5 flex items-center gap-1.5"
             >
               <MessageSquare size={14} style={{ color: tokens.deepAccent }} />
-              <span>نص الرسالة <span className="text-red-500">*</span></span>
+              <span>{t('contact.message') || 'نص الرسالة'} <span className="text-red-500">*</span></span>
             </label>
             <textarea
               id="contact-message"
@@ -392,7 +487,8 @@ export const ContactScreen: React.FC<ContactScreenProps> = ({ onBack, onMessageS
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               onBlur={() => handleBlur('message')}
-              placeholder="اكتب رسالتك هنا..."
+              /* placeholder="اكتب رسالتك هنا..." */
+              placeholder={t('contact.message') || 'اكتب رسالتك هنا...'}
               style={{
                 backgroundColor: tokens.surface,
                 borderColor: touched.message && errors.message ? '#EF4444' : tokens.border,
@@ -423,14 +519,33 @@ export const ContactScreen: React.FC<ContactScreenProps> = ({ onBack, onMessageS
               {isSubmitting ? (
                 <>
                   <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>جاري الإرسال...</span>
+                  {/* جاري الإرسال... */}
+                  <span>{t('contact.sending') || 'جاري الإرسال...'}</span>
                 </>
               ) : (
                 <>
                   <Send size={16} />
-                  <span>إرسال</span>
+                  {/* إرسال */}
+                  <span>{t('contact.send') || 'إرسال'}</span>
                 </>
               )}
+            </button>
+
+            {/* Direct Send via Gmail Button */}
+            <button
+              type="button"
+              onClick={handlePromptGmailSend}
+              disabled={!isValid || isSubmitting || isGmailSending}
+              style={{
+                backgroundColor: isDark ? 'rgba(127, 209, 174, 0.18)' : '#E8F7F0',
+                color: tokens.deepAccent,
+                borderColor: isDark ? 'rgba(127, 209, 174, 0.4)' : '#A7E5CB',
+                opacity: (!isValid || isSubmitting || isGmailSending) ? 0.6 : 1,
+              }}
+              className="w-full h-12 min-h-[48px] rounded-2xl font-bold text-sm border shadow-xs flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.99] disabled:cursor-not-allowed hover:opacity-95"
+            >
+              <Mail size={16} />
+              <span>إرسال مباشر عبر حسابي في Gmail ✉️</span>
             </button>
 
             {/* Privacy note */}
@@ -489,11 +604,123 @@ export const ContactScreen: React.FC<ContactScreenProps> = ({ onBack, onMessageS
             }}
             className="w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-bold border flex items-center justify-center gap-2 hover:opacity-90 transition-opacity min-h-[44px]"
           >
-            <span>أو راسلنا مباشرة:</span>
+            {/* أو راسلنا مباشرة: */}
+            <span>{t('contact.altEmail') || 'أو راسلنا مباشرة:'}</span>
             <span dir="ltr" className="underline font-mono text-[11px]">serby7110@gmail.com</span>
           </a>
         </div>
       </Card>
+
+      {/* Gmail Confirmation Dialog */}
+      {isGmailConfirmOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div
+            style={{
+              backgroundColor: tokens.card,
+              borderColor: tokens.border,
+            }}
+            className="w-full max-w-md rounded-[26px] p-6 shadow-2xl border space-y-4 animate-in zoom-in-95 text-start"
+          >
+            <div
+              style={{ borderColor: tokens.borderSubtle }}
+              className="flex items-center justify-between pb-3 border-b"
+            >
+              <div className="flex items-center gap-2">
+                <div
+                  style={{
+                    backgroundColor: isDark ? 'rgba(127, 209, 174, 0.2)' : 'rgba(127, 209, 174, 0.2)',
+                    color: tokens.deepAccent,
+                  }}
+                  className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
+                >
+                  <Mail size={18} />
+                </div>
+                <h3
+                  style={{ color: tokens.deepAccent }}
+                  className="font-['Aref_Ruqaa',serif] text-xl font-bold"
+                >
+                  تأكيد الإرسال عبر Gmail
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsGmailConfirmOpen(false)}
+                disabled={isGmailSending}
+                style={{ color: tokens.textSecondary }}
+                aria-label="إغلاق"
+                className="p-2 rounded-xl hover:opacity-80 cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs leading-relaxed" style={{ color: tokens.textPrimary }}>
+              <p>
+                هل تؤكد رغبتك في إرسال هذه الرسالة مباشرة من حسابك في Gmail إلى فريق تحرير مستكشف؟
+              </p>
+
+              <div
+                style={{
+                  backgroundColor: tokens.surface,
+                  borderColor: tokens.borderSubtle,
+                }}
+                className="p-3.5 rounded-2xl border space-y-1.5 font-['Cairo',sans-serif]"
+              >
+                <div>
+                  <span style={{ color: tokens.textSecondary }}>المرسل: </span>
+                  <span className="font-bold">{user?.email || email}</span>
+                </div>
+                <div>
+                  <span style={{ color: tokens.textSecondary }}>المستلم: </span>
+                  <span className="font-bold">serby7110@gmail.com</span>
+                </div>
+                <div>
+                  <span style={{ color: tokens.textSecondary }}>الموضوع: </span>
+                  <span className="font-bold">مستكشف: {type} - {subject}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={handleConfirmGmailSend}
+                disabled={isGmailSending}
+                style={{
+                  backgroundColor: tokens.primaryMint,
+                  color: '#0E5C4D',
+                }}
+                className="flex-1 py-3 px-4 rounded-xl font-bold text-xs flex items-center justify-center gap-2 hover:opacity-90 transition-opacity cursor-pointer min-h-[44px]"
+              >
+                {isGmailSending ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-[#0E5C4D] border-t-transparent rounded-full animate-spin" />
+                    <span>جارٍ الإرسال عبر Gmail...</span>
+                  </>
+                ) : (
+                  <>
+                    <Check size={16} />
+                    <span>تأكيد الإرسال عبر Gmail</span>
+                  </>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsGmailConfirmOpen(false)}
+                disabled={isGmailSending}
+                style={{
+                  borderColor: tokens.border,
+                  color: tokens.textSecondary,
+                }}
+                className="py-3 px-4 rounded-xl font-bold text-xs border hover:opacity-80 transition-opacity cursor-pointer min-h-[44px]"
+              >
+                إلغاء
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

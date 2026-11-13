@@ -26,11 +26,11 @@ export interface MethodologyScreenProps {
 }
 
 export const MethodologyScreen: React.FC<MethodologyScreenProps> = ({ onBack }) => {
-  const { t } = useI18n();
+  const { t, dir } = useI18n();
   const { tokens, isDark } = useTheme();
 
   return (
-    <div className="space-y-6 pb-12 animate-in fade-in duration-200" dir="rtl">
+    <div className="space-y-6 pb-12 animate-in fade-in duration-200" dir={dir}>
       {/* Top Navigation Bar with Back Button */}
       <div className="flex items-center justify-between pt-1">
         {onBack ? (
@@ -115,7 +115,7 @@ export const MethodologyScreen: React.FC<MethodologyScreenProps> = ({ onBack }) 
                 className="px-3 py-1 rounded-full text-xs font-bold border inline-flex items-center gap-1.5 font-['Cairo',sans-serif]"
               >
                 <CheckCircle2 size={13} />
-                <span>نص حرفي</span>
+                <span>{/* نص حرفي */}{t('method.verbatim') || 'نص حرفي'}</span>
               </span>
               <span
                 style={{ color: tokens.textSecondary }}
@@ -129,7 +129,8 @@ export const MethodologyScreen: React.FC<MethodologyScreenProps> = ({ onBack }) 
               style={{ color: tokens.textPrimary }}
               className="font-['Aref_Ruqaa',serif] text-lg font-bold"
             >
-              نص حرفي
+              {/* نص حرفي */}
+              {t('method.verbatim') || 'نص حرفي'}
             </h3>
 
             <p
@@ -160,7 +161,7 @@ export const MethodologyScreen: React.FC<MethodologyScreenProps> = ({ onBack }) 
                 className="px-3 py-1 rounded-full text-xs font-bold border inline-flex items-center gap-1.5 font-['Cairo',sans-serif]"
               >
                 <Scroll size={13} />
-                <span>بأسلوب المصدر</span>
+                <span>{/* بأسلوب المصدر */}{t('method.styled') || 'بأسلوب المصدر'}</span>
               </span>
               <span
                 style={{ color: tokens.textSecondary }}
@@ -174,7 +175,8 @@ export const MethodologyScreen: React.FC<MethodologyScreenProps> = ({ onBack }) 
               style={{ color: tokens.textPrimary }}
               className="font-['Aref_Ruqaa',serif] text-lg font-bold"
             >
-              بأسلوب المصدر
+              {/* بأسلوب المصدر */}
+              {t('method.styled') || 'بأسلوب المصدر'}
             </h3>
 
             <p

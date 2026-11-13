@@ -114,7 +114,7 @@ export const AppShell: React.FC<AppShellProps> = ({
         )}
 
         {/* Scrollable Main Content Area */}
-        <main className="flex-1 overflow-y-auto px-4 py-5 pb-24">
+        <main className="flex-1 overflow-y-auto px-4 py-5 pb-24 scroll-smooth">
           {children}
         </main>
 

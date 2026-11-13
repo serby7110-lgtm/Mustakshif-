@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>مستكشف | Mustakshif — موسوعة الأساطير العربية</title>
+  <meta name="description" content="موسوعة الأساطير والكائنات والرموز الفولكلورية العربية — تطبيق أندرويد يعمل دون اتصال بالإنترنت." />
+  <style>
+    :root {
+      --bg: #FFFFFF;
+      --surface: #F2FBF7;
+      --mint: #7FD1AE;
+      --primary: #0E5C4D;
+      --blue: #4A90D9;
+      --blue-soft: #E8F1FB;
+      --text: #14312B;
+      --text-muted: #6B7C78;
+      --border: #D7EFE6;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0B2420;
+        --surface: #12332D;
+        --mint: #7FD1AE;
+        --primary: #9FE8CC;
+        --blue: #7FB2E8;
+        --blue-soft: #163A4A;
+        --text: #E8F6F0;
+        --text-muted: #9DB8B0;
+        --border: #1C443C;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      font-family: 'Cairo', 'Tajawal', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .card {
+      width: 100%;
+      max-width: 600px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 36px 28px;
+      text-align: center;
+    }
+    .logo {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 18px;
+      background: var(--blue-soft);
+      border: 1px solid var(--border);
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 2rem;
+      color: var(--primary);
+    }
+    .subtitle {
+      margin: 0 0 24px;
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      line-height: 1.7;
+    }
+    .play-badge-placeholder {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 14px 24px;
+      border-radius: 14px;
+      background: #0E5C4D;
+      color: #FFFFFF;
+      font-weight: 700;
+      font-size: 1rem;
+      text-decoration: none;
+      margin-bottom: 24px;
+    }
+    .links {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      padding-top: 18px;
+      border-top: 1px solid var(--border);
+    }
+    .links a {
+      color: var(--blue);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+    .links a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="logo" aria-hidden="true">
+      <svg width="36" height="36" viewBox="0 0 48 48" fill="none">
+        <rect x="9" y="9" width="30" height="30" rx="2" stroke="#0E5C4D" stroke-width="2.5" />
+        <rect x="9" y="9" width="30" height="30" rx="2" transform="rotate(45 24 24)" stroke="#7FD1AE" stroke-width="2.5" />
+        <circle cx="24" cy="24" r="4.5" fill="#4A90D9" />
+      </svg>
+    </div>
+    <h1>مستكشف &bull; Mustakshif</h1>
+    <p class="subtitle">
+      موسوعة الأساطير والكائنات والرموز الفولكلورية العربية — قارئ عربي هادئ يعمل دون اتصال بالإنترنت على أجهزة أندرويد.
+    </p>
+    <a class="play-badge-placeholder" href="#google-play-coming-soon" aria-label="متاح قريباً على Google Play">
+      <span>قريباً على متجر Google Play</span>
+    </a>
+    <nav class="links" aria-label="روابط قانونية وتقنية">
+      <a href="/privacy.html">سياسة الخصوصية</a>
+      <a href="/app-ads.txt">ملف app-ads.txt</a>
+    </nav>
+  </main>
+</body>
+</html>

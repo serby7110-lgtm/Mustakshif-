@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Eight-pointed Islamic star (Rub el Hizb) in Mint and Deep Emerald -->
+    <!-- Primary Rotated Star -->
+    <path
+        android:fillColor="#0E5C4D"
+        android:pathData="M54,18 L64,36 L84,36 L72,50 L80,68 L62,64 L54,82 L46,64 L28,68 L36,50 L24,36 L44,36 Z" />
+    <!-- Secondary Intersecting Star -->
+    <path
+        android:fillColor="#7FD1AE"
+        android:pathData="M54,26 L61,40 L76,40 L67,51 L73,65 L59,62 L54,76 L49,62 L35,65 L41,51 L32,40 L47,40 Z" />
+    <!-- Center Core Dot -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,49 A5,5 0 1,0 54,59 A5,5 0 1,0 54,49 Z" />
+</vector>

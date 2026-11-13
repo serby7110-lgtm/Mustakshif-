@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "319935118490",
+    "project_id": "mustakshif-490b4",
+    "storage_bucket": "mustakshif-490b4.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:319935118490:android:b2c398da15f6f3f17af323",
+        "android_client_info": {
+          "package_name": "com.sink.mustakshif"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCMecMdlDs0x_GlCw6w1nD-fqcp76ZuIHw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

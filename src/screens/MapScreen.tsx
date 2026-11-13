@@ -152,7 +152,7 @@ export const MapScreen: React.FC<MapScreenProps> = ({
   onSelectEntry,
   onSelectCivilization,
 }) => {
-  const { t } = useI18n();
+  const { t, dir } = useI18n();
   const { tokens, isDark } = useTheme();
 
   // Top Bar Search & Filter states (with 300ms debounce)
@@ -586,7 +586,7 @@ export const MapScreen: React.FC<MapScreenProps> = ({
   const borderDashed = isDark ? 'rgba(127, 209, 174, 0.28)' : '#C9E8D9';
 
   return (
-    <div className="space-y-4 pb-8 animate-in fade-in duration-200" dir="rtl">
+    <div className="space-y-4 pb-8 animate-in fade-in duration-200" dir={dir}>
       {/* 1. Header with Title & Stats Pill */}
       <div className="flex items-center justify-between gap-3 pt-1">
         <div>
@@ -632,7 +632,7 @@ export const MapScreen: React.FC<MapScreenProps> = ({
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="ابحث في الخريطة (مثلاً: الغول، عاد، مأرب، دومة الجندل...)"
+            placeholder={`${t('map.search')} (مثلاً: الغول، عاد، مأرب، دومة الجندل...)`} /* ابحث في الخريطة */
             style={{
               backgroundColor: tokens.card,
               borderColor: tokens.border,
@@ -842,7 +842,8 @@ export const MapScreen: React.FC<MapScreenProps> = ({
         {/* Master Scalable SVG Map Canvas */}
         <svg
           viewBox="0 0 1000 650"
-          className="w-full h-full block"
+          className="w-full h-full block map-canvas-svg"
+          style={dir === 'ltr' ? { transform: 'scaleX(-1)' } : undefined}
           xmlns="http://www.w3.org/2000/svg"
         >
           <defs>

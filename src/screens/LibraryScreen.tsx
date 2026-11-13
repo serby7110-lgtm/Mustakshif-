@@ -30,6 +30,7 @@ import { Card } from '../components/primitives/Card';
 import { StudioScreen } from './StudioScreen';
 import { MythEntry } from '../data/types';
 import mythsData from '../data/myths.json';
+import { LONG_FORM_ENTRIES, toLibraryMythEntry } from '../data/longForm';
 import { hasDeepStory } from '../data/storyTypes';
 import { getEstimatedReadingTime, formatReadingTime } from '../utils/readingTime';
 import { legacyAr as ar } from '../i18n/legacyAr';
@@ -60,7 +61,7 @@ export interface LibraryScreenProps {
 export const LibraryScreen: React.FC<LibraryScreenProps> = ({
   onSelectEntry,
 }) => {
-  const { t } = useI18n();
+  const { t, dir } = useI18n();
   const { tokens, isDark } = useTheme();
 
   // Segmented control: 'myths' | 'studio'
@@ -101,8 +102,15 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
     storage.setLibraryViewMode(mode);
   };
 
-  // All entries from myths.json
-  const allMyths = useMemo(() => mythsData as unknown as MythEntry[], []);
+  // All entries from myths.json merged with long-form entries
+  const allMyths = useMemo(() => {
+    const base = mythsData as unknown as MythEntry[];
+    const seen = new Set(base.map((m) => m.id));
+    const longFormExtras = LONG_FORM_ENTRIES.filter((lf) => !seen.has(lf.id)).map(
+      toLibraryMythEntry
+    );
+    return [...base, ...longFormExtras];
+  }, []);
 
   // Calculate counts for each reading status
   const statusCounts = useMemo(() => {
@@ -180,7 +188,7 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
   }, [finalSortedMyths, visibleCount]);
 
   return (
-    <div className="space-y-4 pb-8 animate-in fade-in duration-200" dir="rtl">
+    <div className="space-y-4 pb-8 animate-in fade-in duration-200" dir={dir}>
       {/* 1. Header */}
       <div className="flex items-center justify-between gap-3 pt-1">
         <div>
@@ -395,7 +403,7 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
           >
             <ArrowUpDown size={14} style={{ color: tokens.deepAccent }} />
             <span style={{ color: tokens.textSecondary }} className="text-[11px] font-medium shrink-0">
-              الترتيب:
+              {t('library.sort') || 'الترتيب:'}
             </span>
             <select
               value={sortBy}
@@ -540,19 +548,47 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
                       </span>
                     )}
 
-                    {/* Top Right: حكاية كاملة badge */}
-                    {hasDeepStory(entry.id) && (
-                      <span
-                        style={{
-                          backgroundColor: tokens.primaryMint,
-                          color: '#0E5C4D',
-                          borderColor: 'rgba(14, 92, 77, 0.25)',
-                        }}
-                        className="absolute top-2 right-2 px-2.5 py-0.5 rounded-full backdrop-blur-xs text-[10px] font-bold border shadow-xs flex items-center gap-1"
-                      >
-                        <Sparkles size={10} style={{ color: '#0E5C4D' }} />
-                        <span>حكاية كاملة</span>
-                      </span>
+                    {/* Top Right: طويلة / Premium / حكاية كاملة badges */}
+                    {entry.isLongForm ? (
+                      <div className="absolute top-2 right-2 flex items-center gap-1">
+                        <span
+                          style={{
+                            backgroundColor: tokens.primaryMint,
+                            color: '#0E5C4D',
+                            borderColor: 'rgba(14, 92, 77, 0.25)',
+                          }}
+                          className="px-2 py-0.5 rounded-full backdrop-blur-xs text-[10px] font-bold border shadow-xs flex items-center gap-1"
+                        >
+                          <BookOpen size={10} style={{ color: '#0E5C4D' }} />
+                          <span>طويلة</span>
+                        </span>
+                        {entry.isPremium && (
+                          <span
+                            style={{
+                              backgroundColor: isDark ? 'rgba(74, 144, 217, 0.92)' : tokens.coolBlueTint,
+                              color: isDark ? '#FFFFFF' : tokens.coolBlueAccent,
+                              borderColor: tokens.border,
+                            }}
+                            className="px-2 py-0.5 rounded-full backdrop-blur-xs text-[10px] font-bold border shadow-xs"
+                          >
+                            Premium
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      hasDeepStory(entry.id) && (
+                        <span
+                          style={{
+                            backgroundColor: tokens.primaryMint,
+                            color: '#0E5C4D',
+                            borderColor: 'rgba(14, 92, 77, 0.25)',
+                          }}
+                          className="absolute top-2 right-2 px-2.5 py-0.5 rounded-full backdrop-blur-xs text-[10px] font-bold border shadow-xs flex items-center gap-1"
+                        >
+                          <Sparkles size={10} style={{ color: '#0E5C4D' }} />
+                          <span>حكاية كاملة</span>
+                        </span>
+                      )
                     )}
 
                     {/* Top Left: Reading status pill */}
@@ -706,7 +742,33 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
                     >
                       {entry.name}
                     </h3>
-                    {hasDeepStory(entry.id) && (
+                    {entry.isLongForm && (
+                      <>
+                        <span
+                          style={{
+                            backgroundColor: tokens.primaryMint,
+                            color: '#0E5C4D',
+                          }}
+                          className="px-2 py-0.5 rounded-full text-[10px] font-bold flex items-center gap-0.5"
+                        >
+                          <BookOpen size={9} />
+                          <span>طويلة</span>
+                        </span>
+                        {entry.isPremium && (
+                          <span
+                            style={{
+                              backgroundColor: tokens.coolBlueTint,
+                              color: tokens.coolBlueAccent,
+                              borderColor: tokens.border,
+                            }}
+                            className="px-2 py-0.5 rounded-full text-[10px] font-bold border"
+                          >
+                            Premium
+                          </span>
+                        )}
+                      </>
+                    )}
+                    {!entry.isLongForm && hasDeepStory(entry.id) && (
                       <span
                         style={{
                           backgroundColor: tokens.primaryMint,

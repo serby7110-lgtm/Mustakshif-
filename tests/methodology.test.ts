@@ -66,8 +66,8 @@ test('Methodology: Card 1 & 4 use mint accent; Card 2 & 3 use cool-blue accent w
   assert.ok(code.includes('#ADCFF6') || code.includes('#4A90D9') || code.includes('74, 144, 217'), 'Cool-blue accent used for Card 2 & 3');
 
   // Each card shows its label pill at top
-  assert.ok(code.includes('<span>نص حرفي</span>') || code.includes("t('method.literal')"), 'Card 1 top label pill');
-  assert.ok(code.includes('<span>بأسلوب المصدر</span>') || code.includes("t('method.sourceStyle')"), 'Card 2 top label pill');
+  assert.ok(code.includes('<span>نص حرفي</span>') || code.includes("t('method.literal')") || code.includes("t('method.verbatim')"), 'Card 1 top label pill');
+  assert.ok(code.includes('<span>بأسلوب المصدر</span>') || code.includes("t('method.sourceStyle')") || code.includes("t('method.styled')"), 'Card 2 top label pill');
   assert.ok(code.includes('<span>الرواية الشعبية</span>') || code.includes("t('method.folk')"), 'Card 3 top label pill');
   assert.ok(code.includes('<span>التحليل التاريخي</span>') || code.includes("t('method.analysis')"), 'Card 4 top label pill');
 });

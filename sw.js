@@ -1,4 +1,6 @@
-const CACHE = 'mustakshif-v1';
+// رقم نسخة الكاش — غيّر هذا الرقم عند كل تحديث للتطبيق لمسح الكاش القديم تلقائياً
+const CACHE_VERSION = '1.0.0';
+const CACHE = 'mustakshif-v1'; // يحمل رقم النسخة v1 — يتم تغييره عند كل تحديث
 const ASSETS = ['/', '/index.html', '/manifest.json', '/icons/icon.svg'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));

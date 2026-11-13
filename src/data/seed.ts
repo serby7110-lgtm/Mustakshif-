@@ -8,6 +8,7 @@
 
 import { MythEntry } from './types';
 import mythsJson from './myths.json';
+import { LONG_FORM_ENTRIES, toLibraryMythEntry } from './longForm';
 
 export const MYTH_ENTRIES: MythEntry[] = [
   // ==========================================
@@ -996,6 +997,8 @@ export const MYTH_ENTRIES: MythEntry[] = [
 ];
 
 export const getEntryById = (id: string): MythEntry | undefined => {
+  const longEntry = LONG_FORM_ENTRIES.find((entry) => entry.id === id);
+  if (longEntry) return toLibraryMythEntry(longEntry);
   const fromMyths = (mythsJson as unknown as MythEntry[]).find((entry) => entry.id === id);
   if (fromMyths) return fromMyths;
   return MYTH_ENTRIES.find((entry) => entry.id === id);
@@ -1009,6 +1012,10 @@ export const getEntriesByCategory = (category: string): MythEntry[] => {
   for (const entry of (mythsJson as unknown as MythEntry[])) {
     if (entry.category === category) map.set(entry.id, entry);
   }
+  for (const longEntry of LONG_FORM_ENTRIES) {
+    const converted = toLibraryMythEntry(longEntry);
+    if (converted.category === category) map.set(converted.id, converted);
+  }
   return Array.from(map.values());
 };
 
@@ -1019,6 +1026,10 @@ export const getAllEntries = (): MythEntry[] => {
   }
   for (const entry of (mythsJson as unknown as MythEntry[])) {
     map.set(entry.id, entry);
+  }
+  for (const longEntry of LONG_FORM_ENTRIES) {
+    const converted = toLibraryMythEntry(longEntry);
+    map.set(converted.id, converted);
   }
   return Array.from(map.values());
 };

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base application theme using DayNight for API 21+ compatibility -->
+    <style name="Theme.Mustakshif" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Brand Colors -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryVariant">@color/colorPrimaryMint</item>
+        <item name="colorSecondary">@color/colorSecondary</item>
+        <item name="android:windowBackground">@color/colorBackground</item>
+        <item name="colorSurface">@color/colorSurface</item>
+
+        <!-- Status Bar & Navigation Bar Colors for API 21+ -->
+        <item name="android:statusBarColor">@color/colorBackground</item>
+        <item name="android:navigationBarColor">@color/colorBackground</item>
+
+        <!-- Text Colors -->
+        <item name="android:textColorPrimary">@color/colorTextPrimary</item>
+        <item name="android:textColorSecondary">@color/colorTextSecondary</item>
+
+        <!-- RTL Enforced Layout Direction -->
+        <item name="android:layoutDirection">rtl</item>
+    </style>
+</resources>

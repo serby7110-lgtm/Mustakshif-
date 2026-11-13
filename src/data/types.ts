@@ -48,6 +48,13 @@ export interface MythEntry {
   approxYear?: number;
   mythTradition?: string;
   mythAnalysis?: string;
+  isLongForm?: boolean;
+  isPremium?: boolean;
+  isHistorical?: boolean;
+  entryType?: string;
+  evidenceLabels?: string[];
+  targetWords?: number;
+  requiredSubscription?: string;
 }
 
 export const CATEGORY_META: Record<MythCategory, CategoryMetaItem> = {
@@ -55,7 +62,7 @@ export const CATEGORY_META: Record<MythCategory, CategoryMetaItem> = {
   gods: { key: 'gods', label: 'معبودات وأرباب قديمة', icon: 'crown', tileTint: '#F6EBD2', subLabel: 'اللات والعزى وهبل', countLabel: '١٠ أرباب' },
   rituals: { key: 'rituals', label: 'طقوس ومعتقدات غابرة', icon: 'flame', tileTint: '#FEF3C7', subLabel: 'الاستسقاء والكهانة', countLabel: '٨ طقوس' },
   places: { key: 'places', label: 'أماكن وممالك مفقودة', icon: 'landmark', tileTint: '#F2FBF7', subLabel: 'إرم ووبار ومأرب', countLabel: '١٠ مواقع' },
-  personalities: { key: 'personalities', label: 'شخصيات وأساطير شعبية', icon: 'users', tileTint: '#E8F1FB', subLabel: 'سيف بن ذي يزن', countLabel: '٥ شخصيات' },
+  personalities: { key: 'personalities', label: 'شخصيات وأساطير شعبية', icon: 'users', tileTint: '#E8F1FB', subLabel: 'سيف بن ذي يزن', countLabel: '٨ شخصيات' },
   heroes: { key: 'heroes', label: 'فرسان وشخصيات ملحمية', icon: 'sword', tileTint: '#FEE2E2', subLabel: 'عنترة والزير سالم', countLabel: '٦ أبطال' },
   sa3aleek: { key: 'sa3aleek', label: 'الصعاليك', icon: 'runner', tileTint: '#FDE7DA', subLabel: 'تأبط شراً والشنفرى وعروة', countLabel: '٤ صعاليك' },
   kings: { key: 'kings', label: 'ملوك وملكات', icon: 'crown', tileTint: '#F6EBD2', subLabel: 'الزباء والسموأل وجذيمة', countLabel: '٤ ملوك' },

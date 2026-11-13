@@ -80,7 +80,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   onSelectCivilization,
   onExploreCivilizations,
 }) => {
-  const { t } = useI18n();
+  const { t, dir } = useI18n();
   const { tokens, isDark } = useTheme();
 
   const allCivilizations = useMemo(() => getAllCivilizations(), []);
@@ -163,7 +163,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-200" dir="rtl">
+    <div className="space-y-6 animate-in fade-in duration-200" dir={dir}>
       {/* 1. Header: greeting + logo button */}
       <header className="flex items-center justify-between gap-4 pt-1">
         <div className="text-right">
@@ -808,7 +808,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 }}
                 className="text-[11px] font-bold px-2 py-0.5 rounded-full"
               >
-                ٥ شخصيات
+                ٨ شخصيات
               </span>
             </div>
             <div>
@@ -1007,7 +1007,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 }}
                 className="inline-block self-start text-[11px] font-bold px-2.5 py-0.5 rounded-full mb-2 shadow-xs"
               >
-                {ar.home.heroBadge}
+                {t('home.mythOfDay') || ar.home.heroBadge}
               </span>
 
               <h2 className="font-['Aref_Ruqaa',serif] text-2xl sm:text-3xl font-bold text-white leading-tight tracking-wide drop-shadow-sm">
@@ -1053,7 +1053,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               style={{ color: tokens.deepAccent }}
               className="font-['Aref_Ruqaa',serif] text-xl sm:text-2xl font-bold leading-tight"
             >
-              أقوامٌ وحضارات
+              {t('home.civilizations')}
             </h2>
             <p
               style={{ color: tokens.textSecondary }}

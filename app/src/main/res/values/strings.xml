@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">مستكشف</string>
+    <string name="app_subtitle">موسوعة الأساطير والكائنات والرموز الفولكلورية العربية</string>
+
+    <!-- AdMob Arabic UI Strings -->
+    <string name="ad_profile_disclosure">قد يعرض التطبيق إعلانات لدعم استمراريته.</string>
+    <string name="ad_privacy_options">إعدادات خصوصية الإعلانات</string>
+    <string name="app_open_loading_label">جارٍ تحضير الموسوعة...</string>
+
+    <!-- FCM & Notification Arabic Strings -->
+    <string name="notification_channel_daily_myth">أسطورة اليوم</string>
+    <string name="notification_channel_daily_myth_desc">تنبيهات اختيارية لاكتشاف أسطورة عربية يومياً</string>
+    <string name="notification_permission_rationale_title">تنبيهات أسطورة اليوم</string>
+    <string name="notification_permission_rationale_body">يحتاج تطبيق مستكشف إلى إذن الإشعارات لإرسال تنبيه يومي بأسطورة مختارة. يمكنك المتابعة والقراءة بحرية حتى في حال الرفض.</string>
+    <string name="notification_permission_allow">سماح</string>
+    <string name="notification_permission_later">لاحقاً</string>
+
+    <!-- Long-Form & Premium Arabic UI Strings -->
+    <string name="badge_long_form">طويلة</string>
+    <string name="badge_premium">Premium</string>
+    <string name="long_form_free_teaser">فصل أول مجاني</string>
+    <string name="long_form_locked_badge">مقفل — Premium</string>
+    <string name="long_form_resume">استئناف القراءة</string>
+    <string name="long_form_start_chapter_1">ابدأ الفصل الأول مجاناً</string>
+    <string name="long_form_unlock_prompt">الفصل الثاني وما بعده متاح عبر اشتراك premium_monthly.</string>
+    <string name="long_form_unlock_cta">فتح الفصول عبر Premium</string>
+    <string name="long_form_batch_pending">هيكل الفصل جاهز — سيتم إضافة النص الكامل في الدفعات القادمة.</string>
+    <string name="long_form_mark_progress">تحديث التقدم</string>
+    <string name="long_form_chapter_completed">مكتمل 100%</string>
+</resources>

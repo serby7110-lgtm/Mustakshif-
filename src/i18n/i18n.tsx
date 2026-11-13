@@ -14,6 +14,7 @@ export interface LanguageMeta {
 
 export const LANGS: LanguageMeta[] = [
   { code: 'ar', lang: 'ar', label: 'العربية', flag: '🇹🇳', dir: 'rtl' },
+  { code: 'en', lang: 'en', label: 'English', flag: '🇬🇧', dir: 'ltr' },
   { code: 'id', lang: 'id', label: 'Bahasa Indonesia', flag: '🇮🇩', dir: 'ltr' },
   { code: 'th', lang: 'th', label: 'ไทย', flag: '🇹🇭', dir: 'ltr' },
 ];

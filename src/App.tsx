@@ -18,7 +18,7 @@ import { MYTH_ENTRIES, getEntriesByCategory, getEntryById } from './data/seed';
 import { MythEntry, MythCategory, CATEGORY_LABELS } from './data/types';
 import { storage, FontSize } from './data/storage';
 import { ThemeProvider, useTheme } from './theme/ThemeContext';
-import { ar } from './i18n/ar';
+import { legacyAr as ar } from './i18n/legacyAr';
 
 import { HomeScreen } from './screens/HomeScreen';
 import { ArticleScreen } from './screens/ArticleScreen';
@@ -211,7 +211,7 @@ function AppContent() {
                     style={{ color: tokens.textSecondary }}
                     className="text-xs"
                   >
-                    {MYTH_ENTRIES.filter((e) => e.category === categoryFilterModal).length} مدخلة موثقة
+                    {getEntriesByCategory(categoryFilterModal).length} مدخلة موثقة
                   </p>
                 </div>
                 <button
@@ -240,13 +240,36 @@ function AppContent() {
                     className="p-3.5 rounded-2xl hover:opacity-90 transition-all border flex items-center justify-between gap-3 cursor-pointer group min-h-[52px]"
                   >
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
+                      <div className="flex items-center gap-1.5 flex-wrap mb-1">
                         <span
                           style={{ color: tokens.textPrimary }}
                           className="font-['Aref_Ruqaa',serif] text-base font-bold group-hover:opacity-90"
                         >
                           {item.name}
                         </span>
+                        {item.isLongForm && (
+                          <span
+                            style={{
+                              backgroundColor: tokens.primaryMint,
+                              color: '#0E5C4D',
+                            }}
+                            className="px-2 py-0.5 rounded-full text-[10px] font-bold"
+                          >
+                            طويلة
+                          </span>
+                        )}
+                        {item.isPremium && (
+                          <span
+                            style={{
+                              backgroundColor: tokens.coolBlueTint,
+                              color: tokens.coolBlueAccent,
+                              borderColor: tokens.border,
+                            }}
+                            className="px-2 py-0.5 rounded-full text-[10px] font-bold border"
+                          >
+                            Premium
+                          </span>
+                        )}
                         <Tag variant={getTagVariant(item.tags[0])} size="sm">
                           {item.tags[0]}
                         </Tag>

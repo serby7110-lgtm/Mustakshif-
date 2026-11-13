@@ -8,18 +8,25 @@ import { translations } from '../src/i18n/index';
 test('STEP 1: i18n files exist in src/i18n/', () => {
   const i18nDir = path.resolve(process.cwd(), 'src/i18n');
   assert.ok(fs.existsSync(path.join(i18nDir, 'ar.ts')), 'src/i18n/ar.ts must exist');
+  assert.ok(fs.existsSync(path.join(i18nDir, 'en.ts')), 'src/i18n/en.ts must exist');
   assert.ok(fs.existsSync(path.join(i18nDir, 'id.ts')), 'src/i18n/id.ts must exist');
   assert.ok(fs.existsSync(path.join(i18nDir, 'th.ts')), 'src/i18n/th.ts must exist');
   assert.ok(fs.existsSync(path.join(i18nDir, 'index.ts')), 'src/i18n/index.ts must exist');
   assert.ok(fs.existsSync(path.join(i18nDir, 'i18n.ts')), 'src/i18n/i18n.ts must exist');
 });
 
-test('STEP 2: Language metadata contains Tunisia flag 🇹🇳 and all 3 languages', () => {
+test('STEP 2: Language metadata contains Tunisia flag 🇹🇳 and all 4 languages', () => {
   const arabic = LANGUAGES.find((l) => l.lang === 'ar');
   assert.ok(arabic, 'Arabic metadata must exist');
   assert.equal(arabic?.flag, '🇹🇳', 'Arabic flag must be 🇹🇳 (Tunisia)');
   assert.equal(arabic?.dir, 'rtl');
   assert.equal(arabic?.label, 'العربية');
+
+  const english = LANGUAGES.find((l) => l.lang === 'en');
+  assert.ok(english, 'English metadata must exist');
+  assert.equal(english?.flag, '🇬🇧');
+  assert.equal(english?.dir, 'ltr');
+  assert.equal(english?.label, 'English');
 
   const indonesian = LANGUAGES.find((l) => l.lang === 'id');
   assert.ok(indonesian, 'Indonesian metadata must exist');
@@ -34,8 +41,18 @@ test('STEP 2: Language metadata contains Tunisia flag 🇹🇳 and all 3 languag
   assert.equal(thai?.label, 'ไทย');
 });
 
-test('STEP 3: translations index exports ar, id, and th dictionaries', () => {
+test('STEP 3: translations index exports ar, en, id, and th dictionaries', () => {
   assert.ok(translations.ar, 'translations.ar must exist');
+  assert.ok(translations.en !== undefined, 'translations.en must exist');
   assert.ok(translations.id !== undefined, 'translations.id must exist');
   assert.ok(translations.th !== undefined, 'translations.th must exist');
+
+  // Verify that all keys from ar exist in en
+  const arKeys = Object.keys(translations.ar);
+  for (const key of arKeys) {
+    assert.ok(
+      (translations.en as Record<string, string>)[key] !== undefined,
+      `Key ${key} must exist in translations.en`
+    );
+  }
 });

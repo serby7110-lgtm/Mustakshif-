@@ -33,6 +33,8 @@ import {
   ArrowLeft,
   Info,
   Scale,
+  Calendar,
+  ExternalLink,
 } from 'lucide-react';
 
 import { Card } from '../components/primitives/Card';
@@ -40,6 +42,8 @@ import { Tag, TagVariant } from '../components/primitives/Tag';
 import { IconButton } from '../components/primitives/IconButton';
 import { MythEntry, MythEra } from '../data/types';
 import { MYTH_ENTRIES, getEntryById } from '../data/seed';
+import { getLongFormEntryById } from '../data/longForm';
+import { LongFormReaderSection } from '../components/longform/LongFormReaderSection';
 import { getDeepStory } from '../data/storyTypes';
 import { storage, FontSize } from '../data/storage';
 import { getEstimatedReadingTime, formatReadingTime } from '../utils/readingTime';
@@ -48,7 +52,7 @@ import { useArabicTTS, TTSState } from '../hooks/useArabicTTS';
 import { legacyAr as ar } from '../i18n/legacyAr';
 import { getCivByRelatedMythId } from '../data/civTypes';
 import { MethodologyScreen } from './MethodologyScreen';
-
+import { useAuth } from '../context/AuthContext';
 import { useI18n } from '../i18n/i18n';
 export interface ArticleScreenProps {
   entryId: string;
@@ -73,15 +77,33 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
   onSelectCivilization,
   onOpenMethodology,
 }) => {
-  const { t } = useI18n();
+  const { t, lang, dir } = useI18n();
   const { tokens, isDark } = useTheme();
+  const { user, signIn, scheduleReadingSession } = useAuth();
 
   const [isMethodologyOpen, setIsMethodologyOpen] = useState(false);
+
+  // Google Calendar scheduling state
+  const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
+  const [calendarDate, setCalendarDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    return d.toISOString().slice(0, 10);
+  });
+  const [calendarTime, setCalendarTime] = useState('20:00');
+  const [calendarDuration, setCalendarDuration] = useState(30);
+  const [isSchedulingCalendar, setIsSchedulingCalendar] = useState(false);
+  const [calendarCreatedEvent, setCalendarCreatedEvent] = useState<{ id: string; htmlLink?: string } | null>(null);
 
   // Resolve entry from seed.ts by route param id
   const entry = useMemo(() => {
     return getEntryById(entryId) || MYTH_ENTRIES[0];
   }, [entryId]);
+
+  // Long-form premium entry data (Chapter 1 free teaser + locked Chapters 2+)
+  const longFormEntry = useMemo(() => {
+    return getLongFormEntryById(entry.id);
+  }, [entry.id]);
 
   // Deep Story content for game developers and story writers
   const deepStory = useMemo(() => {
@@ -308,12 +330,40 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
     );
   };
 
-  // Track window scroll for thin mint reading progress bar & chapter tracking
+  // Smooth scroll handler for chapter navigation
+  const handleScrollToChapter = (idx: number) => {
+    setActiveChapterIndex(idx);
+    const targetEl = document.getElementById(`chapter-${idx}`);
+    if (!targetEl) return;
+
+    // Support both scroll inside <main> and window scroll
+    const scrollContainer = targetEl.closest('main') || document.documentElement;
+    if (scrollContainer && scrollContainer !== document.documentElement) {
+      const parentRect = scrollContainer.getBoundingClientRect();
+      const elRect = targetEl.getBoundingClientRect();
+      // 75px offset accommodates sticky chapter chips bar & padding
+      const targetScrollTop = scrollContainer.scrollTop + (elRect.top - parentRect.top) - 75;
+      scrollContainer.scrollTo({
+        top: Math.max(0, targetScrollTop),
+        behavior: 'smooth',
+      });
+    } else {
+      targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  // Track window or main scroll for thin mint reading progress bar & chapter tracking
   useEffect(() => {
     const handleScroll = () => {
-      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const mainEl = document.querySelector('main');
+      const isMainScroll = mainEl && mainEl.scrollHeight > mainEl.clientHeight;
+      const scrollY = isMainScroll ? mainEl.scrollTop : window.scrollY;
+      const scrollHeight = isMainScroll
+        ? mainEl.scrollHeight - mainEl.clientHeight
+        : document.documentElement.scrollHeight - window.innerHeight;
+
       if (scrollHeight > 0) {
-        const progress = Math.min(100, Math.max(0, (window.scrollY / scrollHeight) * 100));
+        const progress = Math.min(100, Math.max(0, (scrollY / scrollHeight) * 100));
         setReadingProgress(progress);
 
         // Persist myth reading progress
@@ -327,7 +377,7 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
             const el = document.getElementById(`chapter-${i}`);
             if (el) {
               const rect = el.getBoundingClientRect();
-              if (rect.top <= 200) {
+              if (rect.top <= 220) {
                 currIdx = i;
               }
             }
@@ -347,20 +397,25 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
       }
     };
 
+    const mainEl = document.querySelector('main');
     window.addEventListener('scroll', handleScroll, { passive: true });
+    if (mainEl) {
+      mainEl.addEventListener('scroll', handleScroll, { passive: true });
+    }
     handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (mainEl) {
+        mainEl.removeEventListener('scroll', handleScroll);
+      }
+    };
   }, [deepStory, entry]);
 
-  // Deep-link to chapter if initialChapterIndex is provided
+  // Deep-link to chapter if initialChapterIndex is provided with smooth scrolling
   useEffect(() => {
     if (initialChapterIndex !== undefined) {
       const timer = setTimeout(() => {
-        const el = document.getElementById(`chapter-${initialChapterIndex}`);
-        if (el) {
-          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          setActiveChapterIndex(initialChapterIndex);
-        }
+        handleScrollToChapter(initialChapterIndex);
       }, 250);
       return () => clearTimeout(timer);
     }
@@ -532,6 +587,38 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
     setToastMessage(msg);
   };
 
+  const handleScheduleSession = async () => {
+    setIsSchedulingCalendar(true);
+    try {
+      const [hours, minutes] = calendarTime.split(':').map(Number);
+      const start = new Date(calendarDate);
+      start.setHours(hours || 20, minutes || 0, 0, 0);
+      const end = new Date(start.getTime() + calendarDuration * 60 * 1000);
+
+      const readingMinutes = getEstimatedReadingTime(entry);
+      const result = await scheduleReadingSession({
+        summary: `مستكشف: قراءة أسطورة «${entry.name}»`,
+        description: `جلسة قراءة مجدولة عبر تطبيق مستكشف الأساطير العربية.\nالأسطورة: ${entry.name} (${entry.typeLabel})\nالوقت المقدر للقراءة: ${readingMinutes} دقيقة.\nالتصنيف: ${entry.category}\nالمصادر: ${entry.sources.map((s) => s.title).join('، ')}`,
+        startTime: start.toISOString(),
+        endTime: end.toISOString(),
+      });
+
+      if (result.success && result.event) {
+        setCalendarCreatedEvent({
+          id: result.event.id,
+          htmlLink: result.event.htmlLink,
+        });
+        showToast('تمت جدولة جلسة القراءة في تقويم Google بنجاح 📅✨');
+      } else {
+        showToast(result.error || 'تعذر إضافة الموعد إلى تقويم Google');
+      }
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'حدث خطأ أثناء جدولة الجلسة');
+    } finally {
+      setIsSchedulingCalendar(false);
+    }
+  };
+
   const handleCopyQuest = async () => {
     const chaptersText =
       (deepStory?.chapters || [])
@@ -624,7 +711,22 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
   }
 
   return (
-    <article className="space-y-6 pb-12 animate-in fade-in duration-200" dir="rtl">
+    <article className="space-y-6 pb-12 animate-in fade-in duration-200" dir={dir}>
+      {/* STEP 4: Banner when lang !== 'ar' */}
+      {lang !== 'ar' && (
+        <div
+          style={{
+            backgroundColor: isDark ? 'rgba(127, 209, 174, 0.12)' : '#E8F7F0',
+            borderColor: tokens.primaryMint,
+            color: tokens.deepAccent,
+          }}
+          className="p-2.5 px-4 rounded-xl border text-xs font-semibold flex items-center justify-between gap-2 shadow-2xs"
+        >
+          <span>{t('article.originalArabic')}</span>
+          <span className="text-sm">🇹🇳</span>
+        </div>
+      )}
+
       {/* Thin mint reading-progress bar fixed at top of the screen */}
       <div
         className="fixed top-0 left-0 right-0 z-50 h-1 pointer-events-none transition-all duration-150"
@@ -694,6 +796,20 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
             variant="surface"
             size="md"
             onClick={handleCopyGameCard}
+          />
+
+          {/* Icon button: جدولة قراءة في تقويم Google */}
+          <IconButton
+            icon={<Calendar size={18} style={{ color: tokens.deepAccent }} />}
+            label="جدولة قراءة في تقويم Google"
+            variant="surface"
+            size="md"
+            onClick={() => {
+              if (!user) {
+                showToast('يرجى تسجيل الدخول بحساب Google لجدولة القراءة في التقويم 📅');
+              }
+              setIsCalendarModalOpen(true);
+            }}
           />
 
           {isSupported && (
@@ -885,7 +1001,11 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
           className="relative h-60 sm:h-72 w-full rounded-[18px] overflow-hidden"
         >
           <img
-            src={entry.heroImage}
+            src={
+              entry.heroImage.startsWith('/') || entry.heroImage.startsWith('http')
+                ? entry.heroImage
+                : `/${entry.heroImage}`
+            }
             alt={entry.name}
             className="w-full h-full object-cover object-center"
             loading="lazy"
@@ -1082,6 +1202,14 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
         </div>
       </Card>
 
+      {/* 4.2. Long-Form Premium Chapters, Evidence Pills & Resume Reader */}
+      {longFormEntry && (
+        <LongFormReaderSection
+          entry={longFormEntry}
+          bodyTextSizeClass={bodyTextSizeClass}
+        />
+      )}
+
       {/* 4.5. Deep Story Content for Game Developers & Writers */}
       {deepStory && (
         <section aria-label="الحكاية الكاملة وعدّة المبدع" className="space-y-6 pt-1 text-right">
@@ -1110,11 +1238,7 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                         key={idx}
                         type="button"
                         onClick={() => {
-                          setActiveChapterIndex(idx);
-                          document.getElementById(`chapter-${idx}`)?.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'start',
-                          });
+                          handleScrollToChapter(idx);
                         }}
                         style={{
                           backgroundColor: isActive ? tokens.primaryMint : tokens.card,
@@ -1158,7 +1282,7 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                       variant="white"
                       elevation="card"
                       padded="lg"
-                      className="rounded-[20px] space-y-3.5 text-right scroll-mt-20"
+                      className="rounded-[20px] space-y-3.5 text-right scroll-mt-24 transition-all duration-300"
                     >
                       <div
                         style={{ borderColor: tokens.borderSubtle }}
@@ -2088,6 +2212,258 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                 )}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: جدولة جلسة قراءة في تقويم Google */}
+      {isCalendarModalOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="جدولة جلسة قراءة في تقويم Google"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in"
+        >
+          <div
+            style={{
+              backgroundColor: tokens.card,
+              borderColor: tokens.border,
+            }}
+            className="w-full max-w-md rounded-3xl border p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto"
+          >
+            {/* Modal Header */}
+            <div className="flex items-center justify-between pb-2 border-b" style={{ borderColor: tokens.borderSubtle }}>
+              <div className="flex items-center gap-2">
+                <div
+                  style={{ backgroundColor: isDark ? 'rgba(127, 209, 174, 0.2)' : 'rgba(127, 209, 174, 0.25)' }}
+                  className="w-9 h-9 rounded-xl flex items-center justify-center"
+                >
+                  <Calendar size={20} style={{ color: tokens.deepAccent }} />
+                </div>
+                <div>
+                  <h3 style={{ color: tokens.textPrimary }} className="text-base font-bold">
+                    جدولة جلسة قراءة في تقويم Google
+                  </h3>
+                  <p style={{ color: tokens.textSecondary }} className="text-xs">
+                    تذكير مخصص لقراءة «{entry.name}»
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsCalendarModalOpen(false);
+                  setCalendarCreatedEvent(null);
+                }}
+                disabled={isSchedulingCalendar}
+                aria-label="إغلاق"
+                className="p-1 rounded-full hover:opacity-80 transition-opacity cursor-pointer"
+                style={{ color: tokens.textSecondary }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {calendarCreatedEvent ? (
+              /* Success confirmation state with link to Google Calendar */
+              <div className="space-y-4 py-2 text-center">
+                <div
+                  style={{ backgroundColor: 'rgba(127, 209, 174, 0.2)' }}
+                  className="w-12 h-12 rounded-full flex items-center justify-center mx-auto"
+                >
+                  <Check size={24} style={{ color: tokens.deepAccent }} />
+                </div>
+                <div className="space-y-1">
+                  <h4 style={{ color: tokens.textPrimary }} className="font-bold text-base">
+                    تمت الجدولة بنجاح!
+                  </h4>
+                  <p style={{ color: tokens.textSecondary }} className="text-xs leading-5">
+                    تمت إضافة جلسة قراءة أسطورة «{entry.name}» إلى تقويم Google الخاص بك مع تذكير مسبق قبل الموعد.
+                  </p>
+                </div>
+
+                {calendarCreatedEvent.htmlLink && (
+                  <a
+                    href={calendarCreatedEvent.htmlLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      backgroundColor: tokens.surface,
+                      borderColor: tokens.border,
+                      color: tokens.coolBlueAccent,
+                    }}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border text-xs font-bold hover:opacity-90 transition-all"
+                  >
+                    <span>فتح الحدث في تقويم Google</span>
+                    <ExternalLink size={14} />
+                  </a>
+                )}
+
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsCalendarModalOpen(false);
+                      setCalendarCreatedEvent(null);
+                    }}
+                    style={{
+                      backgroundColor: tokens.primaryMint,
+                      color: '#0E5C4D',
+                    }}
+                    className="w-full py-2.5 rounded-xl text-xs font-bold shadow-xs hover:opacity-90 transition-all cursor-pointer"
+                  >
+                    تم
+                  </button>
+                </div>
+              </div>
+            ) : (
+              /* Configuration and confirmation dialog */
+              <div className="space-y-4">
+                {/* Form fields: Date, Time, Duration */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label style={{ color: tokens.textSecondary }} className="text-xs font-medium block">
+                      تاريخ الجلسة
+                    </label>
+                    <input
+                      type="date"
+                      value={calendarDate}
+                      onChange={(e) => setCalendarDate(e.target.value)}
+                      disabled={isSchedulingCalendar}
+                      style={{
+                        backgroundColor: tokens.surface,
+                        borderColor: tokens.border,
+                        color: tokens.textPrimary,
+                      }}
+                      className="w-full px-3 py-2 rounded-xl border text-xs outline-none focus:ring-1 focus:ring-teal-500"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label style={{ color: tokens.textSecondary }} className="text-xs font-medium block">
+                      وقت البدء
+                    </label>
+                    <input
+                      type="time"
+                      value={calendarTime}
+                      onChange={(e) => setCalendarTime(e.target.value)}
+                      disabled={isSchedulingCalendar}
+                      style={{
+                        backgroundColor: tokens.surface,
+                        borderColor: tokens.border,
+                        color: tokens.textPrimary,
+                      }}
+                      className="w-full px-3 py-2 rounded-xl border text-xs outline-none focus:ring-1 focus:ring-teal-500"
+                    />
+                  </div>
+                </div>
+
+                {/* Duration chips */}
+                <div className="space-y-1.5">
+                  <label style={{ color: tokens.textSecondary }} className="text-xs font-medium block">
+                    مدة جلسة القراءة
+                  </label>
+                  <div className="flex gap-2">
+                    {[15, 30, 45, 60].map((mins) => (
+                      <button
+                        key={mins}
+                        type="button"
+                        onClick={() => setCalendarDuration(mins)}
+                        disabled={isSchedulingCalendar}
+                        style={{
+                          backgroundColor:
+                            calendarDuration === mins
+                              ? isDark
+                                ? 'rgba(127, 209, 174, 0.25)'
+                                : tokens.primaryMint
+                              : tokens.surface,
+                          borderColor: calendarDuration === mins ? tokens.deepAccent : tokens.border,
+                          color:
+                            calendarDuration === mins
+                              ? isDark
+                                ? tokens.deepAccent
+                                : '#0E5C4D'
+                              : tokens.textSecondary,
+                        }}
+                        className="flex-1 py-1.5 rounded-lg border text-xs font-bold transition-all cursor-pointer"
+                      >
+                        {mins} د
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* MANDATORY USER CONFIRMATION DIALOG */}
+                <div
+                  style={{
+                    backgroundColor: isDark ? 'rgba(127, 209, 174, 0.08)' : 'rgba(127, 209, 174, 0.12)',
+                    borderColor: 'rgba(127, 209, 174, 0.4)',
+                  }}
+                  className="rounded-2xl border p-3.5 space-y-2 text-xs"
+                >
+                  <div className="flex items-center gap-1.5 font-bold" style={{ color: tokens.deepAccent }}>
+                    <Info size={15} />
+                    <span>تأكيد إضافة الحدث إلى تقويم Google</span>
+                  </div>
+                  <ul className="space-y-1 leading-5" style={{ color: tokens.textPrimary }}>
+                    <li>
+                      <strong>الحدث:</strong> قراءة أسطورة «{entry.name}»
+                    </li>
+                    <li>
+                      <strong>الموعد:</strong> {calendarDate} في تمام الساعة {calendarTime} ({calendarDuration} دقيقة)
+                    </li>
+                    <li>
+                      <strong>الحساب المستهدف:</strong> {user ? user.email : 'سيُطلب منك تسجيل الدخول عبر Google'}
+                    </li>
+                    <li>
+                      <strong>التنبيهات:</strong> إشعار تنبيه قبل 15 دقيقة وبريد تذكيري قبل ساعة.
+                    </li>
+                  </ul>
+                  <p style={{ color: tokens.textSecondary }} className="text-[11px] pt-1">
+                    بالضغط على زر التأكيد أدناه، سيتم إنشاء هذا الحدث مباشرة في تقويم Google الخاص بك.
+                  </p>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex items-center justify-end gap-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsCalendarModalOpen(false)}
+                    disabled={isSchedulingCalendar}
+                    style={{
+                      backgroundColor: tokens.surface,
+                      borderColor: tokens.border,
+                      color: tokens.textSecondary,
+                    }}
+                    className="px-4 py-2.5 rounded-xl border text-xs font-medium hover:opacity-80 transition-colors cursor-pointer min-h-[40px]"
+                  >
+                    إلغاء
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleScheduleSession}
+                    disabled={isSchedulingCalendar}
+                    style={{
+                      backgroundColor: tokens.primaryMint,
+                      color: '#0E5C4D',
+                    }}
+                    className="px-5 py-2.5 rounded-xl text-xs font-bold shadow-xs hover:opacity-90 transition-all cursor-pointer min-h-[40px] flex items-center gap-1.5 disabled:opacity-50"
+                  >
+                    {isSchedulingCalendar ? (
+                      <>
+                        <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                        <span>جارٍ الإضافة للتقويم...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Calendar size={15} />
+                        <span>تأكيد الإضافة إلى تقويم Google</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

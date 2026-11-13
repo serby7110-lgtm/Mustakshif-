@@ -25,6 +25,7 @@ const STORAGE_KEYS = {
   DUAL_NARRATIVE_VIEW: 'mustakshif_dual_narrative_view_v1',
   MYTH_DUAL_NARRATIVE_VIEW: 'mustakshif_myth_dual_narrative_view_v1',
   SENT_MESSAGES_COUNT: 'mustakshif_sent_messages_count',
+  AUTO_DARK_MODE: 'mustakshif_auto_dark_mode_v1',
 } as const;
 
 export type ThemeMode = 'light' | 'dark' | 'darkTeal';
@@ -108,6 +109,20 @@ export const storage = {
   setThemeMode: (mode: ThemeMode) => {
     try {
       safeStorage.setItem(STORAGE_KEYS.THEME_MODE, mode);
+    } catch {}
+  },
+
+  getAutoDarkMode: (): boolean => {
+    try {
+      return safeStorage.getItem(STORAGE_KEYS.AUTO_DARK_MODE) === 'true';
+    } catch {
+      return false;
+    }
+  },
+
+  setAutoDarkMode: (enabled: boolean) => {
+    try {
+      safeStorage.setItem(STORAGE_KEYS.AUTO_DARK_MODE, enabled ? 'true' : 'false');
     } catch {}
   },
 
@@ -374,6 +389,77 @@ export const storage = {
     try {
       safeStorage.setItem(STORAGE_KEYS.SENT_MESSAGES_COUNT, String(Math.max(0, count)));
     } catch {}
+  },
+
+  hasPremiumMonthly: (): boolean => {
+    try {
+      return safeStorage.getItem('mustakshif_premium_monthly_v1') === 'true';
+    } catch {
+      return false;
+    }
+  },
+
+  setPremiumMonthly: (active: boolean): void => {
+    try {
+      safeStorage.setItem('mustakshif_premium_monthly_v1', active ? 'true' : 'false');
+    } catch {}
+  },
+
+  getLongFormChapterProgressMap: (): Record<string, number> => {
+    try {
+      const raw = safeStorage.getItem('mustakshif_long_form_chapter_progress_v1');
+      return raw ? JSON.parse(raw) : {};
+    } catch {
+      return {};
+    }
+  },
+
+  setLongFormChapterProgress: (
+    entryId: string,
+    chapterId: string,
+    chapterIndex: number,
+    chapterTitle: string,
+    progressPercent: number
+  ): void => {
+    try {
+      const clamped = Math.min(100, Math.max(0, Math.round(progressPercent)));
+      const map = storage.getLongFormChapterProgressMap();
+      const key = `${entryId}:${chapterId}`;
+      map[key] = Math.max(map[key] || 0, clamped);
+      safeStorage.setItem('mustakshif_long_form_chapter_progress_v1', JSON.stringify(map));
+
+      const resumeRaw = safeStorage.getItem('mustakshif_long_form_resume_v1');
+      const resumeMap = resumeRaw ? JSON.parse(resumeRaw) : {};
+      resumeMap[entryId] = {
+        entryId,
+        lastChapterIndex: chapterIndex,
+        lastChapterId: chapterId,
+        lastChapterTitle: chapterTitle,
+        chapterProgressPercent: clamped,
+        updatedAt: Date.now(),
+      };
+      safeStorage.setItem('mustakshif_long_form_resume_v1', JSON.stringify(resumeMap));
+    } catch {}
+  },
+
+  getLongFormResumeState: (
+    entryId: string
+  ): {
+    entryId: string;
+    lastChapterIndex: number;
+    lastChapterId: string;
+    lastChapterTitle: string;
+    chapterProgressPercent: number;
+    updatedAt: number;
+  } | null => {
+    try {
+      const raw = safeStorage.getItem('mustakshif_long_form_resume_v1');
+      if (!raw) return null;
+      const map = JSON.parse(raw);
+      return map[entryId] || null;
+    } catch {
+      return null;
+    }
   },
 };
 

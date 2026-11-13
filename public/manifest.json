@@ -11,7 +11,7 @@
   "theme_color": "#0007ff",
   "icons": [
     {
-      "src": "https://mustakshif.netlify.app/icons/icon.svg",
+      "src": "/icons/icon.svg",
       "type": "image/svg+xml",
       "isSquare": false,
       "isPng": false,
@@ -23,7 +23,7 @@
       "is192x192": false
     },
     {
-      "src": "https://mustakshif.netlify.app/favicon.ico",
+      "src": "/favicon.ico",
       "type": "image/x-icon",
       "isSquare": false,
       "isPng": false,

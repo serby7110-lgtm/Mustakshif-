@@ -50,6 +50,11 @@
   background-color: var(--color-surface);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+}
+
+html, body, main {
+  scroll-behavior: smooth;
 }
 
 body {
@@ -209,4 +214,28 @@ body.dark-teal,
   background-color: #ffffff;
   pointer-events: none;
   animation: starTwinkle infinite ease-in-out;
+}
+
+/* Direction-aware layout rules */
+[dir="rtl"] {
+  direction: rtl;
+  text-align: right;
+}
+
+[dir="ltr"] {
+  direction: ltr;
+  text-align: left;
+}
+
+/* Map SVG: flip horizontally when dir="ltr" */
+[dir="ltr"] .map-canvas-svg,
+[dir="ltr"] .map-svg-container svg {
+  transform: scaleX(-1);
+}
+
+/* Icons: mirror chevron/back icons when RTL */
+[dir="rtl"] .icon-back-mirror,
+[dir="rtl"] .rtl-mirror,
+[dir="rtl"] .chevron-mirror {
+  transform: scaleX(-1);
 }
