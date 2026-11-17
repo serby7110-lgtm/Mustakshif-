@@ -16,7 +16,7 @@ export const ar = {
   'cat.rituals': 'الطقوس',
   'cat.personalities': 'الشخصيات',
   'cat.sa3aleek': 'الصعاليك',
-  'cat.kings': 'الملوك',
+  'cat.kings': 'ملوك وملكات',
   'cat.seers': 'العرافون',
   'article.readStory': 'اقرأ القصة',
   'article.sources': 'المصادر',

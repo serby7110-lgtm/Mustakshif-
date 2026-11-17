@@ -9,7 +9,7 @@ import {
   toLibraryMythEntry,
   isChapterUnlocked,
 } from '../src/data/longForm';
-import { getEntryById, getAllEntries, getEntriesByCategory } from '../src/data/seed';
+import { MYTH_ENTRIES, getEntryById, getAllEntries, getEntriesByCategory } from '../src/data/seed';
 import { CATEGORY_META } from '../src/data/types';
 import { storage } from '../src/data/storage';
 
@@ -132,28 +132,54 @@ describe('Mustakshif Three Premium Long-Form Entries', () => {
   it('increases الشخصيات category count from 5 to 8 and merges long-form entries with badges metadata', () => {
     const personalities = getEntriesByCategory('personalities');
     assert.equal(personalities.length, 8);
-    assert.equal(CATEGORY_META.personalities.countLabel, '٨ شخصيات');
+    assert.equal(CATEGORY_META.personalities.countLabel, '8 شخصيات');
 
     const homeTsx = fs.readFileSync(
       path.join(ROOT, 'src/screens/HomeScreen.tsx'),
       'utf-8'
     );
-    assert.match(homeTsx, /٨ شخصيات/);
+    assert.match(homeTsx, /getEntriesByCategory\('personalities'\)\.length/);
+    assert.match(homeTsx, /#F2FBF7/);
+    assert.match(homeTsx, /#17877B/);
+    assert.match(homeTsx, /#E8F1FB/);
+    assert.match(homeTsx, /#4A90D9/);
+    assert.match(homeTsx, /#0E5C4D/);
+    assert.doesNotMatch(homeTsx, /#FDE7DA|#C24514|#F6EBD2|#9C6F1E/);
 
     const appTsx = fs.readFileSync(path.join(ROOT, 'src/App.tsx'), 'utf-8');
-    assert.match(appTsx, /getEntriesByCategory\(categoryFilterModal\)\.length/);
+    assert.match(appTsx, /documentedCount/);
+    assert.match(appTsx, /sources\.length > 0/);
+    assert.match(appTsx, /evidenceLabels\.length > 0/);
     assert.match(appTsx, /طويلة/);
     assert.match(appTsx, /Premium/);
+
+    const seedTs = fs.readFileSync(path.join(ROOT, 'src/data/seed.ts'), 'utf-8');
+    const legacyArTs = fs.readFileSync(path.join(ROOT, 'src/i18n/legacyAr.ts'), 'utf-8');
+    const oldTypoRe = new RegExp('\\u062c\\u0632\\u0631 \\u0627\\u0644\\u0648\\u0642\\u0648\\u0627\\u0642');
+    assert.doesNotMatch(seedTs, oldTypoRe);
+    assert.doesNotMatch(legacyArTs, oldTypoRe);
+    assert.match(seedTs, /جزر الواق الواق/);
+    assert.match(legacyArTs, /جزر الواق الواق/);
 
     const all = getAllEntries();
     for (const id of ['dhul-qarnayn', 'sinbad', 'ibn-battuta']) {
       assert.equal(isLongFormEntry(id), true);
+      const rawSeedEntry = MYTH_ENTRIES.find((m) => m.id === id);
+      assert.ok(rawSeedEntry, `${id} must exist directly inside MYTH_ENTRIES in src/data/seed.ts`);
+      assert.equal(rawSeedEntry.category, 'personalities');
+      assert.equal(rawSeedEntry.isPremium, true);
+      assert.equal(rawSeedEntry.isLongForm, true);
+      assert.equal(rawSeedEntry.requiredSubscription, 'premium_monthly');
+      assert.ok(Array.isArray(rawSeedEntry.evidenceLabels) && rawSeedEntry.evidenceLabels.length > 0);
+      assert.ok(Array.isArray(rawSeedEntry.chapters) && rawSeedEntry.chapters.length > 0);
+
       const seedEntry = getEntryById(id);
       assert.ok(seedEntry, `${id} should resolve via getEntryById`);
       assert.equal(seedEntry.category, 'personalities');
       assert.equal(seedEntry.isLongForm, true);
       assert.equal(seedEntry.isPremium, true);
       assert.equal(seedEntry.requiredSubscription, 'premium_monthly');
+      assert.ok(Array.isArray(seedEntry.chapters) && seedEntry.chapters.length > 0, `${id} should carry chapters`);
       assert.ok(all.some((m) => m.id === id), `${id} should exist in getAllEntries`);
       assert.ok(
         personalities.some((m) => m.id === id),

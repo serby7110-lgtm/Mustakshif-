@@ -30,9 +30,21 @@ export default defineConfig(() => {
               if (id.includes('lucide-react')) {
                 return 'vendor-lucide';
               }
+              if (id.includes('i18next')) {
+                return 'vendor-i18n';
+              }
               if (id.includes('react') || id.includes('react-dom')) {
                 return 'vendor-react';
               }
+            }
+            if (id.includes('/src/content/')) {
+              if (id.endsWith('/ar.json')) return 'content-ar';
+              if (id.endsWith('/en.json')) return 'content-en';
+              if (id.endsWith('/id.json')) return 'content-id';
+              if (id.endsWith('/th.json')) return 'content-th';
+            }
+            if (id.includes('/src/data/') && id.endsWith('.json')) {
+              return 'data-json';
             }
           },
         },

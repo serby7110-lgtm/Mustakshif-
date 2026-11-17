@@ -29,6 +29,7 @@ import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.LoadAdError
+import com.mustakshif.app.data.EntitlementManager
 import com.mustakshif.app.firebase.AnalyticsManager
 import com.mustakshif.app.firebase.CrashlyticsHelper
 import com.mustakshif.app.firebase.RemoteConfigManager
@@ -37,7 +38,8 @@ import com.mustakshif.app.theme.LightBackground
 
 /**
  * Anchored Adaptive Banner Ad Slot.
- * - Allowed ONLY on Home, Library, and Studio; hidden inside Article reading screen.
+ * - Allowed ONLY on Home, Library, and Studio; hidden inside Article & Subscription screens.
+ * - Hidden whenever premium_monthly entitlement is active.
  * - Placed strictly ABOVE bottom navigation with calm spacing so accidental clicks are avoided.
  * - Reserves fixed anchored adaptive height while loading (zero layout shift).
  * - Collapses cleanly to 0 height on load failure, consent denial, or Remote Config disable.
@@ -50,8 +52,9 @@ fun BannerAdSlot(
 ) {
     val canRequestAds by ConsentManager.canRequestAdsState.collectAsState()
     val remoteConfig by RemoteConfigManager.values.collectAsState()
+    val hasPremiumMonthly by EntitlementManager.hasPremiumMonthly.collectAsState()
 
-    if (!remoteConfig.adsEnabled || !remoteConfig.bannerEnabled || !AdManager.canShowBanner(screen, canRequestAds)) {
+    if (hasPremiumMonthly || !remoteConfig.adsEnabled || !remoteConfig.bannerEnabled || !AdManager.canShowBanner(screen, canRequestAds)) {
         return
     }
 

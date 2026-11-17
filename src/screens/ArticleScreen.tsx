@@ -9,7 +9,7 @@
  * All colors read strictly from theme tokens.
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   ChevronRight,
   Share2,
@@ -26,15 +26,15 @@ import {
   Compass,
   Scroll,
   Gamepad2,
-  Feather,
+  PenLine,
+  User,
   Copy,
   X,
   Landmark,
   ArrowLeft,
   Info,
   Scale,
-  Calendar,
-  ExternalLink,
+  Lock,
 } from 'lucide-react';
 
 import { Card } from '../components/primitives/Card';
@@ -47,13 +47,27 @@ import { LongFormReaderSection } from '../components/longform/LongFormReaderSect
 import { getDeepStory } from '../data/storyTypes';
 import { storage, FontSize } from '../data/storage';
 import { getEstimatedReadingTime, formatReadingTime } from '../utils/readingTime';
+import {
+  resolveScrollMetrics,
+  calculateReadingProgress,
+  computePersistableProgress,
+} from '../utils/readingProgress';
 import { useTheme } from '../theme/ThemeContext';
 import { useArabicTTS, TTSState } from '../hooks/useArabicTTS';
-import { legacyAr as ar } from '../i18n/legacyAr';
 import { getCivByRelatedMythId } from '../data/civTypes';
 import { MethodologyScreen } from './MethodologyScreen';
-import { useAuth } from '../context/AuthContext';
 import { useI18n } from '../i18n/i18n';
+import { resolveHeroImageUrl } from '../utils/assets';
+import { copyTextSafely } from '../utils/clipboard';
+import {
+  getLocalizedEntry,
+  getLocalizedLongFormEntry,
+  getLocalizedCivilization,
+  getLocalizedDeepStory,
+  localizeTag,
+  localizeEra,
+  localizeEvidenceLabel,
+} from '../content';
 export interface ArticleScreenProps {
   entryId: string;
   onBack: () => void;
@@ -63,6 +77,9 @@ export interface ArticleScreenProps {
   initialChapterIndex?: number;
   onSelectCivilization?: (civId: string) => void;
   onOpenMethodology?: () => void;
+  isPremiumActive?: boolean;
+  onPremiumChange?: (active: boolean) => void;
+  onOpenSubscription?: () => void;
 }
 
 export type TtsState = TTSState;
@@ -76,50 +93,54 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
   initialChapterIndex,
   onSelectCivilization,
   onOpenMethodology,
+  isPremiumActive,
+  onPremiumChange,
+  onOpenSubscription,
 }) => {
   const { t, lang, dir } = useI18n();
   const { tokens, isDark } = useTheme();
-  const { user, signIn, scheduleReadingSession } = useAuth();
 
   const [isMethodologyOpen, setIsMethodologyOpen] = useState(false);
 
-  // Google Calendar scheduling state
-  const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
-  const [calendarDate, setCalendarDate] = useState(() => {
-    const d = new Date();
-    d.setDate(d.getDate() + 1);
-    return d.toISOString().slice(0, 10);
-  });
-  const [calendarTime, setCalendarTime] = useState('20:00');
-  const [calendarDuration, setCalendarDuration] = useState(30);
-  const [isSchedulingCalendar, setIsSchedulingCalendar] = useState(false);
-  const [calendarCreatedEvent, setCalendarCreatedEvent] = useState<{ id: string; htmlLink?: string } | null>(null);
-
-  // Resolve entry from seed.ts by route param id
-  const entry = useMemo(() => {
-    return getEntryById(entryId) || MYTH_ENTRIES[0];
+  // Resolve raw and localized entry from seed.ts / content by route param id
+  const rawEntry = useMemo(() => {
+    return getEntryById(entryId) ?? MYTH_ENTRIES[0];
   }, [entryId]);
+
+  const entry = useMemo(() => {
+    return rawEntry ? getLocalizedEntry(rawEntry, lang) : undefined;
+  }, [rawEntry, lang]);
+
+  const resolvedEntryId = entry?.id ?? '';
 
   // Long-form premium entry data (Chapter 1 free teaser + locked Chapters 2+)
   const longFormEntry = useMemo(() => {
-    return getLongFormEntryById(entry.id);
-  }, [entry.id]);
+    if (!resolvedEntryId) return undefined;
+    const raw = getLongFormEntryById(resolvedEntryId);
+    return raw ? getLocalizedLongFormEntry(raw, lang) : undefined;
+  }, [resolvedEntryId, lang]);
 
   // Deep Story content for game developers and story writers
   const deepStory = useMemo(() => {
-    return getDeepStory(entry.id);
-  }, [entry.id]);
+    if (!resolvedEntryId) return undefined;
+    const raw = getDeepStory(resolvedEntryId);
+    return getLocalizedDeepStory(raw, resolvedEntryId, lang);
+  }, [resolvedEntryId, lang]);
 
   // Cross-link: check if current myth belongs to any civilization's relatedMyths
   const relatedCivilization = useMemo(() => {
-    return getCivByRelatedMythId(entry.id);
-  }, [entry.id]);
+    if (!resolvedEntryId) return undefined;
+    const raw = getCivByRelatedMythId(resolvedEntryId);
+    return raw ? getLocalizedCivilization(raw, lang) : undefined;
+  }, [resolvedEntryId, lang]);
 
-  // Reading progress state (thin mint bar at top)
+  // Reading progress state (bar pinned at top of ArticleScreen)
   const [readingProgress, setReadingProgress] = useState(0);
+  const articleRef = useRef<HTMLElement | null>(null);
 
   // Active chapter tracking for sticky chapter chips
   const [activeChapterIndex, setActiveChapterIndex] = useState(0);
+  const chapterChipRefs = useRef<Record<number, HTMLButtonElement | null>>({});
 
   // Font size state (A- / A+): persisted in storage, applied to body & chapters only
   const [fontSize, setFontSizeState] = useState<FontSize>(() => storage.getFontSize());
@@ -132,14 +153,22 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
   const [selectedHook, setSelectedHook] = useState<{
     type: 'game' | 'writing';
     label: string;
-    icon: string;
     text: string;
   } | null>(null);
   const [copiedHook, setCopiedHook] = useState(false);
 
   // Timeline era slider state: default to first era or 'جاهلية'
   const eras: readonly MythEra[] = ['جاهلية', 'صدر الإسلام', 'العصر العباسي'];
+  const normalizeEra = (raw?: string): MythEra => {
+    if (!raw) return 'جاهلية';
+    if (raw === 'الجاهلية' || raw === 'جاهلية') return 'جاهلية';
+    if (raw === 'صدر الإسلام') return 'صدر الإسلام';
+    if (raw === 'العصر العباسي') return 'العصر العباسي';
+    return 'جاهلية';
+  };
   const [activeEra, setActiveEra] = useState<MythEra>('جاهلية');
+  const activeEraIndex = Math.max(0, eras.indexOf(activeEra));
+  const hookStrokeColor = isDark ? '#9FE8CC' : '#0E5C4D';
 
   // Myth Dual-narrative mode (mythTradition vs mythAnalysis)
   const [mythNarrativeView, setMythNarrativeView] = useState<'tradition' | 'analysis'>(() => {
@@ -151,8 +180,8 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
     storage.setMythDualNarrativeView(view);
   };
 
-  const hasMythTradition = Boolean(entry.mythTradition && entry.mythTradition.trim().length > 0);
-  const hasMythAnalysis = Boolean(entry.mythAnalysis && entry.mythAnalysis.trim().length > 0);
+  const hasMythTradition = Boolean(entry?.mythTradition && entry.mythTradition.trim().length > 0);
+  const hasMythAnalysis = Boolean(entry?.mythAnalysis && entry.mythAnalysis.trim().length > 0);
   const showMythDualSection = hasMythTradition || hasMythAnalysis;
 
   const effectiveMythNarrativeView: 'tradition' | 'analysis' =
@@ -164,14 +193,14 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
 
   const currentMythNarrativeText =
     effectiveMythNarrativeView === 'tradition'
-      ? entry.mythTradition
-      : entry.mythAnalysis;
+      ? (entry?.mythTradition ?? '')
+      : (entry?.mythAnalysis ?? '');
 
   const renderDualNarrativeSection = () => {
     if (!showMythDualSection) return null;
 
     return (
-      <section aria-label="القراءة التاريخية" className="space-y-3 pt-1">
+      <section aria-label={t('article.historicalReading') || 'القراءة التاريخية'} className="space-y-3 pt-1">
         <div className="flex items-center justify-between pb-0.5">
           <div className="flex items-center gap-2">
             <h3
@@ -179,7 +208,7 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
               className="font-['Aref_Ruqaa',serif] text-xl font-bold flex items-center gap-2"
             >
               <Scroll size={20} style={{ color: tokens.deepAccent }} />
-              <span>القراءة التاريخية</span>
+              <span>{t('article.historicalReading') || 'القراءة التاريخية'}</span>
             </h3>
             <button
               type="button"
@@ -207,7 +236,7 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
               style={{ color: tokens.textSecondary }}
               className="text-xs font-['Cairo',sans-serif] opacity-80"
             >
-              وجهتا نظر للأسطورة
+              {t('article.twoPerspectives')}
             </span>
           )}
         </div>
@@ -221,7 +250,7 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
             }}
             className="flex items-center gap-2 p-1 rounded-2xl border"
             role="tablist"
-            aria-label="اختيار القراءة التاريخية"
+            aria-label={t('article.historicalReading')}
           >
             <button
               type="button"
@@ -281,7 +310,7 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
               ? (effectiveMythNarrativeView === 'tradition' ? 'rgba(127, 209, 174, 0.35)' : 'rgba(74, 144, 217, 0.35)')
               : (effectiveMythNarrativeView === 'tradition' ? '#C0E9DA' : '#CADFF8'),
           }}
-          className="p-4 sm:p-5 rounded-2xl border shadow-xs transition-colors duration-200 space-y-2.5"
+          className="px-4 py-5 rounded-2xl border shadow-xs transition-colors duration-200 space-y-2.5"
         >
           <div className="flex items-center justify-between">
             <span
@@ -315,13 +344,15 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
               style={{ color: tokens.textSecondary }}
               className="text-[11px] font-['Cairo',sans-serif]"
             >
-              {effectiveMythNarrativeView === 'tradition' ? 'من الموروث الشعبي' : 'قراءة نقدية وتاريخية'}
+              {effectiveMythNarrativeView === 'tradition'
+                ? t('article.folkPerspective')
+                : t('article.criticalPerspective')}
             </span>
           </div>
 
           <p
             style={{ color: tokens.textPrimary }}
-            className="font-['Amiri',serif] text-base sm:text-lg leading-8 sm:leading-9 text-justify pt-1"
+            className="font-['Amiri',serif] text-[17px] sm:text-[18px] leading-[1.95] text-start pt-1"
           >
             {currentMythNarrativeText}
           </p>
@@ -333,6 +364,10 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
   // Smooth scroll handler for chapter navigation
   const handleScrollToChapter = (idx: number) => {
     setActiveChapterIndex(idx);
+    const chipEl = chapterChipRefs.current[idx];
+    if (chipEl) {
+      chipEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
     const targetEl = document.getElementById(`chapter-${idx}`);
     if (!targetEl) return;
 
@@ -352,74 +387,105 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
     }
   };
 
-  // Track window or main scroll for thin mint reading progress bar & chapter tracking
+  // Reset scroll position cleanly when navigating to a different article
+  useEffect(() => {
+    setReadingProgress(0);
+    setActiveChapterIndex(0);
+    const mainEl = document.querySelector('main');
+    if (mainEl && typeof mainEl.scrollTo === 'function') {
+      mainEl.scrollTo({ top: 0, behavior: 'auto' });
+    }
+    if (typeof window !== 'undefined' && typeof window.scrollTo === 'function') {
+      window.scrollTo({ top: 0, behavior: 'auto' });
+    }
+  }, [entryId]);
+
+  // Track window or main scroll & layout resizes for reading progress bar & chapter tracking
   useEffect(() => {
     const handleScroll = () => {
       const mainEl = document.querySelector('main');
-      const isMainScroll = mainEl && mainEl.scrollHeight > mainEl.clientHeight;
-      const scrollY = isMainScroll ? mainEl.scrollTop : window.scrollY;
-      const scrollHeight = isMainScroll
-        ? mainEl.scrollHeight - mainEl.clientHeight
-        : document.documentElement.scrollHeight - window.innerHeight;
+      const metrics = resolveScrollMetrics({
+        mainScrollHeight: mainEl?.scrollHeight ?? 0,
+        mainClientHeight: mainEl?.clientHeight ?? 0,
+        mainScrollTop: mainEl?.scrollTop ?? 0,
+        docScrollHeight: document.documentElement?.scrollHeight ?? 0,
+        viewportHeight: window.innerHeight || document.documentElement?.clientHeight || 0,
+        windowScrollY: window.scrollY ?? 0,
+      });
 
-      if (scrollHeight > 0) {
-        const progress = Math.min(100, Math.max(0, (scrollY / scrollHeight) * 100));
-        setReadingProgress(progress);
+      const progress = calculateReadingProgress(metrics.scrollTop, metrics.scrollableHeight);
+      setReadingProgress(progress);
 
-        // Persist myth reading progress
-        const roundedProgress = progress >= 90 ? 100 : Math.max(10, Math.round(progress));
+      if (!entry?.id) return;
+      const roundedProgress = computePersistableProgress(progress);
+      if (roundedProgress > 0) {
         storage.setMythProgress(entry.id, roundedProgress);
+      }
 
-        // Check active chapter if deepStory exists
-        if (deepStory?.chapters && deepStory.chapters.length > 0) {
-          let currIdx = 0;
-          for (let i = 0; i < deepStory.chapters.length; i++) {
-            const el = document.getElementById(`chapter-${i}`);
-            if (el) {
-              const rect = el.getBoundingClientRect();
-              if (rect.top <= 220) {
-                currIdx = i;
-              }
+      // Check active chapter if deepStory exists
+      if (deepStory?.chapters && deepStory.chapters.length > 0) {
+        let currIdx = 0;
+        for (let i = 0; i < deepStory.chapters.length; i++) {
+          const el = document.getElementById(`chapter-${i}`);
+          if (el) {
+            const rect = el.getBoundingClientRect();
+            if (rect.top <= 220) {
+              currIdx = i;
             }
           }
-          setActiveChapterIndex(currIdx);
-          storage.markChapterRead(`${entry.id}_${currIdx}`);
-
-          // Persist last read chapter for Home v2
-          storage.setLastReadChapter({
-            mythId: entry.id,
-            mythName: entry.name,
-            chapterIndex: currIdx,
-            chapterTitle: deepStory.chapters[currIdx]?.title || '',
-            progressPercent: roundedProgress,
-          });
         }
+        setActiveChapterIndex(currIdx);
+        storage.markChapterRead(`${entry.id}_${currIdx}`);
+
+        // Persist last read chapter for Home v2
+        storage.setLastReadChapter({
+          mythId: entry.id,
+          mythName: entry.name ?? '',
+          chapterIndex: currIdx,
+          chapterTitle: deepStory.chapters[currIdx]?.title ?? '',
+          progressPercent: roundedProgress,
+        });
       }
     };
 
     const mainEl = document.querySelector('main');
     window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleScroll, { passive: true });
     if (mainEl) {
       mainEl.addEventListener('scroll', handleScroll, { passive: true });
     }
+
+    let resizeObserver: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined') {
+      resizeObserver = new ResizeObserver(() => handleScroll());
+      if (articleRef.current) resizeObserver.observe(articleRef.current);
+      if (mainEl) resizeObserver.observe(mainEl);
+    }
+
     handleScroll();
     return () => {
       window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
       if (mainEl) {
         mainEl.removeEventListener('scroll', handleScroll);
+      }
+      if (resizeObserver) {
+        resizeObserver.disconnect();
       }
     };
   }, [deepStory, entry]);
 
   // Deep-link to chapter if initialChapterIndex is provided with smooth scrolling
   useEffect(() => {
-    if (initialChapterIndex !== undefined) {
+    if (typeof initialChapterIndex === 'number' && Number.isFinite(initialChapterIndex) && initialChapterIndex >= 0) {
+      const chaptersLen = deepStory?.chapters?.length ?? 0;
+      const safeIdx = chaptersLen > 0 ? Math.min(initialChapterIndex, chaptersLen - 1) : initialChapterIndex;
       const timer = setTimeout(() => {
-        handleScrollToChapter(initialChapterIndex);
+        handleScrollToChapter(safeIdx);
       }, 250);
       return () => clearTimeout(timer);
     }
-  }, [initialChapterIndex]);
+  }, [initialChapterIndex, deepStory?.chapters?.length]);
 
   // Font size change handler
   const handleFontSizeChange = (direction: 'up' | 'down') => {
@@ -435,90 +501,92 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
     storage.setFontSize(nextSize);
   };
 
-  // Font size typography classes applied exclusively to body paragraphs and chapters
+  // Font size typography classes applied exclusively to body paragraphs and chapters (base: 17px mobile / 18px tablet+, line-height 1.95)
   const bodyTextSizeClass = useMemo(() => {
     switch (fontSize) {
       case 'sm':
-        return 'text-xs sm:text-sm leading-7 sm:leading-8';
+        return 'text-[15px] sm:text-[16px] leading-[1.95]';
       case 'lg':
-        return 'text-base sm:text-lg leading-9 sm:leading-10';
+        return 'text-[19px] sm:text-[20px] leading-[1.95]';
       case 'md':
       default:
-        return 'text-sm sm:text-[15px] leading-8 sm:leading-9';
+        return 'text-[17px] sm:text-[18px] leading-[1.95]';
     }
   }, [fontSize]);
 
   // Copy quote handler: copies text + " — " + source
-  const handleCopyQuote = (quoteText: string, quoteSource: string, idx: number) => {
+  const handleCopyQuote = async (quoteText: string, quoteSource: string, idx: number) => {
     const textToCopy = `${quoteText} — ${quoteSource}`;
-    try {
-      if (typeof navigator !== 'undefined' && navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(textToCopy);
-      }
-    } catch {}
-    setCopiedQuoteIdx(idx);
-    setTimeout(() => setCopiedQuoteIdx(null), 2000);
+    const copied = await copyTextSafely(textToCopy);
+    if (copied) {
+      setCopiedQuoteIdx(idx);
+      setTimeout(() => setCopiedQuoteIdx(null), 2000);
+    } else {
+      showToast(t('common.copyError'));
+    }
   };
 
-  // Gather hooks for "ألهمني" feature
+  // Gather hooks for Inspire modal
   const availableHooks = useMemo(() => {
-    const list: Array<{ type: 'game' | 'writing'; label: string; icon: string; text: string }> = [];
+    const list: Array<{ type: 'game' | 'writing'; label: string; text: string }> = [];
     if (deepStory?.gameHooks) {
       deepStory.gameHooks.forEach((h) => {
-        list.push({ type: 'game', label: 'فكرة لعبة', icon: '🎮', text: h });
+        list.push({ type: 'game', label: t('article.gameIdea'), text: h });
       });
     }
     if (deepStory?.writingHooks) {
       deepStory.writingHooks.forEach((h) => {
-        list.push({ type: 'writing', label: 'فكرة قصة', icon: '✍️', text: h });
+        list.push({ type: 'writing', label: t('article.storyIdea'), text: h });
       });
     }
     if (list.length === 0) {
+      const firstEra = entry?.timeline?.[0]?.era;
+      const safeName = entry?.name ?? '';
+      const safeRegion = entry?.region ?? '';
+      const safeSummary = entry?.summary ?? '';
       list.push({
         type: 'game',
-        label: 'فكرة لعبة',
-        icon: '🎮',
-        text: `استكشاف أسطورة ${entry.name}: ميكانيكا عالم مفتوح في ${entry.region} مع ألغاز حل خيوط ${entry.summary}`,
+        label: t('article.gameIdea'),
+        text: `${safeName}${safeRegion ? ` (${safeRegion})` : ''}: ${safeSummary}`,
       });
       list.push({
         type: 'writing',
-        label: 'فكرة قصة',
-        icon: '✍️',
-        text: `حبكة سردية تدور حول مواجهة سر ${entry.name} في ${entry.timeline[0]?.era || 'البادية'} والصراع الإنساني مع المجهول.`,
+        label: t('article.storyIdea'),
+        text: `${safeName} — ${firstEra ? localizeEra(firstEra, lang) : localizeEra('جاهلية', lang)}: ${safeSummary}`,
       });
     }
     return list;
-  }, [deepStory, entry]);
+  }, [deepStory, entry, lang, t]);
 
   // Open Inspire Modal with a random hook
   const handleOpenInspireModal = () => {
+    if (availableHooks.length === 0) return;
     const randomHook = availableHooks[Math.floor(Math.random() * availableHooks.length)];
     setSelectedHook(randomHook);
     setCopiedHook(false);
     setInspireModalOpen(true);
   };
 
-  // Re-roll hook
+  // Re-roll hook deterministically without risking an infinite loop
   const handleReshuffleHook = () => {
-    if (availableHooks.length <= 1) return;
-    let nextHook = selectedHook;
-    while (nextHook === selectedHook) {
-      nextHook = availableHooks[Math.floor(Math.random() * availableHooks.length)];
-    }
-    setSelectedHook(nextHook);
+    const len = availableHooks.length;
+    if (len <= 1) return;
+    const currentIdx = selectedHook ? availableHooks.indexOf(selectedHook) : -1;
+    const offset = currentIdx >= 0 ? (currentIdx + 1 + Math.floor(Math.random() * (len - 1))) % len : 0;
+    setSelectedHook(availableHooks[offset]);
     setCopiedHook(false);
   };
 
   // Copy selected inspire hook
-  const handleCopyHook = () => {
+  const handleCopyHook = async () => {
     if (!selectedHook) return;
-    try {
-      if (typeof navigator !== 'undefined' && navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(selectedHook.text);
-      }
-    } catch {}
-    setCopiedHook(true);
-    setTimeout(() => setCopiedHook(false), 2000);
+    const copied = await copyTextSafely(selectedHook.text);
+    if (copied) {
+      setCopiedHook(true);
+      setTimeout(() => setCopiedHook(false), 2000);
+    } else {
+      showToast(t('common.copyError'));
+    }
   };
 
   // Arabic Text-to-Speech hook: idle | playing | paused
@@ -535,8 +603,8 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
 
   // Initialize active era based on entry timeline if available
   useEffect(() => {
-    if (entry.timeline && entry.timeline.length > 0) {
-      setActiveEra(entry.timeline[0].era);
+    if (Array.isArray(entry?.timeline) && entry.timeline.length > 0) {
+      setActiveEra(normalizeEra(entry.timeline[0]?.era));
     } else {
       setActiveEra('جاهلية');
     }
@@ -550,8 +618,13 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
   }, [stop, entryId]);
 
   const handleToggleSpeech = () => {
+    if (!entry) return;
     if (ttsState === 'idle') {
       // First tap: reads entry title then all body paragraphs in order
+      if (!Array.isArray(entry.body)) {
+        speak([entry.name ?? '']);
+        return;
+      }
       speak([entry.name, ...entry.body]);
     } else if (ttsState === 'playing') {
       // Second tap: pause
@@ -562,16 +635,31 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
     }
   };
 
-  const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: `${ar.app.title} | ${entry.name}`,
-        text: entry.summary,
-        url: window.location.href,
-      }).catch(() => {});
-    } else {
+  const handleShare = async () => {
+    if (!entry) return;
+    const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
+    if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
+      try {
+        await navigator.share({
+          title: `${t('app.title')} | ${entry.name ?? ''}`,
+          text: entry.summary ?? '',
+          url: shareUrl,
+        });
+        return;
+      } catch (err) {
+        if ((err as { name?: string })?.name === 'AbortError') {
+          return;
+        }
+        console.warn('[ArticleScreen] navigator.share failed, falling back to clipboard:', err);
+      }
+    }
+
+    const copied = await copyTextSafely(shareUrl || (entry.name ?? ''));
+    if (copied) {
       setCopiedShare(true);
       setTimeout(() => setCopiedShare(false), 2000);
+    } else {
+      showToast(t('common.copyError'));
     }
   };
 
@@ -579,125 +667,65 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
 
   useEffect(() => {
     if (!toastMessage) return;
-    const t = setTimeout(() => setToastMessage(null), 2500);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setToastMessage(null), 2500);
+    return () => clearTimeout(timer);
   }, [toastMessage]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
   };
 
-  const handleScheduleSession = async () => {
-    setIsSchedulingCalendar(true);
-    try {
-      const [hours, minutes] = calendarTime.split(':').map(Number);
-      const start = new Date(calendarDate);
-      start.setHours(hours || 20, minutes || 0, 0, 0);
-      const end = new Date(start.getTime() + calendarDuration * 60 * 1000);
-
-      const readingMinutes = getEstimatedReadingTime(entry);
-      const result = await scheduleReadingSession({
-        summary: `مستكشف: قراءة أسطورة «${entry.name}»`,
-        description: `جلسة قراءة مجدولة عبر تطبيق مستكشف الأساطير العربية.\nالأسطورة: ${entry.name} (${entry.typeLabel})\nالوقت المقدر للقراءة: ${readingMinutes} دقيقة.\nالتصنيف: ${entry.category}\nالمصادر: ${entry.sources.map((s) => s.title).join('، ')}`,
-        startTime: start.toISOString(),
-        endTime: end.toISOString(),
-      });
-
-      if (result.success && result.event) {
-        setCalendarCreatedEvent({
-          id: result.event.id,
-          htmlLink: result.event.htmlLink,
-        });
-        showToast('تمت جدولة جلسة القراءة في تقويم Google بنجاح 📅✨');
-      } else {
-        showToast(result.error || 'تعذر إضافة الموعد إلى تقويم Google');
-      }
-    } catch (err) {
-      showToast(err instanceof Error ? err.message : 'حدث خطأ أثناء جدولة الجلسة');
-    } finally {
-      setIsSchedulingCalendar(false);
-    }
-  };
-
   const handleCopyQuest = async () => {
+    if (!entry) return;
+    const bodyText = Array.isArray(entry.body) ? entry.body.join('\n\n') : '';
     const chaptersText =
-      (deepStory?.chapters || [])
-        .map((c) => `${c.title}:\n${c.text}`)
-        .join('\n\n') || entry.body.join('\n\n');
+      (Array.isArray(deepStory?.chapters) ? deepStory.chapters : [])
+        .map((c) => `${c?.title ?? ''}:\n${c?.text ?? ''}`)
+        .join('\n\n') || bodyText;
 
     const questData = {
       id: entry.id,
-      name: entry.name,
+      name: entry.name ?? '',
       category: entry.category,
-      region: entry.region,
+      region: entry.region ?? '',
       story: chaptersText,
-      scenes: deepStory?.scenes || [],
-      decision: deepStory?.decision || '',
+      scenes: Array.isArray(deepStory?.scenes) ? deepStory.scenes : [],
+      decision: deepStory?.decision ?? '',
     };
 
-    try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(JSON.stringify(questData, null, 2));
-      } else {
-        const ta = document.createElement('textarea');
-        ta.value = JSON.stringify(questData, null, 2);
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand('copy');
-        document.body.removeChild(ta);
-      }
-      showToast('تم نسخ مهمة اللعبة كـ JSON 🎮');
-    } catch {
-      showToast('تم نسخ مهمة اللعبة كـ JSON 🎮');
-    }
+    const copied = await copyTextSafely(JSON.stringify(questData, null, 2));
+    showToast(copied ? t('common.copied') : t('common.copyError'));
   };
 
   const handleCopyGameCard = async () => {
+    if (!entry) return;
     const fullCard = {
       ...entry,
       deepStory: deepStory || null,
     };
 
-    try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(JSON.stringify(fullCard, null, 2));
-      } else {
-        const ta = document.createElement('textarea');
-        ta.value = JSON.stringify(fullCard, null, 2);
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand('copy');
-        document.body.removeChild(ta);
-      }
-      showToast('تم نسخ بطاقة اللعبة كـ JSON 📋');
-    } catch {
-      showToast('تم نسخ بطاقة اللعبة كـ JSON 📋');
-    }
+    const copied = await copyTextSafely(JSON.stringify(fullCard, null, 2));
+    showToast(copied ? t('common.copied') : t('common.copyError'));
   };
 
   const handleCopyDecision = async (decText: string) => {
-    try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(decText);
-      }
-      showToast('تم نسخ قرار اللاعب ⚖️');
-    } catch {
-      showToast('تم نسخ قرار اللاعب ⚖️');
-    }
+    const copied = await copyTextSafely(decText ?? '');
+    showToast(copied ? t('common.copied') : t('common.copyError'));
   };
 
   const activeTimelineNote = useMemo(() => {
-    const found = entry.timeline.find((t) => t.era === activeEra);
-    if (found) return found.note;
+    const timelineList = Array.isArray(entry?.timeline) ? entry.timeline : [];
+    const found = timelineList.find((tl) => normalizeEra(tl?.era) === activeEra);
+    if (found?.note) return found.note;
 
     if (activeEra === 'جاهلية') {
-      return 'تداولت القبائل أخبار هذه الأسطورة في أسمار البادية قبل تدوين المعاجم، وارتبطت بمهالك الصحراء والشعر الجاهلي.';
+      return t('article.defaultNoteJahiliyya');
     }
     if (activeEra === 'صدر الإسلام') {
-      return 'تناولتها الروايات في صدر الإسلام لتفريق الحقيقة الإيمانية عن الخرافات الجاهلية الشائعة.';
+      return t('article.defaultNoteEarlyIslam');
     }
-    return 'دوّنها كبار علماء العصر العباسي كالجاحظ والمسعودي وابن الكلبي في مصنفات الأدب والتاريخ والحيوان.';
-  }, [entry, activeEra]);
+    return t('article.defaultNoteAbbasid');
+  }, [entry, activeEra, t]);
 
   const getTagVariant = (tag: string): TagVariant => {
     if (tag === 'رعب') return 'horror';
@@ -710,10 +738,62 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
     return <MethodologyScreen onBack={() => setIsMethodologyOpen(false)} />;
   }
 
+  if (!rawEntry || !entry) {
+    return (
+      <article className="space-y-6 pb-12 animate-in fade-in duration-200" dir={dir}>
+        <nav className="flex items-center justify-end pt-1">
+          <button
+            type="button"
+            onClick={onBack}
+            aria-label={t('article.back')}
+            style={{
+              backgroundColor: tokens.card,
+              borderColor: tokens.border,
+              color: tokens.deepAccent,
+            }}
+            className="flex items-center justify-center w-11 h-11 rounded-2xl border shadow-sm cursor-pointer min-h-[44px] min-w-[44px]"
+          >
+            <ChevronRight size={22} className={`stroke-[2.5] ${dir === 'ltr' ? 'rotate-180' : ''}`} />
+          </button>
+        </nav>
+        <Card variant="white" elevation="subtle" className="p-8 text-center space-y-3 rounded-[20px]">
+          <BookOpen size={32} className="mx-auto" style={{ color: tokens.textSecondary }} />
+          <p style={{ color: tokens.textPrimary }} className="font-['Aref_Ruqaa',serif] text-lg font-bold">
+            {t('article.entryNotFound')}
+          </p>
+          <button
+            type="button"
+            onClick={onBack}
+            style={{
+              backgroundColor: tokens.surface,
+              borderColor: tokens.border,
+              color: tokens.deepAccent,
+            }}
+            className="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-full border text-xs font-bold cursor-pointer min-h-[44px]"
+          >
+            {t('article.backHome')}
+          </button>
+        </Card>
+      </article>
+    );
+  }
+
+  const heroImageUrl = resolveHeroImageUrl(entry.heroImage);
+  const safeBody = Array.isArray(entry.body) ? entry.body : [];
+  const safeDeepChapters = Array.isArray(deepStory?.chapters) ? deepStory.chapters.filter(Boolean) : [];
+  const hasLongFormChapters = Array.isArray(longFormEntry?.chapters) && longFormEntry.chapters.length > 0;
+  const safeSources = Array.isArray(entry.sources) ? entry.sources : [];
+  const safeRelatedIds = Array.isArray(entry.related) ? entry.related : [];
+
   return (
-    <article className="space-y-6 pb-12 animate-in fade-in duration-200" dir={dir}>
-      {/* STEP 4: Banner when lang !== 'ar' */}
-      {lang !== 'ar' && (
+    <article ref={articleRef} className="space-y-6 pb-12 animate-in fade-in duration-200" dir={dir}>
+      {/* Show notice banner ONLY if current non-Arabic entry has partially missing translation */}
+      {lang !== 'ar' &&
+        Boolean(
+          entry.hasMissingTranslation ||
+            longFormEntry?.hasMissingTranslation ||
+            deepStory?.hasMissingTranslation
+        ) && (
         <div
           style={{
             backgroundColor: isDark ? 'rgba(127, 209, 174, 0.12)' : '#E8F7F0',
@@ -722,26 +802,38 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
           }}
           className="p-2.5 px-4 rounded-xl border text-xs font-semibold flex items-center justify-between gap-2 shadow-2xs"
         >
-          <span>{t('article.originalArabic')}</span>
+          <span>{t('article.fallbackArabicNotice')}</span>
           <span className="text-sm">🇹🇳</span>
         </div>
       )}
 
-      {/* Thin mint reading-progress bar fixed at top of the screen */}
+      {/* Reading-progress bar fixed at top of ArticleScreen */}
       <div
-        className="fixed top-0 left-0 right-0 z-50 h-1 pointer-events-none transition-all duration-150"
-        style={{
-          backgroundColor: isDark ? 'rgba(127, 209, 174, 0.2)' : 'rgba(127, 209, 174, 0.25)',
-        }}
-        aria-hidden="true"
+        role="progressbar"
+        aria-label={t('article.readingProgressLabel')}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={Math.round(readingProgress)}
+        data-testid="article-reading-progress"
+        dir={dir}
+        className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-md z-50 pointer-events-none"
       >
         <div
-          className="h-full transition-all duration-100 ease-out"
+          className="h-1.5 w-full overflow-hidden backdrop-blur-xs"
           style={{
-            width: `${readingProgress}%`,
-            backgroundColor: tokens.primaryMint,
+            backgroundColor: isDark ? 'rgba(11, 36, 32, 0.88)' : 'rgba(221, 238, 230, 0.92)',
           }}
-        />
+        >
+          <div
+            data-testid="article-reading-progress-fill"
+            className="h-full transition-[width] duration-150 ease-out rounded-e-full"
+            style={{
+              width: `${readingProgress}%`,
+              background: `linear-gradient(to ${dir === 'rtl' ? 'left' : 'right'}, ${tokens.deepAccent}, ${tokens.primaryMint})`,
+              backgroundColor: tokens.primaryMint,
+            }}
+          />
+        </div>
       </div>
 
       {/* Toast Notification */}
@@ -768,14 +860,14 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
 
       {/* 1. Top Bar */}
       <nav
-        aria-label="شريط أدوات المقال"
+        aria-label={t('article.narrativeTitle')}
         className="flex items-center justify-between gap-3 pt-1 flex-wrap"
       >
         {/* Actions row: share, bookmark, game card copy, speaker + Font-size control (A- / A+) */}
         <div className="flex items-center gap-1.5 flex-wrap">
           <IconButton
             icon={copiedShare ? <Check size={18} style={{ color: tokens.deepAccent }} /> : <Share2 size={18} />}
-            label={copiedShare ? ar.article.shareSuccess : ar.article.share}
+            label={copiedShare ? t('article.shareSuccess') : t('article.share')}
             variant="surface"
             size="md"
             onClick={handleShare}
@@ -783,33 +875,18 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
 
           <IconButton
             icon={<Bookmark size={18} className={isSaved ? 'fill-current' : ''} style={{ color: isSaved ? tokens.deepAccent : undefined }} />}
-            label={isSaved ? ar.article.bookmarkRemove : ar.article.bookmarkAdd}
+            label={isSaved ? t('article.bookmarkRemove') : t('article.bookmarkAdd')}
             variant="surface"
             size="md"
             onClick={() => onToggleSave?.(entry.id)}
           />
 
-          {/* Icon button: انسخ كبطاقة لعبة */}
           <IconButton
             icon={<Gamepad2 size={18} style={{ color: tokens.coolBlueAccent }} />}
-            label="انسخ كبطاقة لعبة"
+            label={t('article.copyGameCard')}
             variant="surface"
             size="md"
             onClick={handleCopyGameCard}
-          />
-
-          {/* Icon button: جدولة قراءة في تقويم Google */}
-          <IconButton
-            icon={<Calendar size={18} style={{ color: tokens.deepAccent }} />}
-            label="جدولة قراءة في تقويم Google"
-            variant="surface"
-            size="md"
-            onClick={() => {
-              if (!user) {
-                showToast('يرجى تسجيل الدخول بحساب Google لجدولة القراءة في التقويم 📅');
-              }
-              setIsCalendarModalOpen(true);
-            }}
           />
 
           {isSupported && (
@@ -825,10 +902,10 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
               }
               label={
                 ttsState === 'playing'
-                  ? ar.article.audioPause
+                  ? t('article.audioPause')
                   : ttsState === 'paused'
-                  ? ar.article.audioResume
-                  : ar.article.audioPlay
+                  ? t('article.audioResume')
+                  : t('article.audioPlay')
               }
               variant={ttsState !== 'idle' ? 'primary' : 'surface'}
               size="md"
@@ -844,18 +921,18 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
             }}
             className="flex items-center rounded-2xl border px-1 py-0.5 shadow-2xs"
             role="group"
-            aria-label="التحكم بحجم الخط"
+            aria-label={t('article.fontSizeBadge')}
           >
             <button
               type="button"
               onClick={() => handleFontSizeChange('down')}
               disabled={fontSize === 'sm'}
-              aria-label="تصغير الخط"
-              title="تصغير الخط (A-)"
+              aria-label={t('article.fontShrinkAria')}
+              title={`${t('article.fontShrinkAria')} (A-)`}
               style={{
                 color: fontSize === 'sm' ? tokens.borderSubtle : tokens.textPrimary,
               }}
-              className="px-2 py-1 text-xs font-bold hover:opacity-80 transition-colors disabled:opacity-40 cursor-pointer min-h-[36px] min-w-[32px] flex items-center justify-center font-serif"
+              className="px-2.5 py-1 text-xs font-bold hover:opacity-80 transition-colors disabled:opacity-40 cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center font-serif"
             >
               A-
             </button>
@@ -867,12 +944,12 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
               type="button"
               onClick={() => handleFontSizeChange('up')}
               disabled={fontSize === 'lg'}
-              aria-label="تكبير الخط"
-              title="تكبير الخط (A+)"
+              aria-label={t('article.fontEnlargeAria')}
+              title={`${t('article.fontEnlargeAria')} (A+)`}
               style={{
                 color: fontSize === 'lg' ? tokens.borderSubtle : tokens.textPrimary,
               }}
-              className="px-2 py-1 text-sm font-bold hover:opacity-80 transition-colors disabled:opacity-40 cursor-pointer min-h-[36px] min-w-[32px] flex items-center justify-center font-serif"
+              className="px-2.5 py-1 text-sm font-bold hover:opacity-80 transition-colors disabled:opacity-40 cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center font-serif"
             >
               A+
             </button>
@@ -884,8 +961,8 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
           <button
             type="button"
             onClick={onBack}
-            aria-label={ar.article.back}
-            title={ar.article.back}
+            aria-label={t('article.back')}
+            title={t('article.back')}
             style={{
               backgroundColor: tokens.card,
               borderColor: tokens.border,
@@ -893,7 +970,7 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
             }}
             className="flex items-center justify-center w-11 h-11 rounded-2xl border shadow-sm transition-all duration-150 active:scale-95 cursor-pointer min-h-[44px] min-w-[44px]"
           >
-            <ChevronRight size={22} className="stroke-[2.5]" />
+            <ChevronRight size={22} className={`stroke-[2.5] ${dir === 'ltr' ? 'rotate-180' : ''}`} />
           </button>
         </div>
       </nav>
@@ -916,7 +993,9 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
               }`}
             />
             <span className="font-bold">
-              {ttsState === 'playing' ? 'يتم السرد الآن…' : 'صوت الراوي متوقف مؤقتاً'}
+              {ttsState === 'playing'
+                ? (t('article.audioNarrating') || 'يتم السرد الآن…')
+                : t('article.audioPauseTooltip')}
             </span>
           </div>
 
@@ -929,7 +1008,7 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                 color: tokens.deepAccent,
               }}
               className="p-1.5 rounded-xl shadow-xs cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
-              aria-label={ttsState === 'playing' ? ar.article.audioPause : ar.article.audioResume}
+              aria-label={ttsState === 'playing' ? t('article.audioPause') : t('article.audioResume')}
             >
               {ttsState === 'playing' ? <Pause size={16} /> : <Play size={16} />}
             </button>
@@ -942,7 +1021,7 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                 color: isDark ? '#FF9A9A' : '#A63333',
               }}
               className="p-1.5 rounded-xl shadow-xs cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
-              aria-label={ar.article.audioStop}
+              aria-label={t('article.audioStop')}
             >
               <RotateCcw size={16} />
             </button>
@@ -1000,24 +1079,26 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
           style={{ backgroundColor: tokens.surface }}
           className="relative h-60 sm:h-72 w-full rounded-[18px] overflow-hidden"
         >
-          <img
-            src={
-              entry.heroImage.startsWith('/') || entry.heroImage.startsWith('http')
-                ? entry.heroImage
-                : `/${entry.heroImage}`
-            }
-            alt={entry.name}
-            className="w-full h-full object-cover object-center"
-            loading="lazy"
-            decoding="async"
-          />
+          {heroImageUrl ? (
+            <img
+              src={heroImageUrl}
+              alt={entry.name ?? ''}
+              className="w-full h-full object-cover object-center"
+              loading="lazy"
+              decoding="async"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center" style={{ color: tokens.textSecondary }}>
+              <BookOpen size={44} strokeWidth={1.4} className="opacity-50" />
+            </div>
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
 
           {/* Region Badge */}
           <div className="absolute bottom-3 right-3 left-3 flex items-center justify-between text-xs text-white">
             <span className="flex items-center gap-1 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-full text-[11px] font-medium border border-white/20">
               <MapPin size={12} style={{ color: tokens.primaryMint }} />
-              <span>{entry.region}</span>
+              <span>{entry.region ?? ''}</span>
             </span>
             {entry.latinName && (
               <span className="text-[11px] font-mono text-white/90 bg-black/50 backdrop-blur-xs px-2 py-0.5 rounded-md">
@@ -1034,17 +1115,17 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
           style={{ color: tokens.deepAccent }}
           className="font-['Aref_Ruqaa',serif] text-3xl sm:text-4xl font-bold leading-tight tracking-wide"
         >
-          {entry.name}
+          {entry.name ?? ''}
         </h1>
 
-        {/* STEP 4: Small progress hint text under the title while playing */}
+        {/* Small progress hint text under the title while playing */}
         {ttsState === 'playing' && (
           <p
-            dir="rtl"
+            dir={dir}
             style={{ color: tokens.textSecondary }}
             className="text-xs sm:text-sm font-['Cairo',sans-serif] animate-pulse flex items-center justify-center gap-1.5"
           >
-            <span>يتم السرد الآن…</span>
+            <span>{t('article.audioNarrating') || 'يتم السرد الآن…'}</span>
           </p>
         )}
 
@@ -1058,7 +1139,7 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
             className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border text-xs font-bold font-['Cairo',sans-serif] shadow-xs min-h-[32px]"
           >
             <Sparkles size={13} style={{ color: tokens.deepAccent }} />
-            <span>{entry.typeLabel}</span>
+            <span>{entry.typeLabel ?? ''}</span>
           </span>
 
           <span
@@ -1070,21 +1151,33 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-mono font-bold shadow-xs min-h-[32px]"
           >
             <Clock size={13} style={{ color: tokens.coolBlueAccent }} />
-            <span>{formatReadingTime(getEstimatedReadingTime(entry))}</span>
+            <span>{formatReadingTime(getEstimatedReadingTime(rawEntry), lang)}</span>
           </span>
 
-          {entry.tags && entry.tags.length > 0 && (
-            <Tag variant={getTagVariant(entry.tags[0])} size="sm">
-              {entry.tags[0]}
+          <span
+            data-testid="article-reading-progress-text"
+            style={{
+              backgroundColor: isDark ? 'rgba(127, 209, 174, 0.14)' : 'rgba(127, 209, 174, 0.22)',
+              borderColor: tokens.border,
+              color: tokens.deepAccent,
+            }}
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full border text-xs font-mono font-bold shadow-xs min-h-[32px]"
+          >
+            <span>{t('article.readingProgressValue', { percent: Math.round(readingProgress) })}</span>
+          </span>
+
+          {Array.isArray(rawEntry.tags) && rawEntry.tags.length > 0 && rawEntry.tags[0] && (
+            <Tag variant={getTagVariant(rawEntry.tags[0])} size="sm">
+              {localizeTag(rawEntry.tags[0], lang)}
             </Tag>
           )}
         </div>
 
-        {/* "سمات" chips row (traits) after the typeLabel pill */}
+        {/* Traits chips row after typeLabel pill */}
         {deepStory?.traits && deepStory.traits.length > 0 && (
           <div className="flex items-center justify-center gap-1.5 flex-wrap pt-0.5">
             <span style={{ color: tokens.textSecondary }} className="text-xs font-bold">
-              السمات:
+              {t('article.traits')}:
             </span>
             {deepStory.traits.map((trait, idx) => (
               <span
@@ -1109,7 +1202,7 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
           {entry.summary}
         </p>
 
-        {/* STEP 1 Cross-link: Mint banner card under the summary */}
+        {/* Cross-link: Mint banner card under the summary */}
         {relatedCivilization && (
           <div className="pt-2 px-1 max-w-md mx-auto">
             <button
@@ -1120,8 +1213,8 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                 borderColor: isDark ? 'rgba(127, 209, 174, 0.4)' : '#A7E5C8',
                 color: isDark ? '#A7E5C8' : '#0B5545',
               }}
-              className="w-full p-3 sm:p-3.5 rounded-2xl border shadow-xs hover:scale-[1.01] active:scale-98 transition-all cursor-pointer flex items-center justify-between gap-3 text-right group"
-              aria-label={`اقرأ حضارة هذا القوم: ${relatedCivilization.name}`}
+              className="w-full p-3 sm:p-3.5 rounded-2xl border shadow-xs hover:scale-[1.01] active:scale-98 transition-all cursor-pointer flex items-center justify-between gap-3 text-start group"
+              aria-label={`${t('article.relatedCivLabel')}: ${relatedCivilization.name}`}
             >
               <div className="flex items-center gap-2.5 min-w-0">
                 <div
@@ -1133,10 +1226,10 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                 >
                   <Landmark size={18} />
                 </div>
-                <div className="text-right min-w-0">
+                <div className="text-start min-w-0">
                   <div className="flex items-center gap-1.5">
                     <span className="text-xs font-bold font-['Cairo',sans-serif]">
-                      اقرأ حضارة هذا القوم ←
+                      {t('article.relatedCivLabel')}
                     </span>
                     <span
                       style={{ color: tokens.deepAccent }}
@@ -1149,16 +1242,18 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                     style={{ color: tokens.textSecondary }}
                     className="text-[11px] block truncate opacity-85"
                   >
-                    {relatedCivilization.era} • {relatedCivilization.region}
+                    {relatedCivilization.era || t('common.undated')} • {relatedCivilization.region ?? ''}
                   </span>
                 </div>
               </div>
 
               <div
                 style={{ color: tokens.deepAccent }}
-                className="transform group-hover:-translate-x-1 transition-transform shrink-0 p-1"
+                className={`transform transition-transform shrink-0 p-1 ${
+                  dir === 'ltr' ? 'group-hover:translate-x-1' : 'group-hover:-translate-x-1'
+                }`}
               >
-                <ArrowLeft size={16} />
+                <ArrowLeft size={16} className={dir === 'ltr' ? 'rotate-180' : ''} />
               </div>
             </button>
           </div>
@@ -1169,8 +1264,8 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
       <Card
         variant="white"
         elevation="card"
-        padded="lg"
-        className="rounded-[20px] space-y-4 text-right"
+        padded={false}
+        className="rounded-[20px] px-4 py-5 space-y-4 text-start"
       >
         <div
           style={{ borderColor: tokens.borderSubtle }}
@@ -1180,78 +1275,123 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
             style={{ color: tokens.deepAccent }}
             className="font-['Aref_Ruqaa',serif] text-xl font-bold"
           >
-            {ar.article.narrativeTitle}
+            {t('article.narrativeTitle')}
           </h2>
           <span
             style={{ color: tokens.textSecondary }}
             className="text-[11px] font-medium"
           >
-            {ar.article.paragraphsCount(entry.body.length)}
+            {t('article.paragraphsCount', { count: safeBody.length })}
           </span>
         </div>
 
-        <div
-          style={{ color: tokens.textPrimary }}
-          className="space-y-4 font-['Cairo',sans-serif]"
-        >
-          {entry.body.map((paragraph, index) => (
-            <p key={index} className={`text-justify indent-4 ${bodyTextSizeClass}`}>
-              {paragraph}
-            </p>
-          ))}
-        </div>
+        {safeBody.length > 0 ? (
+          <div
+            style={{ color: tokens.textPrimary }}
+            className="space-y-4 font-['Cairo',sans-serif]"
+          >
+            {safeBody.map((paragraph, index) => (
+              <p key={index} className={`text-start ${bodyTextSizeClass}`}>
+                {paragraph ?? ''}
+              </p>
+            ))}
+          </div>
+        ) : (
+          <div
+            style={{
+              backgroundColor: tokens.surface,
+              borderColor: tokens.borderSubtle,
+              color: tokens.textSecondary,
+            }}
+            className="p-4 rounded-2xl border text-xs sm:text-sm font-['Cairo',sans-serif]"
+          >
+            {t('article.noStoryYet')}
+          </div>
+        )}
       </Card>
 
-      {/* 4.2. Long-Form Premium Chapters, Evidence Pills & Resume Reader */}
-      {longFormEntry && (
+      {/* 4.2. Long-Form Premium Chapters, Evidence Pills & Resume Reader (for entries without full deepStory chapters) */}
+      {longFormEntry && !(deepStory?.chapters && deepStory.chapters.length > 0) && (
         <LongFormReaderSection
           entry={longFormEntry}
           bodyTextSizeClass={bodyTextSizeClass}
+          isPremiumActive={isPremiumActive}
+          onPremiumChange={onPremiumChange}
+          onOpenSubscription={onOpenSubscription}
         />
       )}
 
       {/* 4.5. Deep Story Content for Game Developers & Writers */}
       {deepStory && (
-        <section aria-label="الحكاية الكاملة وعدّة المبدع" className="space-y-6 pt-1 text-right">
-          {/* Section "الحكاية الكاملة" */}
-          {deepStory.chapters && deepStory.chapters.length > 0 && (
+        <section aria-label={t('article.chapters')} className="space-y-6 pt-1 text-start">
+          {/* Chapters */}
+          {safeDeepChapters.length > 0 ? (
             <div className="space-y-3.5">
-              {/* Sticky horizontal chapter chips */}
+              {/* Sticky horizontal chapter chips with inline padding & soft fade masks */}
               <div
                 style={{
                   backgroundColor: isDark ? 'rgba(11, 36, 32, 0.94)' : 'rgba(242, 251, 247, 0.95)',
                   borderColor: tokens.borderSubtle,
                 }}
-                className="sticky top-1 z-30 py-2.5 backdrop-blur-md -mx-4 px-4 sm:mx-0 sm:px-0 border-b"
+                className="sticky top-1.5 z-30 py-2.5 backdrop-blur-md -mx-4 border-b"
               >
-                <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
-                  <span
-                    style={{ color: tokens.textSecondary }}
-                    className="text-[11px] font-bold shrink-0 pl-1"
+                <div className="relative">
+                  {/* Soft fade masks on overflow edges */}
+                  <div
+                    aria-hidden="true"
+                    style={{
+                      background: `linear-gradient(to ${dir === 'rtl' ? 'left' : 'right'}, ${isDark ? '#0B2420' : '#F2FBF7'}, transparent)`,
+                    }}
+                    className="pointer-events-none absolute inset-y-0 start-0 w-4 z-10"
+                  />
+                  <div
+                    aria-hidden="true"
+                    style={{
+                      background: `linear-gradient(to ${dir === 'rtl' ? 'right' : 'left'}, ${isDark ? '#0B2420' : '#F2FBF7'}, transparent)`,
+                    }}
+                    className="pointer-events-none absolute inset-y-0 end-0 w-6 z-10"
+                  />
+
+                  <div
+                    style={{ paddingInline: '16px', scrollPaddingInline: '16px' }}
+                    className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1"
                   >
-                    الفصول:
-                  </span>
-                  {deepStory.chapters.map((ch, idx) => {
-                    const isActive = activeChapterIndex === idx;
-                    return (
-                      <button
-                        key={idx}
-                        type="button"
-                        onClick={() => {
-                          handleScrollToChapter(idx);
-                        }}
-                        style={{
-                          backgroundColor: isActive ? tokens.primaryMint : tokens.card,
-                          color: isActive ? '#0E5C4D' : tokens.textSecondary,
-                          borderColor: isActive ? 'rgba(14, 92, 77, 0.35)' : tokens.border,
-                        }}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border shadow-2xs whitespace-nowrap transition-all duration-200 cursor-pointer shrink-0 min-h-[36px]"
-                      >
-                        <span className="text-[10px] opacity-75">#{idx + 1}</span>
-                        <span>{ch.title}</span>
-                      </button>
-                    );
-                  })}
+                    <span
+                      style={{ color: tokens.textSecondary }}
+                      className="text-[11px] font-bold shrink-0 pe-1"
+                    >
+                      {t('article.chapters')}:
+                    </span>
+                    {safeDeepChapters.map((ch, idx) => {
+                      const isActive = activeChapterIndex === idx;
+                      return (
+                        <button
+                          key={idx}
+                          ref={(el) => {
+                            chapterChipRefs.current[idx] = el;
+                          }}
+                          type="button"
+                          onClick={(e) => {
+                            e.currentTarget.scrollIntoView({
+                              behavior: 'smooth',
+                              block: 'nearest',
+                              inline: 'center',
+                            });
+                            handleScrollToChapter(idx);
+                          }}
+                          style={{
+                            backgroundColor: isActive ? tokens.primaryMint : tokens.card,
+                            color: isActive ? '#0E5C4D' : tokens.textSecondary,
+                            borderColor: isActive ? 'rgba(14, 92, 77, 0.35)' : tokens.border,
+                          }}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border shadow-2xs whitespace-nowrap transition-all duration-200 cursor-pointer shrink-0 min-h-[36px]"
+                        >
+                          <span className="text-[10px] opacity-75">#{idx + 1}</span>
+                          <span>{ch.title ?? ''}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
 
@@ -1261,7 +1401,7 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                   className="font-['Aref_Ruqaa',serif] text-xl font-bold flex items-center gap-2"
                 >
                   <BookOpen size={20} style={{ color: tokens.primaryMint }} />
-                  <span>{t('article.chapters')}</span>
+                  <span>{t('article.chapters') || 'الحكاية الكاملة'}</span>
                 </h3>
                 <span
                   style={{
@@ -1270,48 +1410,145 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                   }}
                   className="text-[11px] font-bold px-2.5 py-0.5 rounded-full"
                 >
-                  {deepStory.chapters.length} فصول
+                  {t('article.chaptersCount', { count: safeDeepChapters.length })}
                 </span>
               </div>
 
               <div className="space-y-4">
-                {deepStory.chapters.map((chapter, idx) => (
-                  <React.Fragment key={idx}>
-                    <Card
-                      id={`chapter-${idx}`}
-                      variant="white"
-                      elevation="card"
-                      padded="lg"
-                      className="rounded-[20px] space-y-3.5 text-right scroll-mt-24 transition-all duration-300"
-                    >
-                      <div
-                        style={{ borderColor: tokens.borderSubtle }}
-                        className="border-b pb-2 flex items-center justify-between"
-                      >
-                        <h4
-                          style={{ color: tokens.deepAccent }}
-                          className="font-['Aref_Ruqaa',serif] text-lg sm:text-xl font-bold leading-snug"
+                {safeDeepChapters.map((chapter, idx) => {
+                  const effectivePremium = isPremiumActive ?? storage.hasPremiumMonthly();
+                  const isChapterLocked = Boolean(entry.isPremium) && idx > 0 && !effectivePremium;
+                  const chText = chapter.text ?? '';
+                  const chEvLabel = chapter.evidenceLabel ?? '';
+                  const hasChWords = typeof chapter.wordCount === 'number' && Number.isFinite(chapter.wordCount) && chapter.wordCount > 0;
+
+                  return (
+                    <React.Fragment key={idx}>
+                      <div className="space-y-1.5">
+                        {chEvLabel && (
+                          <div className="flex items-center justify-between gap-2 px-1">
+                            <span
+                              style={{
+                                backgroundColor: chEvLabel.includes('نص قرآني') || chEvLabel.includes('حديث')
+                                  ? (isDark ? 'rgba(127, 209, 174, 0.2)' : 'rgba(127, 209, 174, 0.28)')
+                                  : tokens.coolBlueTint,
+                                color: chEvLabel.includes('نص قرآني') || chEvLabel.includes('حديث')
+                                  ? (isDark ? '#9FE8CC' : '#0E5C4D')
+                                  : tokens.coolBlueAccent,
+                                borderColor: tokens.border,
+                              }}
+                              className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold border shadow-2xs"
+                            >
+                              {localizeEvidenceLabel(chEvLabel, lang)}
+                            </span>
+                            {hasChWords && (
+                              <span
+                                style={{ color: tokens.textSecondary }}
+                                className="text-[11px] font-mono"
+                              >
+                                {formatReadingTime(
+                                  chapter.estimatedReadingMinutes ?? Math.max(1, Math.ceil((chapter.wordCount ?? 0) / 180)),
+                                  lang
+                                )}
+                              </span>
+                            )}
+                          </div>
+                        )}
+
+                        <Card
+                          id={`chapter-${idx}`}
+                          variant="white"
+                          elevation="card"
+                          padded={false}
+                          className="rounded-[20px] px-4 py-5 space-y-3.5 text-start scroll-mt-24 transition-all duration-300"
                         >
-                          {chapter.title}
-                        </h4>
-                        <span
-                          style={{ color: tokens.textSecondary }}
-                          className="text-[11px] font-mono"
-                        >
-                          فصل {idx + 1}
-                        </span>
+                          <div
+                            style={{ borderColor: tokens.borderSubtle }}
+                            className="border-b pb-2 flex items-center justify-between"
+                          >
+                            <h4
+                              style={{ color: tokens.deepAccent }}
+                              className="font-['Aref_Ruqaa',serif] text-lg sm:text-xl font-bold leading-snug"
+                            >
+                              {chapter.title ?? ''}
+                            </h4>
+                            <span
+                              style={{ color: tokens.textSecondary }}
+                              className="text-[11px] font-mono"
+                            >
+                              #{idx + 1}
+                            </span>
+                          </div>
+
+                          {isChapterLocked ? (
+                            <div
+                              style={{
+                                backgroundColor: isDark ? 'rgba(74, 144, 217, 0.14)' : '#E8F1FB',
+                                borderColor: '#4A90D9',
+                              }}
+                              className="p-4 rounded-2xl border flex items-center justify-between gap-3 flex-wrap"
+                            >
+                              <div className="flex items-center gap-2 text-xs font-bold" style={{ color: tokens.textPrimary }}>
+                                <Lock size={15} strokeWidth={1.9} style={{ color: '#4A90D9' }} />
+                                <span>{t('longForm.chapter2LockTitle')}</span>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => onOpenSubscription?.()}
+                                style={{ backgroundColor: '#4A90D9', color: '#FFFFFF' }}
+                                className="px-3.5 py-1.5 rounded-xl text-xs font-bold cursor-pointer hover:opacity-90"
+                              >
+                                {t('longForm.subscribeNow') || 'اشترك الآن'}
+                              </button>
+                            </div>
+                          ) : (
+                            <div
+                              style={{ color: tokens.textPrimary }}
+                              className={`space-y-3 font-['Cairo',sans-serif] text-start whitespace-pre-line ${bodyTextSizeClass}`}
+                            >
+                              {chText.includes('[إعادة تخيل أدبي]') ? (
+                                <>
+                                  <div>{chText.split('[إعادة تخيل أدبي]')[0].trimEnd()}</div>
+                                  <div
+                                    style={{
+                                      backgroundColor: tokens.coolBlueTint,
+                                      borderColor: tokens.border,
+                                    }}
+                                    className="p-3.5 rounded-2xl border space-y-1.5"
+                                  >
+                                    <span
+                                      style={{ color: tokens.coolBlueAccent }}
+                                      className="inline-block text-[11px] font-bold"
+                                    >
+                                      [إعادة تخيل أدبي]
+                                    </span>
+                                    <div>{chText.split('[إعادة تخيل أدبي]').slice(1).join('[إعادة تخيل أدبي]').trim()}</div>
+                                  </div>
+                                </>
+                              ) : (
+                                chText || t('article.noStoryYet')
+                              )}
+                            </div>
+                          )}
+
+                          {!isChapterLocked && chapter.source && (
+                            <div
+                              style={{
+                                borderColor: tokens.borderSubtle,
+                                color: tokens.textSecondary,
+                              }}
+                              className="pt-2.5 border-t text-[11px] font-['Cairo',sans-serif] flex items-center justify-between gap-2"
+                            >
+                              <span>
+                                {t('article.sourceLabel')} <strong style={{ color: tokens.deepAccent }}>{chapter.source}</strong>
+                              </span>
+                            </div>
+                          )}
+                        </Card>
                       </div>
 
-                      <div
-                        style={{ color: tokens.textPrimary }}
-                        className={`space-y-3 font-['Cairo',sans-serif] text-justify whitespace-pre-line ${bodyTextSizeClass}`}
-                      >
-                        {chapter.text}
-                      </div>
-                    </Card>
-
-                    {/* Ornamental divider between chapters */}
-                    {idx < (deepStory.chapters?.length ?? 0) - 1 && (
+                      {/* Ornamental divider between chapters */}
+                      {idx < (deepStory.chapters?.length ?? 0) - 1 && (
                       <div className="flex items-center justify-center my-3 gap-3" aria-hidden="true">
                         <div
                           style={{
@@ -1333,13 +1570,22 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                       </div>
                     )}
                   </React.Fragment>
-                ))}
+                  );
+                })}
               </div>
             </div>
+          ) : !hasLongFormChapters && (
+            <Card
+              variant="white"
+              elevation="subtle"
+              className="p-4 rounded-[20px] text-xs font-['Cairo',sans-serif]"
+            >
+              <span style={{ color: tokens.textSecondary }}>{t('civ.noChaptersYet')}</span>
+            </Card>
           )}
 
           {/* Section "من المصادر" */}
-          {deepStory.quotes && deepStory.quotes.length > 0 && (
+          {Array.isArray(deepStory.quotes) && deepStory.quotes.length > 0 && (
             <div className="space-y-3">
               <div className="flex items-center justify-between pb-1">
                 <h3
@@ -1347,29 +1593,33 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                   className="font-['Aref_Ruqaa',serif] text-xl font-bold flex items-center gap-2"
                 >
                   <Scroll size={20} style={{ color: tokens.coolBlueAccent }} />
-                  <span>{t('article.quotes')}</span>
+                  <span>{t('article.quotes') || 'من المصادر'}</span>
                 </h3>
                 <span
                   style={{ color: tokens.textSecondary }}
                   className="text-[11px]"
                 >
-                  نصوص ومقتطفات تراثية
+                  {t('article.quotesSubtitle')}
                 </span>
               </div>
 
               <div className="space-y-3">
                 {deepStory.quotes.map((quote, idx) => {
-                  const isLiteral = quote.type === 'نص حرفي';
+                  const qType = quote?.type || 'نص حرفي';
+                  const qText = quote?.text ?? '';
+                  const qSource = quote?.source || t('common.unknownAuthor');
+                  const isLiteral =
+                    qType === 'نص حرفي' ||
+                    qType === localizeEvidenceLabel('نص حرفي', lang);
                   return (
                     <Card
                       key={idx}
                       variant="white"
                       elevation="subtle"
-                      padded="md"
-                      className="rounded-[18px] space-y-3 relative overflow-hidden"
+                      padded={false}
+                      className="rounded-[18px] px-4 py-4 space-y-3 relative overflow-hidden"
                     >
                       <div className="flex items-center justify-between gap-2">
-                        {/* pill showing the type: "نص حرفي" = mint pill, "بأسلوب المصدر" = blue pill */}
                         <span
                           style={{
                             backgroundColor: isLiteral ? (isDark ? 'rgba(127, 209, 174, 0.2)' : 'rgba(127, 209, 174, 0.25)') : tokens.coolBlueTint,
@@ -1378,26 +1628,26 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                           }}
                           className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold border shadow-2xs"
                         >
-                          {quote.type}
+                          {localizeEvidenceLabel(qType, lang)}
                         </span>
 
                         {/* Copy button that copies: quote text + " — " + source */}
                         <button
                           type="button"
-                          onClick={() => handleCopyQuote(quote.text, quote.source, idx)}
+                          onClick={() => handleCopyQuote(qText, qSource, idx)}
                           style={{
                             backgroundColor: tokens.surface,
                             borderColor: tokens.border,
                             color: copiedQuoteIdx === idx ? tokens.deepAccent : tokens.textSecondary,
                           }}
                           className="p-1 px-2.5 rounded-lg border text-xs flex items-center gap-1 hover:opacity-80 transition-colors cursor-pointer min-h-[32px]"
-                          title="نسخ الاقتباس والمصدر"
-                          aria-label="نسخ الاقتباس والمصدر"
+                          title={t('article.copyQuote')}
+                          aria-label={t('article.copyQuote')}
                         >
                           {copiedQuoteIdx === idx ? (
                             <>
                               <Check size={13} style={{ color: tokens.deepAccent }} />
-                              <span className="text-[11px] font-bold">تم النسخ</span>
+                              <span className="text-[11px] font-bold">{t('article.copiedBadge')}</span>
                             </>
                           ) : (
                             <>
@@ -1411,11 +1661,11 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                       <blockquote
                         style={{
                           color: tokens.textPrimary,
-                          borderColor: isLiteral ? tokens.primaryMint : tokens.coolBlueAccent,
+                          borderInlineStartColor: isLiteral ? tokens.primaryMint : tokens.coolBlueAccent,
                         }}
-                        className="pr-3.5 border-r-2 font-['Amiri',serif] text-base sm:text-lg leading-8 sm:leading-9 text-justify font-normal"
+                        className="ps-3.5 border-s-2 font-['Amiri',serif] text-[17px] sm:text-[18px] leading-[1.95] text-start font-normal"
                       >
-                        {quote.text}
+                        {qText}
                       </blockquote>
 
                       <div
@@ -1426,7 +1676,7 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                         className="pt-2 border-t flex items-center justify-between text-xs"
                       >
                         <span className="font-['Cairo',sans-serif] font-medium">
-                          المصدر: <strong style={{ color: tokens.deepAccent }}>{quote.source}</strong>
+                          {t('article.sourceLabel')} <strong style={{ color: tokens.deepAccent }}>{qSource}</strong>
                         </span>
                       </div>
                     </Card>
@@ -1436,10 +1686,10 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
             </div>
           )}
 
-          {/* القراءة التاريخية: Dual-narrative mode (after quotes) */}
+          {/* Dual-narrative mode (after quotes): الرواية الشعبية / التحليل التاريخي */}
           {renderDualNarrativeSection()}
 
-          {/* Section "عدّة المبدع" */}
+          {/* Creator Kit section */}
           <div className="space-y-3.5">
             <div className="flex items-center justify-between pb-1">
               <h3
@@ -1447,7 +1697,7 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                 className="font-['Aref_Ruqaa',serif] text-xl font-bold flex items-center gap-2"
               >
                 <Sparkles size={20} style={{ color: tokens.deepAccent }} />
-                <span>{t('article.creatorKit')}</span>
+                <span>{t('article.creatorKit') || 'عدّة المبدع'}</span>
               </h3>
               <span
                 style={{
@@ -1456,7 +1706,7 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                 }}
                 className="text-[11px] font-bold px-2 py-0.5 rounded-full"
               >
-                للكتاب والمطورين
+                {t('article.creativeSeeds')}
               </span>
             </div>
 
@@ -1468,14 +1718,14 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
               }}
               className="p-4 rounded-[20px] border shadow-xs space-y-3.5"
             >
-              {/* Row 1: العناصر الدرامية (motifs) */}
+              {/* Row 1: motifs */}
               {deepStory.motifs && deepStory.motifs.length > 0 && (
                 <div className="space-y-1.5">
                   <span
                     style={{ color: tokens.deepAccent }}
                     className="text-xs font-bold block"
                   >
-                    العناصر الدرامية:
+                    {t('article.motifsThemes') || 'العناصر الدرامية'}:
                   </span>
                   <div className="flex flex-wrap gap-1.5">
                     {deepStory.motifs.map((motif, i) => (
@@ -1495,14 +1745,14 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                 </div>
               )}
 
-              {/* Row 2: الثيمات (themes) */}
+              {/* Row 2: themes */}
               {deepStory.themes && deepStory.themes.length > 0 && (
                 <div className="space-y-1.5">
                   <span
                     style={{ color: tokens.deepAccent }}
                     className="text-xs font-bold block"
                   >
-                    الثيمات:
+                    {t('article.motifsThemes') || 'الثيمات'}:
                   </span>
                   <div className="flex flex-wrap gap-1.5">
                     {deepStory.themes.map((theme, i) => (
@@ -1522,14 +1772,14 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                 </div>
               )}
 
-              {/* Row 3: شخصيات الحكاية (cast) */}
+              {/* Row 3: cast */}
               {deepStory.cast && deepStory.cast.length > 0 && (
                 <div className="space-y-1.5">
                   <span
                     style={{ color: tokens.deepAccent }}
                     className="text-xs font-bold block"
                   >
-                    شخصيات الحكاية:
+                    {t('article.mainCast') || 'شخصيات الحكاية'}:
                   </span>
                   <div className="flex flex-wrap gap-1.5">
                     {deepStory.cast.map((c, i) => (
@@ -1540,9 +1790,10 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                           color: tokens.textPrimary,
                           borderColor: tokens.borderSubtle,
                         }}
-                        className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border"
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border"
                       >
-                        👤 {c}
+                        <User size={14} strokeWidth={1.9} style={{ color: hookStrokeColor }} />
+                        <span>{c}</span>
                       </span>
                     ))}
                   </div>
@@ -1550,14 +1801,16 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
               )}
             </div>
 
-            {/* Two cards side by side (stacked on mobile): "لصنّاع الألعاب" & "لكتّاب القصص" */}
+            {/* Two cards side by side */}
+            {((deepStory.gameHooks && deepStory.gameHooks.length > 0) ||
+              (deepStory.writingHooks && deepStory.writingHooks.length > 0)) && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-              {/* لصنّاع الألعاب */}
+              {/* Game developers */}
               <Card
                 variant="white"
                 elevation="card"
-                padded="md"
-                className="rounded-[20px] space-y-3"
+                padded={false}
+                className="rounded-[20px] px-4 py-5 space-y-3"
               >
                 <div
                   style={{ borderColor: tokens.borderSubtle }}
@@ -1566,17 +1819,17 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                   <div
                     style={{
                       backgroundColor: tokens.coolBlueTint,
-                      color: tokens.coolBlueAccent,
+                      color: hookStrokeColor,
                     }}
                     className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
                   >
-                    <Gamepad2 size={18} />
+                    <Gamepad2 size={18} strokeWidth={1.9} style={{ color: hookStrokeColor }} />
                   </div>
                   <h4
                     style={{ color: tokens.deepAccent }}
                     className="font-['Aref_Ruqaa',serif] text-lg font-bold"
                   >
-                    لصنّاع الألعاب
+                    {t('article.gameHooks') || 'لصنّاع الألعاب'}
                   </h4>
                 </div>
 
@@ -1587,12 +1840,12 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                       style={{ color: tokens.textPrimary }}
                       className="flex items-start gap-2"
                     >
-                      <span
-                        style={{ color: tokens.coolBlueAccent }}
+                      <Gamepad2
+                        size={18}
+                        strokeWidth={1.9}
+                        style={{ color: hookStrokeColor }}
                         className="shrink-0 mt-0.5"
-                      >
-                        🎮
-                      </span>
+                      />
                       <span>{hook}</span>
                     </li>
                   ))}
@@ -1603,8 +1856,8 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
               <Card
                 variant="white"
                 elevation="card"
-                padded="md"
-                className="rounded-[20px] space-y-3"
+                padded={false}
+                className="rounded-[20px] px-4 py-5 space-y-3"
               >
                 <div
                   style={{ borderColor: tokens.borderSubtle }}
@@ -1613,17 +1866,17 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                   <div
                     style={{
                       backgroundColor: isDark ? 'rgba(127, 209, 174, 0.2)' : 'rgba(127, 209, 174, 0.25)',
-                      color: tokens.deepAccent,
+                      color: hookStrokeColor,
                     }}
                     className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
                   >
-                    <Feather size={18} />
+                    <PenLine size={18} strokeWidth={1.9} style={{ color: hookStrokeColor }} />
                   </div>
                   <h4
                     style={{ color: tokens.deepAccent }}
                     className="font-['Aref_Ruqaa',serif] text-lg font-bold"
                   >
-                    {t('article.writingHooks')}
+                    {t('article.writingHooks') || 'لكتّاب القصص'}
                   </h4>
                 </div>
 
@@ -1634,18 +1887,19 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                       style={{ color: tokens.textPrimary }}
                       className="flex items-start gap-2"
                     >
-                      <span
-                        style={{ color: tokens.primaryMint }}
+                      <PenLine
+                        size={18}
+                        strokeWidth={1.9}
+                        style={{ color: hookStrokeColor }}
                         className="shrink-0 mt-0.5"
-                      >
-                        ✍️
-                      </span>
+                      />
                       <span>{hook}</span>
                     </li>
                   ))}
                 </ul>
               </Card>
             </div>
+            )}
 
             {/* خطافات حكاية (storyHooks) & أدوار لعبية (gameRoles) */}
             {(deepStory.storyHooks || deepStory.gameRoles) && (
@@ -1654,9 +1908,9 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                   backgroundColor: tokens.card,
                   borderColor: tokens.border,
                 }}
-                className="p-4 sm:p-5 rounded-2xl border shadow-xs space-y-3.5"
+                className="px-4 py-5 rounded-2xl border shadow-xs space-y-3.5"
               >
-                {/* خطافات حكاية */}
+                {/* storyHooks */}
                 {deepStory.storyHooks && deepStory.storyHooks.length > 0 && (
                   <div className="space-y-2">
                     <span
@@ -1664,7 +1918,7 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                       className="text-xs font-bold flex items-center gap-1.5"
                     >
                       <Scroll size={14} style={{ color: tokens.primaryMint }} />
-                      <span>خطافات حكاية:</span>
+                      <span>{t('article.storyHooksLabel')}:</span>
                     </span>
                     <ul className="space-y-1.5 text-xs sm:text-[13px] leading-relaxed">
                       {deepStory.storyHooks.map((hook, i) => (
@@ -1677,15 +1931,15 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                   </div>
                 )}
 
-                {/* أدوار لعبية */}
+                {/* gameRoles */}
                 {deepStory.gameRoles && deepStory.gameRoles.length > 0 && (
                   <div className="space-y-2 pt-1 border-t" style={{ borderColor: tokens.borderSubtle }}>
                     <span
                       style={{ color: tokens.deepAccent }}
                       className="text-xs font-bold flex items-center gap-1.5"
                     >
-                      <Gamepad2 size={14} style={{ color: tokens.coolBlueAccent }} />
-                      <span>أدوار لعبية:</span>
+                      <Gamepad2 size={18} strokeWidth={1.9} style={{ color: hookStrokeColor }} />
+                      <span>{t('article.gameRoles')}:</span>
                     </span>
                     <div className="flex flex-wrap gap-1.5">
                       {deepStory.gameRoles.map((role, i) => (
@@ -1696,9 +1950,10 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                             color: tokens.coolBlueAccent,
                             borderColor: tokens.border,
                           }}
-                          className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium border"
+                          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border"
                         >
-                          🎮 {role}
+                          <Gamepad2 size={18} strokeWidth={1.9} style={{ color: hookStrokeColor }} />
+                          <span>{role}</span>
                         </span>
                       ))}
                     </div>
@@ -1707,7 +1962,7 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
               </div>
             )}
 
-            {/* مشاهد مقترحة (scenes vertical timeline) */}
+            {/* Scenes timeline */}
             {deepStory.scenes && deepStory.scenes.length > 0 && (
               <div
                 style={{
@@ -1724,7 +1979,7 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                   <span>{t('article.scenes')}</span>
                 </h4>
 
-                <div className="relative pr-5 space-y-4 border-r-2" style={{ borderColor: tokens.primaryMint }}>
+                <div className="relative ps-5 space-y-4 border-s-2" style={{ borderColor: tokens.primaryMint }}>
                   {deepStory.scenes.map((scene, idx) => (
                     <div key={idx} className="relative">
                       {/* Teal node per scene */}
@@ -1733,7 +1988,7 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                           backgroundColor: tokens.deepAccent,
                           borderColor: tokens.primaryMint,
                         }}
-                        className="absolute -right-[27px] top-1 w-3.5 h-3.5 rounded-full border-2 ring-4 ring-[#7FD1AE]/20"
+                        className="absolute -start-[27px] top-1 w-3.5 h-3.5 rounded-full border-2 ring-4 ring-[#7FD1AE]/20"
                       />
                       <div className="space-y-1">
                         <h5
@@ -1752,7 +2007,7 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
               </div>
             )}
 
-            {/* قرار اللاعب (highlighted card with cool-blue tinted background #E8F1FB, blue border, decision text in bold, plus a copy button) */}
+            {/* Player Decision */}
             {deepStory.decision && (
               <div
                 style={{
@@ -1778,10 +2033,10 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                       color: tokens.coolBlueAccent,
                     }}
                     className="p-1.5 rounded-xl border flex items-center gap-1 text-xs font-bold hover:opacity-80 transition-opacity cursor-pointer px-2.5 py-1 min-h-[36px]"
-                    title="نسخ قرار اللاعب"
+                    title={t('common.copy')}
                   >
                     <Copy size={14} />
-                    <span>نسخ القرار</span>
+                    <span>{t('common.copy')}</span>
                   </button>
                 </div>
                 <p style={{ color: tokens.textPrimary }} className="text-sm sm:text-base font-bold leading-relaxed">
@@ -1790,7 +2045,7 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
               </div>
             )}
 
-            {/* Button: حوّل إلى مهمة لعبة */}
+            {/* Button: Convert to Quest */}
             <div className="pt-1 flex flex-wrap gap-2.5">
               <button
                 type="button"
@@ -1802,7 +2057,7 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-bold shadow-md hover:opacity-90 active:scale-95 transition-all cursor-pointer min-h-[44px]"
               >
                 <Gamepad2 size={16} />
-                <span>حوّل إلى مهمة لعبة</span>
+                <span>{t('article.convertQuest')}</span>
               </button>
             </div>
           </div>
@@ -1844,7 +2099,7 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
             <span>{t('article.timeline')}</span>
           </h3>
           <span style={{ color: tokens.textSecondary }} className="text-[11px]">
-            {ar.article.timelineSubtitle}
+            {t('article.timelineSub')}
           </span>
         </div>
 
@@ -1853,51 +2108,74 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
             backgroundColor: tokens.card,
             borderColor: tokens.border,
           }}
-          className="p-3 sm:p-4 rounded-[18px] border shadow-xs space-y-4"
+          className="px-4 py-4 rounded-[18px] border shadow-xs space-y-4"
         >
-          <div className="relative flex items-center justify-between px-2 sm:px-4">
+          <div className="relative grid grid-cols-3 items-start">
+            {/* Inactive remainder track (#DDEEE6) */}
             <div
-              style={{ backgroundColor: tokens.coolBlueTint }}
-              className="absolute top-1/2 inset-x-8 -translate-y-1/2 h-1 rounded-full z-0"
+              style={{
+                backgroundColor: isDark ? 'rgba(221, 238, 230, 0.2)' : '#DDEEE6',
+                right: '16.6667%',
+                left: '16.6667%',
+                top: '18px',
+              }}
+              className="absolute h-1 rounded-full z-0"
             />
 
+            {/* Filled active connector segment up to active node (#4A90D9) */}
             <div
-              className="absolute top-1/2 -translate-y-1/2 h-1 rounded-full transition-all duration-300 z-0"
+              className="absolute h-1 rounded-full transition-all duration-200 z-0"
               style={{
-                backgroundColor: tokens.coolBlueAccent,
-                right: activeEra === 'جاهلية' ? '15%' : activeEra === 'صدر الإسلام' ? '15%' : '15%',
-                left: activeEra === 'جاهلية' ? '65%' : activeEra === 'صدر الإسلام' ? '35%' : '15%',
+                backgroundColor: '#4A90D9',
+                top: '18px',
+                ...(dir === 'rtl' ? { right: '16.6667%' } : { left: '16.6667%' }),
+                width: activeEraIndex === 0 ? '0%' : activeEraIndex === 1 ? '33.3333%' : '66.6667%',
               }}
             />
 
             {eras.map((era) => {
               const isActive = activeEra === era;
+              const nodeNum =
+                lang === 'ar'
+                  ? era === 'جاهلية'
+                    ? '١'
+                    : era === 'صدر الإسلام'
+                    ? '٢'
+                    : '٣'
+                  : era === 'جاهلية'
+                  ? '1'
+                  : era === 'صدر الإسلام'
+                  ? '2'
+                  : '3';
 
               return (
                 <button
                   key={era}
                   type="button"
                   onClick={() => setActiveEra(era)}
+                  aria-pressed={isActive}
                   className="relative z-10 flex flex-col items-center group cursor-pointer focus:outline-none min-h-[48px]"
                 >
                   <div
                     style={{
-                      backgroundColor: isActive ? tokens.coolBlueAccent : tokens.card,
-                      color: isActive ? (isDark ? tokens.background : '#FFFFFF') : tokens.textSecondary,
-                      borderColor: isActive ? tokens.coolBlueAccent : tokens.borderSubtle,
+                      backgroundColor: isActive ? '#4A90D9' : (isDark ? tokens.card : '#FFFFFF'),
+                      color: isActive ? '#FFFFFF' : tokens.textSecondary,
+                      borderColor: isActive ? '#4A90D9' : (isDark ? tokens.borderSubtle : '#DDEEE6'),
                     }}
-                    className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs transition-all duration-200 border-2 shadow-sm"
+                    className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs transition-all duration-200 border-2 shadow-sm ${
+                      isActive ? 'ring-4 ring-[#4A90D9]/25' : ''
+                    }`}
                   >
-                    {era === 'جاهلية' ? '١' : era === 'صدر الإسلام' ? '٢' : '٣'}
+                    {nodeNum}
                   </div>
                   <span
                     style={{
-                      color: isActive ? tokens.coolBlueAccent : tokens.textSecondary,
+                      color: isActive ? '#4A90D9' : tokens.textSecondary,
                       fontWeight: isActive ? 700 : 500,
                     }}
-                    className="text-xs mt-1.5 font-['Cairo',sans-serif] transition-colors leading-none"
+                    className="text-xs mt-1.5 font-['Cairo',sans-serif] transition-colors duration-200 leading-none text-center"
                   >
-                    {era}
+                    {localizeEra(era, lang)}
                   </span>
                 </button>
               );
@@ -1909,14 +2187,13 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
               backgroundColor: tokens.surface,
               borderColor: tokens.border,
             }}
-            className="p-3.5 rounded-xl border text-right transition-all"
+            className="p-3.5 rounded-xl border text-start transition-all"
           >
             <div
               style={{ color: tokens.coolBlueAccent }}
               className="flex items-center gap-1.5 mb-1 text-xs font-bold"
             >
-              <span>ملاحظة العصر:</span>
-              <span style={{ color: tokens.textPrimary }}>{activeEra}</span>
+              <span>{t('article.eraNoteLabel', { era: localizeEra(activeEra, lang) })}</span>
             </div>
             <p
               style={{ color: tokens.textPrimary }}
@@ -1928,7 +2205,7 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
         </div>
       </div>
 
-      {/* 7. "المصادر" Section */}
+      {/* 7. Sources Section */}
       <div className="space-y-3">
         <h3
           style={{ color: tokens.textPrimary }}
@@ -1939,59 +2216,72 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
         </h3>
 
         <div className="space-y-2.5">
-          {entry.sources.map((src, index) => (
-            <div
-              key={index}
-              style={{
-                backgroundColor: tokens.card,
-                borderColor: tokens.border,
-              }}
-              className="flex items-center justify-between gap-3 p-3.5 rounded-2xl border shadow-xs text-right min-h-[48px]"
-            >
-              <div className="flex items-center gap-3">
-                <div
-                  style={{
-                    backgroundColor: tokens.coolBlueTint,
-                    color: tokens.coolBlueAccent,
-                    borderColor: tokens.borderSubtle,
-                  }}
-                  className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border"
-                >
-                  <BookOpen size={19} strokeWidth={2} />
-                </div>
-
-                <div className="text-right">
-                  <h4
-                    style={{ color: tokens.textPrimary }}
-                    className="font-bold text-sm font-['Cairo',sans-serif] leading-tight"
-                  >
-                    {src.title}
-                  </h4>
-                  <p
-                    style={{ color: tokens.textSecondary }}
-                    className="text-xs mt-0.5"
-                  >
-                    {ar.article.author} {src.author}
-                  </p>
-                </div>
-              </div>
-
-              <span
+          {safeSources.length > 0 ? (
+            safeSources.map((src, index) => (
+              <div
+                key={index}
                 style={{
-                  color: tokens.coolBlueAccent,
-                  backgroundColor: tokens.coolBlueTint,
+                  backgroundColor: tokens.card,
+                  borderColor: tokens.border,
                 }}
-                className="text-[11px] font-mono px-2.5 py-1 rounded-lg shrink-0 font-medium"
+                className="flex items-center justify-between gap-3 p-3.5 rounded-2xl border shadow-xs text-start min-h-[48px]"
               >
-                {src.year}
-              </span>
+                <div className="flex items-center gap-3">
+                  <div
+                    style={{
+                      backgroundColor: tokens.coolBlueTint,
+                      color: tokens.coolBlueAccent,
+                      borderColor: tokens.borderSubtle,
+                    }}
+                    className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border"
+                  >
+                    <BookOpen size={19} strokeWidth={2} />
+                  </div>
+
+                  <div className="text-start">
+                    <h4
+                      style={{ color: tokens.textPrimary }}
+                      className="font-bold text-sm font-['Cairo',sans-serif] leading-tight"
+                    >
+                      {src?.title || entry.name || ''}
+                    </h4>
+                    <p
+                      style={{ color: tokens.textSecondary }}
+                      className="text-xs mt-0.5"
+                    >
+                      {t('article.authorPrefix')} {src?.author || t('common.unknownAuthor')}
+                    </p>
+                  </div>
+                </div>
+
+                <span
+                  style={{
+                    color: tokens.coolBlueAccent,
+                    backgroundColor: tokens.coolBlueTint,
+                  }}
+                  className="text-[11px] font-mono px-2.5 py-1 rounded-lg shrink-0 font-medium"
+                >
+                  {src?.year || t('common.undated')}
+                </span>
+              </div>
+            ))
+          ) : (
+            <div
+              style={{
+                backgroundColor: tokens.surface,
+                borderColor: tokens.borderSubtle,
+                color: tokens.textSecondary,
+              }}
+              className="p-3.5 rounded-2xl border text-xs text-start"
+            >
+              {t('article.noSourcesYet')}
             </div>
-          ))}
+          )}
         </div>
       </div>
 
-      {/* 8. "الكيانات ذات الصلة" */}
-      {entry.related && entry.related.length > 0 && (
+      {/* 8. Related Entities */}
+      {safeRelatedIds.length > 0 && (
         <div className="space-y-3 pt-1">
           <div className="flex items-center justify-between">
             <h3
@@ -2002,54 +2292,60 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
               <span>{t('article.related')}</span>
             </h3>
             <span style={{ color: tokens.textSecondary }} className="text-[11px]">
-              {ar.article.relatedSubtitle}
+              {t('article.relatedSub')}
             </span>
           </div>
 
           <div className="flex items-center gap-3 overflow-x-auto pb-2 pt-1 no-scrollbar -mx-1 px-1">
-            {entry.related.map((relId) => {
-              const rel = getEntryById(relId);
-              if (!rel) return null;
+            {safeRelatedIds.map((relId) => {
+              const rawRel = getEntryById(relId);
+              if (!rawRel) return null;
+              const rel = getLocalizedEntry(rawRel, lang);
+              const relHeroUrl = resolveHeroImageUrl(rel.heroImage);
 
               return (
                 <button
                   key={rel.id}
                   type="button"
-                  onClick={() => onSelectRelated(rel)}
+                  onClick={() => onSelectRelated(rawRel)}
                   style={{
                     backgroundColor: tokens.card,
                     borderColor: tokens.border,
                   }}
-                  className="flex items-center gap-3 p-2.5 pr-3 pl-4 rounded-2xl border shadow-xs transition-all duration-200 cursor-pointer shrink-0 text-right group min-h-[52px]"
+                  className="flex items-center gap-3 p-2.5 px-3 rounded-2xl border shadow-xs transition-all duration-200 cursor-pointer shrink-0 text-start group min-h-[52px]"
                 >
                   <div
                     style={{
                       backgroundColor: tokens.surface,
                       borderColor: tokens.borderSubtle,
                     }}
-                    className="w-12 h-12 rounded-xl overflow-hidden shrink-0 border"
+                    className="w-12 h-12 rounded-xl overflow-hidden shrink-0 border flex items-center justify-center"
                   >
-                    <img
-                      src={rel.heroImage}
-                      alt={rel.name}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                      loading="lazy"
-                      decoding="async"
-                    />
+                    {relHeroUrl ? (
+                      <img
+                        src={relHeroUrl}
+                        alt={rel.name ?? ''}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    ) : (
+                      <BookOpen size={18} style={{ color: tokens.textSecondary }} className="opacity-60" />
+                    )}
                   </div>
 
-                  <div className="text-right">
+                  <div className="text-start">
                     <span
                       style={{ color: tokens.textPrimary }}
                       className="font-['Aref_Ruqaa',serif] text-sm font-bold block truncate max-w-[130px]"
                     >
-                      {rel.name}
+                      {rel.name ?? ''}
                     </span>
                     <span
                       style={{ color: tokens.textSecondary }}
                       className="text-[11px] block truncate max-w-[130px]"
                     >
-                      {rel.typeLabel}
+                      {rel.typeLabel ?? ''}
                     </span>
                   </div>
                 </button>
@@ -2059,9 +2355,8 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
         </div>
       )}
 
-      {/* End of article actions: cool-blue button "ألهمني" and "العودة للرئيسية" */}
+      {/* End of article actions */}
       <div className="pt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
-        {/* Cool-blue button "ألهمني" */}
         <button
           type="button"
           onClick={handleOpenInspireModal}
@@ -2072,7 +2367,7 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
           className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full text-sm font-bold shadow-md hover:opacity-95 transition-all cursor-pointer min-h-[48px]"
         >
           <Sparkles size={18} />
-          <span>ألهمني</span>
+          <span>{t('article.inspireMe')}</span>
         </button>
 
         <button
@@ -2085,7 +2380,7 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
           }}
           className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-5 py-3 rounded-full border text-xs font-bold hover:opacity-90 transition-colors cursor-pointer min-h-[48px]"
         >
-          <span>← {ar.article.backHome}</span>
+          <span>{dir === 'rtl' ? '←' : '→'} {t('article.backHome')}</span>
         </button>
       </div>
 
@@ -2101,11 +2396,11 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
               backgroundColor: tokens.card,
               borderColor: tokens.border,
             }}
-            className="w-full max-w-lg rounded-[24px] p-5 sm:p-6 shadow-2xl border space-y-4 animate-in zoom-in-95 duration-200 text-right"
-            dir="rtl"
+            className="w-full max-w-lg rounded-[24px] p-5 sm:p-6 shadow-2xl border space-y-4 animate-in zoom-in-95 duration-200 text-start"
+            dir={dir}
             role="dialog"
             aria-modal="true"
-            aria-label="فكرة ملهمة للمبدعين"
+            aria-label={t('article.inspireMeTitle')}
           >
             <div
               style={{ borderColor: tokens.borderSubtle }}
@@ -2126,10 +2421,10 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                     style={{ color: tokens.deepAccent }}
                     className="font-['Aref_Ruqaa',serif] text-xl font-bold"
                   >
-                    ألهمني
+                    {t('article.inspireMe')}
                   </h3>
                   <p style={{ color: tokens.textSecondary }} className="text-xs">
-                    فكرة مستوحاة من {entry.name}
+                    {t('article.inspireMeSub', { name: entry.name })}
                   </p>
                 </div>
               </div>
@@ -2139,7 +2434,7 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                 onClick={() => setInspireModalOpen(false)}
                 style={{ color: tokens.textSecondary }}
                 className="p-2 rounded-xl hover:opacity-80 cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
-                aria-label="إغلاق النافذة"
+                aria-label={t('common.close')}
               >
                 <X size={20} />
               </button>
@@ -2161,20 +2456,24 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                   }}
                   className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold"
                 >
-                  <span>{selectedHook.icon}</span>
+                  {selectedHook.type === 'game' ? (
+                    <Gamepad2 size={18} strokeWidth={1.9} style={{ color: hookStrokeColor }} />
+                  ) : (
+                    <PenLine size={18} strokeWidth={1.9} style={{ color: hookStrokeColor }} />
+                  )}
                   <span>{selectedHook.label}</span>
                 </span>
               </div>
 
               <p
                 style={{ color: tokens.textPrimary }}
-                className="font-['Amiri',serif] text-base sm:text-lg leading-8 text-justify"
+                className="font-['Amiri',serif] text-[17px] sm:text-[18px] leading-[1.95] text-start"
               >
                 «{selectedHook.text}»
               </p>
             </div>
 
-            {/* Action buttons: نسخ and فكرة أخرى */}
+            {/* Action buttons */}
             <div className="flex items-center justify-between gap-3 pt-1">
               <button
                 type="button"
@@ -2187,7 +2486,7 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                 className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full border text-xs font-bold hover:opacity-80 transition-colors cursor-pointer min-h-[44px]"
               >
                 <RotateCcw size={15} />
-                <span>فكرة أخرى</span>
+                <span>{t('article.reshuffle')}</span>
               </button>
 
               <button
@@ -2212,258 +2511,6 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                 )}
               </button>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal: جدولة جلسة قراءة في تقويم Google */}
-      {isCalendarModalOpen && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-label="جدولة جلسة قراءة في تقويم Google"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in"
-        >
-          <div
-            style={{
-              backgroundColor: tokens.card,
-              borderColor: tokens.border,
-            }}
-            className="w-full max-w-md rounded-3xl border p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto"
-          >
-            {/* Modal Header */}
-            <div className="flex items-center justify-between pb-2 border-b" style={{ borderColor: tokens.borderSubtle }}>
-              <div className="flex items-center gap-2">
-                <div
-                  style={{ backgroundColor: isDark ? 'rgba(127, 209, 174, 0.2)' : 'rgba(127, 209, 174, 0.25)' }}
-                  className="w-9 h-9 rounded-xl flex items-center justify-center"
-                >
-                  <Calendar size={20} style={{ color: tokens.deepAccent }} />
-                </div>
-                <div>
-                  <h3 style={{ color: tokens.textPrimary }} className="text-base font-bold">
-                    جدولة جلسة قراءة في تقويم Google
-                  </h3>
-                  <p style={{ color: tokens.textSecondary }} className="text-xs">
-                    تذكير مخصص لقراءة «{entry.name}»
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  setIsCalendarModalOpen(false);
-                  setCalendarCreatedEvent(null);
-                }}
-                disabled={isSchedulingCalendar}
-                aria-label="إغلاق"
-                className="p-1 rounded-full hover:opacity-80 transition-opacity cursor-pointer"
-                style={{ color: tokens.textSecondary }}
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            {calendarCreatedEvent ? (
-              /* Success confirmation state with link to Google Calendar */
-              <div className="space-y-4 py-2 text-center">
-                <div
-                  style={{ backgroundColor: 'rgba(127, 209, 174, 0.2)' }}
-                  className="w-12 h-12 rounded-full flex items-center justify-center mx-auto"
-                >
-                  <Check size={24} style={{ color: tokens.deepAccent }} />
-                </div>
-                <div className="space-y-1">
-                  <h4 style={{ color: tokens.textPrimary }} className="font-bold text-base">
-                    تمت الجدولة بنجاح!
-                  </h4>
-                  <p style={{ color: tokens.textSecondary }} className="text-xs leading-5">
-                    تمت إضافة جلسة قراءة أسطورة «{entry.name}» إلى تقويم Google الخاص بك مع تذكير مسبق قبل الموعد.
-                  </p>
-                </div>
-
-                {calendarCreatedEvent.htmlLink && (
-                  <a
-                    href={calendarCreatedEvent.htmlLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      backgroundColor: tokens.surface,
-                      borderColor: tokens.border,
-                      color: tokens.coolBlueAccent,
-                    }}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border text-xs font-bold hover:opacity-90 transition-all"
-                  >
-                    <span>فتح الحدث في تقويم Google</span>
-                    <ExternalLink size={14} />
-                  </a>
-                )}
-
-                <div className="pt-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsCalendarModalOpen(false);
-                      setCalendarCreatedEvent(null);
-                    }}
-                    style={{
-                      backgroundColor: tokens.primaryMint,
-                      color: '#0E5C4D',
-                    }}
-                    className="w-full py-2.5 rounded-xl text-xs font-bold shadow-xs hover:opacity-90 transition-all cursor-pointer"
-                  >
-                    تم
-                  </button>
-                </div>
-              </div>
-            ) : (
-              /* Configuration and confirmation dialog */
-              <div className="space-y-4">
-                {/* Form fields: Date, Time, Duration */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <label style={{ color: tokens.textSecondary }} className="text-xs font-medium block">
-                      تاريخ الجلسة
-                    </label>
-                    <input
-                      type="date"
-                      value={calendarDate}
-                      onChange={(e) => setCalendarDate(e.target.value)}
-                      disabled={isSchedulingCalendar}
-                      style={{
-                        backgroundColor: tokens.surface,
-                        borderColor: tokens.border,
-                        color: tokens.textPrimary,
-                      }}
-                      className="w-full px-3 py-2 rounded-xl border text-xs outline-none focus:ring-1 focus:ring-teal-500"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label style={{ color: tokens.textSecondary }} className="text-xs font-medium block">
-                      وقت البدء
-                    </label>
-                    <input
-                      type="time"
-                      value={calendarTime}
-                      onChange={(e) => setCalendarTime(e.target.value)}
-                      disabled={isSchedulingCalendar}
-                      style={{
-                        backgroundColor: tokens.surface,
-                        borderColor: tokens.border,
-                        color: tokens.textPrimary,
-                      }}
-                      className="w-full px-3 py-2 rounded-xl border text-xs outline-none focus:ring-1 focus:ring-teal-500"
-                    />
-                  </div>
-                </div>
-
-                {/* Duration chips */}
-                <div className="space-y-1.5">
-                  <label style={{ color: tokens.textSecondary }} className="text-xs font-medium block">
-                    مدة جلسة القراءة
-                  </label>
-                  <div className="flex gap-2">
-                    {[15, 30, 45, 60].map((mins) => (
-                      <button
-                        key={mins}
-                        type="button"
-                        onClick={() => setCalendarDuration(mins)}
-                        disabled={isSchedulingCalendar}
-                        style={{
-                          backgroundColor:
-                            calendarDuration === mins
-                              ? isDark
-                                ? 'rgba(127, 209, 174, 0.25)'
-                                : tokens.primaryMint
-                              : tokens.surface,
-                          borderColor: calendarDuration === mins ? tokens.deepAccent : tokens.border,
-                          color:
-                            calendarDuration === mins
-                              ? isDark
-                                ? tokens.deepAccent
-                                : '#0E5C4D'
-                              : tokens.textSecondary,
-                        }}
-                        className="flex-1 py-1.5 rounded-lg border text-xs font-bold transition-all cursor-pointer"
-                      >
-                        {mins} د
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* MANDATORY USER CONFIRMATION DIALOG */}
-                <div
-                  style={{
-                    backgroundColor: isDark ? 'rgba(127, 209, 174, 0.08)' : 'rgba(127, 209, 174, 0.12)',
-                    borderColor: 'rgba(127, 209, 174, 0.4)',
-                  }}
-                  className="rounded-2xl border p-3.5 space-y-2 text-xs"
-                >
-                  <div className="flex items-center gap-1.5 font-bold" style={{ color: tokens.deepAccent }}>
-                    <Info size={15} />
-                    <span>تأكيد إضافة الحدث إلى تقويم Google</span>
-                  </div>
-                  <ul className="space-y-1 leading-5" style={{ color: tokens.textPrimary }}>
-                    <li>
-                      <strong>الحدث:</strong> قراءة أسطورة «{entry.name}»
-                    </li>
-                    <li>
-                      <strong>الموعد:</strong> {calendarDate} في تمام الساعة {calendarTime} ({calendarDuration} دقيقة)
-                    </li>
-                    <li>
-                      <strong>الحساب المستهدف:</strong> {user ? user.email : 'سيُطلب منك تسجيل الدخول عبر Google'}
-                    </li>
-                    <li>
-                      <strong>التنبيهات:</strong> إشعار تنبيه قبل 15 دقيقة وبريد تذكيري قبل ساعة.
-                    </li>
-                  </ul>
-                  <p style={{ color: tokens.textSecondary }} className="text-[11px] pt-1">
-                    بالضغط على زر التأكيد أدناه، سيتم إنشاء هذا الحدث مباشرة في تقويم Google الخاص بك.
-                  </p>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex items-center justify-end gap-2 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setIsCalendarModalOpen(false)}
-                    disabled={isSchedulingCalendar}
-                    style={{
-                      backgroundColor: tokens.surface,
-                      borderColor: tokens.border,
-                      color: tokens.textSecondary,
-                    }}
-                    className="px-4 py-2.5 rounded-xl border text-xs font-medium hover:opacity-80 transition-colors cursor-pointer min-h-[40px]"
-                  >
-                    إلغاء
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={handleScheduleSession}
-                    disabled={isSchedulingCalendar}
-                    style={{
-                      backgroundColor: tokens.primaryMint,
-                      color: '#0E5C4D',
-                    }}
-                    className="px-5 py-2.5 rounded-xl text-xs font-bold shadow-xs hover:opacity-90 transition-all cursor-pointer min-h-[40px] flex items-center gap-1.5 disabled:opacity-50"
-                  >
-                    {isSchedulingCalendar ? (
-                      <>
-                        <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                        <span>جارٍ الإضافة للتقويم...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Calendar size={15} />
-                        <span>تأكيد الإضافة إلى تقويم Google</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       )}

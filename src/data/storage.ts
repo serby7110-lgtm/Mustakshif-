@@ -4,7 +4,8 @@
  * 
  * Mustakshif Storage & Preferences Service (مستكشف)
  * Local persistence for bookmarks, reading history, dark-teal theme, and onboarding.
- * Equivalent to AsyncStorage/SQLite on mobile platforms with graceful fallback.
+ * Equivalent to AsyncStorage/SQLite on mobile platforms with graceful fallback
+ * and runtime type guards against corrupted or malformed stored values.
  */
 
 const STORAGE_KEYS = {
@@ -40,6 +41,100 @@ export interface LastReadChapter {
   timestamp?: number;
 }
 
+export interface LongFormResumeState {
+  entryId: string;
+  lastChapterIndex: number;
+  lastChapterId: string;
+  lastChapterTitle: string;
+  chapterProgressPercent: number;
+  updatedAt: number;
+}
+
+const DEFAULT_BOOKMARKS = ['al-anqa', 'al-ghul', 'iram-dhat-al-imad'];
+const DEFAULT_HISTORY = ['al-anqa', 'al-ghul', 'al-jinn', 'al-lat'];
+const DEFAULT_FAVORITE_QUOTES = ['ghul_quote_0', 'anqa_quote_1'];
+const DEFAULT_READ_CHAPTERS = ['ghul_0', 'ghul_1', 'irm_0', 'anqa_0'];
+const DEFAULT_MYTH_PROGRESS: Record<string, number> = {
+  ghul: 65,
+  'al-ghul': 65,
+  anqa: 100,
+  'al-anqa': 100,
+  irm: 40,
+  'iram-dhat-al-imad': 40,
+  jinn: 100,
+  'al-jinn': 100,
+  allat: 100,
+  'al-lat': 100,
+  hubal: 100,
+};
+
+function warnStorage(context: string, err: unknown): void {
+  console.warn(`[Storage] ${context}:`, err);
+}
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function parseStringArray(raw: string | null, fallback: string[], label: string): string[] {
+  if (!raw) return [...fallback];
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) {
+      warnStorage(`Expected array for ${label}, falling back to default`, parsed);
+      return [...fallback];
+    }
+    return parsed.filter((item): item is string => typeof item === 'string' && item.length > 0);
+  } catch (err) {
+    warnStorage(`Failed to parse ${label}`, err);
+    return [...fallback];
+  }
+}
+
+function parsePlainObject<T extends Record<string, unknown>>(
+  raw: string | null,
+  fallback: T,
+  label: string
+): T {
+  if (!raw) return { ...fallback };
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (!isPlainObject(parsed)) {
+      warnStorage(`Expected object for ${label}, falling back to default`, parsed);
+      return { ...fallback };
+    }
+    return parsed as T;
+  } catch (err) {
+    warnStorage(`Failed to parse ${label}`, err);
+    return { ...fallback };
+  }
+}
+
+function parseNumberMap(
+  raw: string | null,
+  fallback: Record<string, number>,
+  label: string
+): Record<string, number> {
+  const obj = parsePlainObject<Record<string, unknown>>(raw, fallback, label);
+  const sanitized: Record<string, number> = {};
+  for (const [k, v] of Object.entries(obj)) {
+    if (typeof v === 'number' && Number.isFinite(v)) {
+      sanitized[k] = v;
+    }
+  }
+  return Object.keys(sanitized).length > 0 || raw ? sanitized : { ...fallback };
+}
+
+function parseNonNegInt(raw: string | null, fallback: number, label: string): number {
+  if (!raw) return fallback;
+  const parsed = Number.parseInt(raw, 10);
+  if (!Number.isFinite(parsed) || parsed < 0) {
+    warnStorage(`Invalid non-negative integer for ${label}: "${raw}"`, parsed);
+    return fallback;
+  }
+  return parsed;
+}
+
 // In-memory fallback for environments without window.localStorage (e.g. Node tests, SSR)
 const memoryStore = new Map<string, string>();
 
@@ -49,59 +144,59 @@ const safeStorage = {
       if (typeof window !== 'undefined' && window.localStorage) {
         return window.localStorage.getItem(key);
       }
-      return memoryStore.get(key) || null;
-    } catch {
-      return memoryStore.get(key) || null;
+      return memoryStore.get(key) ?? null;
+    } catch (err) {
+      warnStorage(`getItem(${key}) failed, using memoryStore`, err);
+      return memoryStore.get(key) ?? null;
     }
   },
   setItem: (key: string, value: string): void => {
+    memoryStore.set(key, value);
     try {
       if (typeof window !== 'undefined' && window.localStorage) {
         window.localStorage.setItem(key, value);
       }
-      memoryStore.set(key, value);
-    } catch {
-      memoryStore.set(key, value);
+    } catch (err) {
+      warnStorage(`setItem(${key}) failed, stored in memoryStore only`, err);
     }
   },
 };
 
 export const storage = {
   getBookmarks: (): string[] => {
-    try {
-      const data = safeStorage.getItem(STORAGE_KEYS.BOOKMARKS);
-      return data ? JSON.parse(data) : ['al-anqa', 'al-ghul', 'iram-dhat-al-imad'];
-    } catch {
-      return ['al-anqa', 'al-ghul', 'iram-dhat-al-imad'];
-    }
+    const data = safeStorage.getItem(STORAGE_KEYS.BOOKMARKS);
+    return parseStringArray(data, DEFAULT_BOOKMARKS, STORAGE_KEYS.BOOKMARKS);
   },
 
   setBookmarks: (ids: string[]) => {
     try {
-      safeStorage.setItem(STORAGE_KEYS.BOOKMARKS, JSON.stringify(ids));
-    } catch {}
+      const safeIds = Array.isArray(ids) ? ids.filter((id): id is string => typeof id === 'string') : [];
+      safeStorage.setItem(STORAGE_KEYS.BOOKMARKS, JSON.stringify(safeIds));
+    } catch (err) {
+      warnStorage('setBookmarks failed', err);
+    }
   },
 
   getHistory: (): string[] => {
-    try {
-      const data = safeStorage.getItem(STORAGE_KEYS.HISTORY);
-      return data ? JSON.parse(data) : ['al-anqa', 'al-ghul', 'al-jinn', 'al-lat'];
-    } catch {
-      return ['al-anqa', 'al-ghul', 'al-jinn', 'al-lat'];
-    }
+    const data = safeStorage.getItem(STORAGE_KEYS.HISTORY);
+    return parseStringArray(data, DEFAULT_HISTORY, STORAGE_KEYS.HISTORY);
   },
 
   setHistory: (ids: string[]) => {
     try {
-      safeStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(ids));
-    } catch {}
+      const safeIds = Array.isArray(ids) ? ids.filter((id): id is string => typeof id === 'string') : [];
+      safeStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(safeIds));
+    } catch (err) {
+      warnStorage('setHistory failed', err);
+    }
   },
 
   getThemeMode: (): ThemeMode => {
     try {
       const mode = safeStorage.getItem(STORAGE_KEYS.THEME_MODE);
       return mode === 'dark' || mode === 'darkTeal' ? 'dark' : 'light';
-    } catch {
+    } catch (err) {
+      warnStorage('getThemeMode failed', err);
       return 'light';
     }
   },
@@ -109,13 +204,16 @@ export const storage = {
   setThemeMode: (mode: ThemeMode) => {
     try {
       safeStorage.setItem(STORAGE_KEYS.THEME_MODE, mode);
-    } catch {}
+    } catch (err) {
+      warnStorage('setThemeMode failed', err);
+    }
   },
 
   getAutoDarkMode: (): boolean => {
     try {
       return safeStorage.getItem(STORAGE_KEYS.AUTO_DARK_MODE) === 'true';
-    } catch {
+    } catch (err) {
+      warnStorage('getAutoDarkMode failed', err);
       return false;
     }
   },
@@ -123,14 +221,17 @@ export const storage = {
   setAutoDarkMode: (enabled: boolean) => {
     try {
       safeStorage.setItem(STORAGE_KEYS.AUTO_DARK_MODE, enabled ? 'true' : 'false');
-    } catch {}
+    } catch (err) {
+      warnStorage('setAutoDarkMode failed', err);
+    }
   },
 
   getFontSize: (): FontSize => {
     try {
       const size = safeStorage.getItem(STORAGE_KEYS.FONT_SIZE);
       return size === 'sm' || size === 'lg' ? size : 'md';
-    } catch {
+    } catch (err) {
+      warnStorage('getFontSize failed', err);
       return 'md';
     }
   },
@@ -138,13 +239,16 @@ export const storage = {
   setFontSize: (size: FontSize) => {
     try {
       safeStorage.setItem(STORAGE_KEYS.FONT_SIZE, size);
-    } catch {}
+    } catch (err) {
+      warnStorage('setFontSize failed', err);
+    }
   },
 
   getHasCompletedOnboarding: (): boolean => {
     try {
       return safeStorage.getItem(STORAGE_KEYS.ONBOARDING) === 'true';
-    } catch {
+    } catch (err) {
+      warnStorage('getHasCompletedOnboarding failed', err);
       return false;
     }
   },
@@ -152,14 +256,38 @@ export const storage = {
   setHasCompletedOnboarding: (completed: boolean) => {
     try {
       safeStorage.setItem(STORAGE_KEYS.ONBOARDING, completed ? 'true' : 'false');
-    } catch {}
+    } catch (err) {
+      warnStorage('setHasCompletedOnboarding failed', err);
+    }
   },
 
   getLastReadChapter: (): LastReadChapter | null => {
+    const data = safeStorage.getItem(STORAGE_KEYS.LAST_READ);
+    if (!data) return null;
     try {
-      const data = safeStorage.getItem(STORAGE_KEYS.LAST_READ);
-      return data ? JSON.parse(data) : null;
-    } catch {
+      const parsed: unknown = JSON.parse(data);
+      if (
+        isPlainObject(parsed) &&
+        typeof parsed.mythId === 'string' &&
+        typeof parsed.chapterIndex === 'number' &&
+        Number.isFinite(parsed.chapterIndex)
+      ) {
+        return {
+          mythId: parsed.mythId,
+          mythName: typeof parsed.mythName === 'string' ? parsed.mythName : '',
+          chapterIndex: parsed.chapterIndex,
+          chapterTitle: typeof parsed.chapterTitle === 'string' ? parsed.chapterTitle : '',
+          progressPercent:
+            typeof parsed.progressPercent === 'number' && Number.isFinite(parsed.progressPercent)
+              ? parsed.progressPercent
+              : 0,
+          timestamp: typeof parsed.timestamp === 'number' ? parsed.timestamp : undefined,
+        };
+      }
+      warnStorage('Invalid lastReadChapter shape, ignoring stored value', parsed);
+      return null;
+    } catch (err) {
+      warnStorage('getLastReadChapter parse failed', err);
       return null;
     }
   },
@@ -167,98 +295,76 @@ export const storage = {
   setLastReadChapter: (data: LastReadChapter) => {
     try {
       safeStorage.setItem(STORAGE_KEYS.LAST_READ, JSON.stringify(data));
-    } catch {}
+    } catch (err) {
+      warnStorage('setLastReadChapter failed', err);
+    }
   },
 
   clearLastReadChapter: () => {
     try {
       safeStorage.setItem(STORAGE_KEYS.LAST_READ, '');
-    } catch {}
+    } catch (err) {
+      warnStorage('clearLastReadChapter failed', err);
+    }
   },
 
   getFavoriteHooks: (): string[] => {
-    try {
-      const data = safeStorage.getItem(STORAGE_KEYS.STUDIO_FAVORITES);
-      return data ? JSON.parse(data) : [];
-    } catch {
-      return [];
-    }
+    const data = safeStorage.getItem(STORAGE_KEYS.STUDIO_FAVORITES);
+    return parseStringArray(data, [], STORAGE_KEYS.STUDIO_FAVORITES);
   },
 
   setFavoriteHooks: (ids: string[]) => {
     try {
-      safeStorage.setItem(STORAGE_KEYS.STUDIO_FAVORITES, JSON.stringify(ids));
-    } catch {}
+      const safeIds = Array.isArray(ids) ? ids.filter((id): id is string => typeof id === 'string') : [];
+      safeStorage.setItem(STORAGE_KEYS.STUDIO_FAVORITES, JSON.stringify(safeIds));
+    } catch (err) {
+      warnStorage('setFavoriteHooks failed', err);
+    }
   },
 
   getFavoriteQuotes: (): string[] => {
-    try {
-      const data = safeStorage.getItem(STORAGE_KEYS.FAVORITE_QUOTES);
-      return data ? JSON.parse(data) : ['ghul_quote_0', 'anqa_quote_1'];
-    } catch {
-      return ['ghul_quote_0', 'anqa_quote_1'];
-    }
+    const data = safeStorage.getItem(STORAGE_KEYS.FAVORITE_QUOTES);
+    return parseStringArray(data, DEFAULT_FAVORITE_QUOTES, STORAGE_KEYS.FAVORITE_QUOTES);
   },
 
   setFavoriteQuotes: (ids: string[]) => {
     try {
-      safeStorage.setItem(STORAGE_KEYS.FAVORITE_QUOTES, JSON.stringify(ids));
-    } catch {}
-  },
-
-  getAllMythProgress: (): Record<string, number> => {
-    try {
-      const data = safeStorage.getItem(STORAGE_KEYS.MYTH_PROGRESS);
-      return data
-        ? JSON.parse(data)
-        : {
-            ghul: 65,
-            'al-ghul': 65,
-            anqa: 100,
-            'al-anqa': 100,
-            irm: 40,
-            'iram-dhat-al-imad': 40,
-            jinn: 100,
-            'al-jinn': 100,
-            allat: 100,
-            'al-lat': 100,
-            hubal: 100,
-          };
-    } catch {
-      return {
-        ghul: 65,
-        'al-ghul': 65,
-        anqa: 100,
-        'al-anqa': 100,
-        irm: 40,
-        'iram-dhat-al-imad': 40,
-        jinn: 100,
-        'al-jinn': 100,
-        allat: 100,
-        'al-lat': 100,
-        hubal: 100,
-      };
+      const safeIds = Array.isArray(ids) ? ids.filter((id): id is string => typeof id === 'string') : [];
+      safeStorage.setItem(STORAGE_KEYS.FAVORITE_QUOTES, JSON.stringify(safeIds));
+    } catch (err) {
+      warnStorage('setFavoriteQuotes failed', err);
     }
   },
 
+  getAllMythProgress: (): Record<string, number> => {
+    const data = safeStorage.getItem(STORAGE_KEYS.MYTH_PROGRESS);
+    return parseNumberMap(data, DEFAULT_MYTH_PROGRESS, STORAGE_KEYS.MYTH_PROGRESS);
+  },
+
   setMythProgress: (mythId: string, progress: number) => {
+    if (!mythId) return;
     try {
+      const safeProgress = Number.isFinite(progress) ? progress : 0;
       const current = storage.getAllMythProgress();
-      current[mythId] = Math.min(100, Math.max(0, Math.round(progress)));
+      const clamped = Math.min(100, Math.max(0, Math.round(safeProgress)));
+      current[mythId] = clamped;
       if (mythId.startsWith('al-')) {
-        current[mythId.slice(3)] = current[mythId];
+        current[mythId.slice(3)] = clamped;
       } else {
-        current[`al-${mythId}`] = current[mythId];
+        current[`al-${mythId}`] = clamped;
       }
       safeStorage.setItem(STORAGE_KEYS.MYTH_PROGRESS, JSON.stringify(current));
-    } catch {}
+    } catch (err) {
+      warnStorage('setMythProgress failed', err);
+    }
   },
 
   getLibraryViewMode: (): 'grid' | 'list' => {
     try {
       const mode = safeStorage.getItem(STORAGE_KEYS.LIBRARY_VIEW_MODE);
       return mode === 'list' ? 'list' : 'grid';
-    } catch {
+    } catch (err) {
+      warnStorage('getLibraryViewMode failed', err);
       return 'grid';
     }
   },
@@ -266,65 +372,64 @@ export const storage = {
   setLibraryViewMode: (mode: 'grid' | 'list') => {
     try {
       safeStorage.setItem(STORAGE_KEYS.LIBRARY_VIEW_MODE, mode);
-    } catch {}
+    } catch (err) {
+      warnStorage('setLibraryViewMode failed', err);
+    }
   },
 
   getMapSheetsCount: (): number => {
-    try {
-      const val = safeStorage.getItem(STORAGE_KEYS.MAP_SHEETS_COUNT);
-      return val ? parseInt(val, 10) : 10;
-    } catch {
-      return 10;
-    }
+    const val = safeStorage.getItem(STORAGE_KEYS.MAP_SHEETS_COUNT);
+    return parseNonNegInt(val, 10, STORAGE_KEYS.MAP_SHEETS_COUNT);
   },
 
   incrementMapSheetsCount: () => {
     try {
       const current = storage.getMapSheetsCount();
       safeStorage.setItem(STORAGE_KEYS.MAP_SHEETS_COUNT, String(current + 1));
-    } catch {}
+    } catch (err) {
+      warnStorage('incrementMapSheetsCount failed', err);
+    }
   },
 
   getDarkReadingMinutes: (): number => {
-    try {
-      const val = safeStorage.getItem(STORAGE_KEYS.DARK_READING_MINUTES);
-      return val ? parseInt(val, 10) : 32;
-    } catch {
-      return 32;
-    }
+    const val = safeStorage.getItem(STORAGE_KEYS.DARK_READING_MINUTES);
+    return parseNonNegInt(val, 32, STORAGE_KEYS.DARK_READING_MINUTES);
   },
 
   addDarkReadingMinutes: (minutes: number = 1) => {
     try {
+      const delta = Number.isFinite(minutes) && minutes > 0 ? Math.round(minutes) : 0;
       const current = storage.getDarkReadingMinutes();
-      safeStorage.setItem(STORAGE_KEYS.DARK_READING_MINUTES, String(current + minutes));
-    } catch {}
-  },
-
-  getReadChapters: (): string[] => {
-    try {
-      const data = safeStorage.getItem(STORAGE_KEYS.READ_CHAPTERS);
-      return data ? JSON.parse(data) : ['ghul_0', 'ghul_1', 'irm_0', 'anqa_0'];
-    } catch {
-      return ['ghul_0', 'ghul_1', 'irm_0', 'anqa_0'];
+      safeStorage.setItem(STORAGE_KEYS.DARK_READING_MINUTES, String(current + delta));
+    } catch (err) {
+      warnStorage('addDarkReadingMinutes failed', err);
     }
   },
 
+  getReadChapters: (): string[] => {
+    const data = safeStorage.getItem(STORAGE_KEYS.READ_CHAPTERS);
+    return parseStringArray(data, DEFAULT_READ_CHAPTERS, STORAGE_KEYS.READ_CHAPTERS);
+  },
+
   markChapterRead: (chapterKey: string) => {
+    if (!chapterKey) return;
     try {
       const current = storage.getReadChapters();
       if (!current.includes(chapterKey)) {
         current.push(chapterKey);
         safeStorage.setItem(STORAGE_KEYS.READ_CHAPTERS, JSON.stringify(current));
       }
-    } catch {}
+    } catch (err) {
+      warnStorage('markChapterRead failed', err);
+    }
   },
 
   getCivSegment: (): 'list' | 'timeline' => {
     try {
       const val = safeStorage.getItem(STORAGE_KEYS.CIV_SEGMENT);
       return val === 'timeline' ? 'timeline' : 'list';
-    } catch {
+    } catch (err) {
+      warnStorage('getCivSegment failed', err);
       return 'list';
     }
   },
@@ -332,14 +437,17 @@ export const storage = {
   setCivSegment: (segment: 'list' | 'timeline') => {
     try {
       safeStorage.setItem(STORAGE_KEYS.CIV_SEGMENT, segment);
-    } catch {}
+    } catch (err) {
+      warnStorage('setCivSegment failed', err);
+    }
   },
 
   getDualNarrativeView: (): 'tradition' | 'archaeology' => {
     try {
       const val = safeStorage.getItem(STORAGE_KEYS.DUAL_NARRATIVE_VIEW);
       return val === 'archaeology' ? 'archaeology' : 'tradition';
-    } catch {
+    } catch (err) {
+      warnStorage('getDualNarrativeView failed', err);
       return 'tradition';
     }
   },
@@ -347,14 +455,17 @@ export const storage = {
   setDualNarrativeView: (view: 'tradition' | 'archaeology') => {
     try {
       safeStorage.setItem(STORAGE_KEYS.DUAL_NARRATIVE_VIEW, view);
-    } catch {}
+    } catch (err) {
+      warnStorage('setDualNarrativeView failed', err);
+    }
   },
 
   getMythDualNarrativeView: (): 'tradition' | 'analysis' => {
     try {
       const val = safeStorage.getItem(STORAGE_KEYS.MYTH_DUAL_NARRATIVE_VIEW);
       return val === 'analysis' ? 'analysis' : 'tradition';
-    } catch {
+    } catch (err) {
+      warnStorage('getMythDualNarrativeView failed', err);
       return 'tradition';
     }
   },
@@ -362,16 +473,14 @@ export const storage = {
   setMythDualNarrativeView: (view: 'tradition' | 'analysis') => {
     try {
       safeStorage.setItem(STORAGE_KEYS.MYTH_DUAL_NARRATIVE_VIEW, view);
-    } catch {}
+    } catch (err) {
+      warnStorage('setMythDualNarrativeView failed', err);
+    }
   },
 
   getSentMessagesCount: (): number => {
-    try {
-      const val = safeStorage.getItem(STORAGE_KEYS.SENT_MESSAGES_COUNT);
-      return val ? parseInt(val, 10) || 0 : 0;
-    } catch {
-      return 0;
-    }
+    const val = safeStorage.getItem(STORAGE_KEYS.SENT_MESSAGES_COUNT);
+    return parseNonNegInt(val, 0, STORAGE_KEYS.SENT_MESSAGES_COUNT);
   },
 
   incrementSentMessagesCount: (): number => {
@@ -380,38 +489,105 @@ export const storage = {
       const next = current + 1;
       safeStorage.setItem(STORAGE_KEYS.SENT_MESSAGES_COUNT, String(next));
       return next;
-    } catch {
+    } catch (err) {
+      warnStorage('incrementSentMessagesCount failed', err);
       return 1;
     }
   },
 
   setSentMessagesCount: (count: number): void => {
     try {
-      safeStorage.setItem(STORAGE_KEYS.SENT_MESSAGES_COUNT, String(Math.max(0, count)));
-    } catch {}
+      const safeCount = Number.isFinite(count) ? Math.max(0, Math.round(count)) : 0;
+      safeStorage.setItem(STORAGE_KEYS.SENT_MESSAGES_COUNT, String(safeCount));
+    } catch (err) {
+      warnStorage('setSentMessagesCount failed', err);
+    }
   },
 
   hasPremiumMonthly: (): boolean => {
     try {
-      return safeStorage.getItem('mustakshif_premium_monthly_v1') === 'true';
-    } catch {
+      const active = safeStorage.getItem('mustakshif_premium_monthly_v1') === 'true';
+      if (!active) return false;
+      const verifiedAtRaw = safeStorage.getItem('mustakshif_premium_verified_at_v1');
+      if (!verifiedAtRaw) return true;
+      const verifiedAt = Number.parseInt(verifiedAtRaw, 10);
+      const OFFLINE_GRACE_MS = 7 * 24 * 60 * 60 * 1000;
+      return Number.isFinite(verifiedAt) && Date.now() - verifiedAt <= OFFLINE_GRACE_MS;
+    } catch (err) {
+      warnStorage('hasPremiumMonthly failed', err);
       return false;
     }
   },
 
-  setPremiumMonthly: (active: boolean): void => {
+  setPremiumMonthly: (active: boolean, meta?: { renewalDate?: string | null; price?: string; period?: string }): void => {
     try {
       safeStorage.setItem('mustakshif_premium_monthly_v1', active ? 'true' : 'false');
-    } catch {}
+      if (active) {
+        safeStorage.setItem('mustakshif_premium_verified_at_v1', String(Date.now()));
+        const nextMonth = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+        const defaultRenewal = nextMonth.toLocaleDateString('ar-SA', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+        });
+        safeStorage.setItem('mustakshif_premium_renewal_v1', meta?.renewalDate || defaultRenewal);
+      } else {
+        safeStorage.setItem('mustakshif_premium_verified_at_v1', '');
+        safeStorage.setItem('mustakshif_premium_renewal_v1', '');
+      }
+      if (meta?.price) safeStorage.setItem('mustakshif_premium_price_v1', meta.price);
+      if (meta?.period) safeStorage.setItem('mustakshif_premium_period_v1', meta.period);
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('mustakshif:entitlement-changed', { detail: { active } }));
+      }
+    } catch (err) {
+      warnStorage('setPremiumMonthly failed', err);
+    }
+  },
+
+  getSubscriptionDetails: (): {
+    active: boolean;
+    renewalDate: string | null;
+    price: string;
+    period: string;
+    productId: 'premium_monthly';
+    isBillingAvailable: boolean;
+  } => {
+    const active = storage.hasPremiumMonthly();
+    const renewalRaw = safeStorage.getItem('mustakshif_premium_renewal_v1');
+    const price = safeStorage.getItem('mustakshif_premium_price_v1') || '١٤٫٩٩ ر.س';
+    const period = safeStorage.getItem('mustakshif_premium_period_v1') || 'شهرياً';
+
+    let isBillingAvailable = true;
+    try {
+      if (typeof window !== 'undefined') {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('billing') === 'unavailable' || (typeof navigator !== 'undefined' && navigator.onLine === false)) {
+          isBillingAvailable = false;
+        }
+        const bridge = (window as unknown as { MustakshifBilling?: { isAvailable?: () => boolean } }).MustakshifBilling;
+        if (bridge && typeof bridge.isAvailable === 'function') {
+          isBillingAvailable = Boolean(bridge.isAvailable());
+        }
+      }
+    } catch (err) {
+      warnStorage('getSubscriptionDetails billing check failed', err);
+      isBillingAvailable = true;
+    }
+
+    return {
+      active,
+      renewalDate: active && renewalRaw ? renewalRaw : null,
+      price,
+      period,
+      productId: 'premium_monthly',
+      isBillingAvailable,
+    };
   },
 
   getLongFormChapterProgressMap: (): Record<string, number> => {
-    try {
-      const raw = safeStorage.getItem('mustakshif_long_form_chapter_progress_v1');
-      return raw ? JSON.parse(raw) : {};
-    } catch {
-      return {};
-    }
+    const raw = safeStorage.getItem('mustakshif_long_form_chapter_progress_v1');
+    return parseNumberMap(raw, {}, 'mustakshif_long_form_chapter_progress_v1');
   },
 
   setLongFormChapterProgress: (
@@ -421,46 +597,63 @@ export const storage = {
     chapterTitle: string,
     progressPercent: number
   ): void => {
+    if (!entryId || !chapterId) return;
     try {
-      const clamped = Math.min(100, Math.max(0, Math.round(progressPercent)));
+      const safePercent = Number.isFinite(progressPercent) ? progressPercent : 0;
+      const safeIndex = Number.isFinite(chapterIndex) && chapterIndex >= 0 ? Math.round(chapterIndex) : 0;
+      const clamped = Math.min(100, Math.max(0, Math.round(safePercent)));
       const map = storage.getLongFormChapterProgressMap();
       const key = `${entryId}:${chapterId}`;
       map[key] = Math.max(map[key] || 0, clamped);
       safeStorage.setItem('mustakshif_long_form_chapter_progress_v1', JSON.stringify(map));
 
       const resumeRaw = safeStorage.getItem('mustakshif_long_form_resume_v1');
-      const resumeMap = resumeRaw ? JSON.parse(resumeRaw) : {};
+      const resumeMap = parsePlainObject<Record<string, unknown>>(
+        resumeRaw,
+        {},
+        'mustakshif_long_form_resume_v1'
+      );
       resumeMap[entryId] = {
         entryId,
-        lastChapterIndex: chapterIndex,
+        lastChapterIndex: safeIndex,
         lastChapterId: chapterId,
-        lastChapterTitle: chapterTitle,
+        lastChapterTitle: chapterTitle || '',
         chapterProgressPercent: clamped,
         updatedAt: Date.now(),
       };
       safeStorage.setItem('mustakshif_long_form_resume_v1', JSON.stringify(resumeMap));
-    } catch {}
-  },
-
-  getLongFormResumeState: (
-    entryId: string
-  ): {
-    entryId: string;
-    lastChapterIndex: number;
-    lastChapterId: string;
-    lastChapterTitle: string;
-    chapterProgressPercent: number;
-    updatedAt: number;
-  } | null => {
-    try {
-      const raw = safeStorage.getItem('mustakshif_long_form_resume_v1');
-      if (!raw) return null;
-      const map = JSON.parse(raw);
-      return map[entryId] || null;
-    } catch {
-      return null;
+    } catch (err) {
+      warnStorage('setLongFormChapterProgress failed', err);
     }
   },
+
+  getLongFormResumeState: (entryId: string): LongFormResumeState | null => {
+    if (!entryId) return null;
+    const raw = safeStorage.getItem('mustakshif_long_form_resume_v1');
+    if (!raw) return null;
+    const map = parsePlainObject<Record<string, unknown>>(raw, {}, 'mustakshif_long_form_resume_v1');
+    const candidate = map[entryId];
+    if (
+      isPlainObject(candidate) &&
+      typeof candidate.lastChapterIndex === 'number' &&
+      Number.isFinite(candidate.lastChapterIndex) &&
+      typeof candidate.lastChapterId === 'string'
+    ) {
+      return {
+        entryId: typeof candidate.entryId === 'string' ? candidate.entryId : entryId,
+        lastChapterIndex: candidate.lastChapterIndex,
+        lastChapterId: candidate.lastChapterId,
+        lastChapterTitle: typeof candidate.lastChapterTitle === 'string' ? candidate.lastChapterTitle : '',
+        chapterProgressPercent:
+          typeof candidate.chapterProgressPercent === 'number' && Number.isFinite(candidate.chapterProgressPercent)
+            ? candidate.chapterProgressPercent
+            : 0,
+        updatedAt:
+          typeof candidate.updatedAt === 'number' && Number.isFinite(candidate.updatedAt)
+            ? candidate.updatedAt
+            : 0,
+      };
+    }
+    return null;
+  },
 };
-
-

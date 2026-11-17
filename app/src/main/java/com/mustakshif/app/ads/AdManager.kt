@@ -13,6 +13,7 @@ import com.google.android.gms.ads.appopen.AppOpenAd
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.mustakshif.app.MustakshifApplication
+import com.mustakshif.app.data.EntitlementManager
 import com.mustakshif.app.firebase.AnalyticsManager
 import com.mustakshif.app.firebase.CrashlyticsHelper
 import com.mustakshif.app.firebase.PlayServicesGuard
@@ -23,8 +24,8 @@ import kotlinx.coroutines.flow.asStateFlow
 /**
  * Centralized, API-21-safe, crash-proof AdMob coordinator for Mustakshif.
  * Strictly manages THREE formats: Banner (via BannerAdSlot), Interstitial, and App Open.
- * Driven by Remote Config, gated by UMP + PlayServicesGuard, and instrumented with
- * Firebase Analytics (ad_impression / ad_dismissed) & Crashlytics breadcrumbs.
+ * Driven by Remote Config & EntitlementManager (zero ads when premium_monthly is active),
+ * gated by UMP + PlayServicesGuard, and instrumented with Firebase Analytics & Crashlytics.
  */
 object AdManager {
 
@@ -51,6 +52,10 @@ object AdManager {
      * Called only after UMP reports canRequestAds() == true.
      */
     fun onConsentGranted(context: Context) {
+        if (EntitlementManager.hasPremiumMonthly.value) {
+            clearLoadedAds()
+            return
+        }
         if (!PlayServicesGuard.isGooglePlayServicesAvailable(context)) return
         if (!AdConfig.adsEnabled || !ConsentManager.canRequestAds(context)) return
         val appContext = context.applicationContext
@@ -60,15 +65,17 @@ object AdManager {
 
     /**
      * Banner is strictly allowed on Home, Library, and Studio ONLY,
-     * hidden inside Article reading screen and when consent/RemoteConfig disables it.
+     * hidden inside Article/Subscription screens and whenever premium_monthly entitlement is active.
      */
     fun canShowBanner(screen: AppScreen, canRequestAds: Boolean): Boolean {
+        if (EntitlementManager.hasPremiumMonthly.value) return false
         return AdConfig.bannerEnabled &&
             canRequestAds &&
             screen in AdConfig.BANNER_ALLOWED_SCREENS
     }
 
     fun preloadInterstitial(context: Context) {
+        if (EntitlementManager.hasPremiumMonthly.value) return
         if (!PlayServicesGuard.isGooglePlayServicesAvailable(context)) return
         if (!AdConfig.interstitialEnabled || isLoadingInterstitial || interstitialAd != null) return
         if (!ConsentManager.canRequestAds(context)) return
@@ -109,11 +116,7 @@ object AdManager {
 
     /**
      * Shows interstitial ONLY after an article reaches 100% reading progress OR every N completed articles.
-     * Rules enforced:
-     * - Cap 1 per 90s (Remote Config: interstitial_cap_seconds)
-     * - Never on first-ever launch, mid-reading (<100%), or back-navigation loops
-     * - Never within 60 seconds of an App Open ad impression
-     * - Skips cleanly if not preloaded yet, and preloads the next one
+     * Skipped completely while premium_monthly entitlement is active.
      */
     fun onArticleReadingProgress(
         activity: Activity,
@@ -121,6 +124,7 @@ object AdManager {
         isBackNavigation: Boolean = false,
         articleId: String? = null
     ) {
+        if (EntitlementManager.hasPremiumMonthly.value) return
         if (!PlayServicesGuard.isGooglePlayServicesAvailable(activity)) return
         if (!AdConfig.interstitialEnabled) return
         if (isBackNavigation || progressPercent < 100 || isShowingInterstitial || isShowingAppOpenAd) return
@@ -188,6 +192,7 @@ object AdManager {
     }
 
     fun preloadAppOpen(context: Context) {
+        if (EntitlementManager.hasPremiumMonthly.value) return
         if (!PlayServicesGuard.isGooglePlayServicesAvailable(context)) return
         if (!AdConfig.appOpenEnabled || isLoadingAppOpen || appOpenAd != null) return
         if (!ConsentManager.canRequestAds(context)) return
@@ -228,17 +233,14 @@ object AdManager {
 
     /**
      * App Open Ad entry point via ProcessLifecycleOwner & cold-start consent completion.
-     * Rules enforced:
-     * - Fires ONLY on cold start after first-ever launch OR return from background > 30 seconds
-     * - Never fires on first-ever launch or every regular activity resume
-     * - Shows branded loading screen with logo while preparing, guarded by a strict 5-second timeout
-     * - Skips cleanly if UMP consent is not ready or Play Services is unavailable
+     * Skipped completely while premium_monthly entitlement is active.
      */
     fun onAppForegrounded(
         activity: Activity,
         isColdStart: Boolean,
         backgroundDurationMs: Long = 0L
     ) {
+        if (EntitlementManager.hasPremiumMonthly.value) return
         if (!PlayServicesGuard.isGooglePlayServicesAvailable(activity)) return
         if (!AdConfig.appOpenEnabled) return
         if (activity.isFinishing || activity.isDestroyed) return

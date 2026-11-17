@@ -20,7 +20,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'Al-Ghul',
     category: 'creatures',
     typeLabel: 'كائن أسطوري مفترس',
-    heroImage: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=1200&q=80',
+    heroImage: '/images/ghul.jpg',
     summary: 'كائن صحراوي مفترس يتشكل للمسافرين ليضلهم عن الطريق ويفترسهم في مجاهل البادية.',
     body: [
       'الغول في لسان العرب وتراث البادية هو ضرب من الشياطين والمردة التي كانت تعتقد العرب أنها تتراءى للسابلة في الفلوات والمفاوز الموحشة، فتتغول لهم، أي تتلون وتتشكل في صور شتى لتوقع بهم وتهلكهم في مجاهل الصحراء.',
@@ -55,7 +55,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'Al-Anqa (Phoenix)',
     category: 'creatures',
     typeLabel: 'طائر ميثولوجي خالد',
-    heroImage: '/src/assets/images/anqa_oasis_banner_1793094389649.jpg',
+    heroImage: '/images/anqa-oasis-banner.jpg',
     summary: 'طائر هائل عظيم العنق يُضرب به المثل في المستحيل، ويُروى أنه يتجدد بعد احتراقه.',
     body: [
       'العنقاء أو "عنقاء مُغْرِب" هي واحدة من أشهر الكائنات الأسطورية في المتخيل العربي والإنساني، وسُميت بالعنقاء لطول عنقها وبياض في طوقها، أو لجمال ألوان ريشها الذي يجمع محاسن الطير، بينما أضيف إليها "مُغْرِب" لأنها تغرب وتبتعد في أقاصي المعمورة فلا يدركها إنسان.',
@@ -90,7 +90,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'Iram of the Pillars',
     category: 'places',
     typeLabel: 'مدينة أسطورية مفقودة',
-    heroImage: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=1200&q=80',
+    heroImage: '/images/irm.jpg',
     summary: 'عاصمة قوم عاد الأسطورية ذات الأعمدة الشامخة والقصور الذهبية المدفونة تحت رمال الأحقاف.',
     body: [
       'إرم ذات العماد هي المدينة المفقودة التي خلدها القرآن الكريم بوصفه البديع: "التي لم يُخلق مثلها في البلاد"، وكانت حاضرة قوم عاد الأولى الذين سكنوا الأحقاف بين حضرموت وعمان، فبلغوا في العمارة والقوة شأواً عظيماً لم تبلغه أمة قبلهم.',
@@ -125,7 +125,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'Al-Lat',
     category: 'gods',
     typeLabel: 'معبودة الخصب والسيادة',
-    heroImage: 'https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&w=1200&q=80',
+    heroImage: '/images/allat.jpg',
     summary: 'إحدى كبرى معبودات العرب في الطائف والحجاز، ارتبطت بصخرة بيضاء مربعة وسدنة ثقيف.',
     body: [
       'اللات هي إحدى أعظم المعبودات الأنثوية التي قدستها قبائل الحجاز وشمال الجزيرة في العصر الجاهلي، وكانت معبودة ثقيف الأولى في الطائف، وشاركتها قريش والقبائل المجاورة تقديسها وتعظيم حماها كأحد أركان الثالوث الميثولوجي الشهير مع العزى ومناة.',
@@ -158,7 +158,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'Al-Jinn',
     category: 'creatures',
     typeLabel: 'كائنات نارية خفية',
-    heroImage: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
+    heroImage: '/images/jinn.jpg',
     summary: 'عوالم خفية نارية تسكن الفلوات والأودية والخرائب وتتلبس الأشكال وتخالط حياة الإنس.',
     body: [
       'الجن في المعتقد والمخيال العربي القديم هم خلق خفي من نار السموم سبقوا الإنسان في استيطان الأرض، ولهم مجتمعات وقبائل وأنساب وملوك وأديان شتى، ويملكون قدرات خارقة على التشكل في صور الحيوانات والرياح والظلال وسكنى الأودية الموحشة والآبار المهجورة.',
@@ -195,7 +195,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'Al-Uzza',
     category: 'gods',
     typeLabel: 'ربة القوة والشرف',
-    heroImage: 'https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/aluzza.jpg',
     summary: 'أعظم أصنام قريش ومضر بوادي نخلة، وكانت تُقدس كرمز للعزة والغلبة.',
     body: ['كانت العزى أعظم آلهة قريش وبني كنانة، وكان حماها بنخلة الشامية يشتمل على ثلاث شجرات سَمُر عظام تُقدم لها النذور والدماء.'],
     sources: [{ title: 'كتاب الأصنام', author: 'هشام بن الكلبي', year: '٢٠٤ هـ' }],
@@ -210,7 +210,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'Manat',
     category: 'gods',
     typeLabel: 'ربة القدر والمنايا',
-    heroImage: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/manat.jpg',
     summary: 'أقدم معبودات العرب البحرية على ساحل المشلل بين مكة ويثرب.',
     body: ['من أقدم أصنام العرب، عبدها الأوس والخزرج وغسان، وكانت تُستحلف في مصائر الموت والأقدار المحتومة.'],
     sources: [{ title: 'كتاب الأصنام', author: 'هشام بن الكلبي', year: '٢٠٤ هـ' }],
@@ -225,7 +225,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'Hubal',
     category: 'gods',
     typeLabel: 'كبير أصنام الكعبة',
-    heroImage: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/hubal.jpg',
     summary: 'صنم من عقيق أحمر على هيئة إنسان بيده يد ذهبية منصوب في جوف الكعبة.',
     body: ['جلبه عمرو بن لحي الخزاعي من بلاد الشام، وكان تُضرب عنده القداح السبعة لاستطلاع الغيب والقرارات المصيرية.'],
     sources: [{ title: 'تاريخ الرسل والملوك', author: 'محمد بن جرير الطبري', year: '٣١٠ هـ' }],
@@ -240,7 +240,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'Wadd',
     category: 'gods',
     typeLabel: 'رب المحبة والوداد',
-    heroImage: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/wadd.jpg',
     summary: 'صنم قبيلة كلب ومملكة معين بدومة الجندل، صُوِّر كرجل جسيم عليه حلتان وسيف وقوس.',
     body: ['عُبد في اليمن ودومة الجندل وكان يمثل القمر أو المحبة والخصب الإنساني وحماية القبائل.'],
     sources: [{ title: 'كتاب الأصنام', author: 'هشام بن الكلبي', year: '٢٠٤ هـ' }],
@@ -255,7 +255,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: "Suwa'",
     category: 'gods',
     typeLabel: 'معبود قبائل هذيل',
-    heroImage: 'https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/suwa.jpg',
     summary: 'صنم عبدته هذيل في رهاط ببطن نخلة، وصُوّر على هيئة امرأة.',
     body: ['كانت هذيل تقصده بالنذور والذبائح عند موضع رهاط في الحجاز.'],
     sources: [{ title: 'تاريخ اليعقوبي', author: 'اليعقوبي', year: '٢٩٢ هـ' }],
@@ -270,7 +270,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'Yaghuth',
     category: 'gods',
     typeLabel: 'رب النجدة والغوث',
-    heroImage: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/yaghuth.jpg',
     summary: 'صنم على هيئة أسد نحاسي عبدته قبائل مذحج وجرش باليمن.',
     body: ['كانت قبائل اليمن تتسابق على سدانته وحمله في المعارك استمطاراً للنصر والإغاثة.'],
     sources: [{ title: 'المفصل في تاريخ العرب', author: 'جواد علي', year: '١٩٩٣ م' }],
@@ -285,7 +285,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: "Ya'uq",
     category: 'gods',
     typeLabel: 'معبود قبيلة خيوان',
-    heroImage: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/yauq.jpg',
     summary: 'صنم على صورة فرس عبدته قبائل همدان وخيوان في أرض اليمن.',
     body: ['رمز للفروسية والسرعة في المعتقدات اليمنية القديمة، وكان له بيت مخصص يُقصد بالأتاوى.'],
     sources: [{ title: 'الإكليل', author: 'الهمداني', year: '٣٣٤ هـ' }],
@@ -300,7 +300,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'Nasr',
     category: 'gods',
     typeLabel: 'معبود حمير الأكبر',
-    heroImage: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/nasr.jpg',
     summary: 'صنم حميري على صورة نسر باسط جناحيه ببلخع في ديار حمير.',
     body: ['مثّل القوة السماوية والرؤية النافذة في جنوب الجزيرة العربية وحظي بمهابة ملوك التبابعة.'],
     sources: [{ title: 'كتاب الأصنام', author: 'هشام بن الكلبي', year: '٢٠٤ هـ' }],
@@ -315,7 +315,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'Dhu al-Khalasa',
     category: 'gods',
     typeLabel: 'الكعبة اليمانية',
-    heroImage: 'https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/hubal.jpg',
     summary: 'معبد من مروة بيضاء منقوشة تُوجت بإكليل من ذهب بتبارك بين مكة واليمن.',
     body: ['بنت له قبائل خثعم وبجيلة ودوس بيتاً عظيماً نافسوا به كعبة مكة وسُمي الكعبة اليمانية.'],
     sources: [{ title: 'لسان العرب', author: 'ابن منظور', year: '٧١١ هـ' }],
@@ -332,7 +332,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: "Al-Si'la",
     category: 'creatures',
     typeLabel: 'ساحرة الغياض والبراري',
-    heroImage: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/saqlaba.jpg',
     summary: 'أنثى متوحشة من أخبث الغيلان تتشكل في هيئة امرأة حسناء تغوي العابرين.',
     body: ['تصفها الروايات بأنها أشد خبثاً من الغول، ترقص تحت ضوء القمر في الغابات وتجر فرائسها إلى الكهوف.'],
     sources: [{ title: 'كتاب الحيوان', author: 'الجاحظ', year: '٢٥٥ هـ' }],
@@ -347,7 +347,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'Al-Rukh (Roc)',
     category: 'creatures',
     typeLabel: 'طائر كوني عملاق',
-    heroImage: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/anqa.jpg',
     summary: 'طائر أسطوري خرافي عظيم الحجم قادر على حمل الفيلة وبيضته كقبة مسجد.',
     body: ['اشتهر في مغامرات السندباد البحري وحكايات ألف ليلة وليلة كطائر يعيش في جزر المحيط المجهولة.'],
     sources: [{ title: 'ألف ليلة وليلة', author: 'تراث شعبي قديم', year: 'العصر العباسي' }],
@@ -362,7 +362,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'Al-Shiqq',
     category: 'creatures',
     typeLabel: 'نصف إنسان شيطاني',
-    heroImage: 'https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/shiqqsatih.jpg',
     summary: 'كائن شطري له نصف رأس ونصف جسد ويد واحدة ورجل واحدة يثب بها كالريح.',
     body: ['كائن خرافي زعم العرب أنه يعترض السائر منفرداً ويضربه بعصا مسمومة فيرديه قتيلاً.'],
     sources: [{ title: 'عجائب المخلوقات', author: 'القزويني', year: '٦٨٢ هـ' }],
@@ -377,7 +377,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'Al-Marid',
     category: 'creatures',
     typeLabel: 'عملاق الجان المتمرد',
-    heroImage: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/marid.jpg',
     summary: 'صنف جبار عظيم البطش من الجان يتميز بالتمرد والقدرة على التحكم بالعواصف.',
     body: ['ورد في التراث كأعتى قوى الجان حجماً وقوة، وكثيراً ما حُبس في القماقم النحاسية بخاتم سليمان.'],
     sources: [{ title: 'آكام المرجان', author: 'الشبلي', year: '٧٦٩ هـ' }],
@@ -392,7 +392,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'Al-Ifrit',
     category: 'creatures',
     typeLabel: 'الداهية الماكر من الجان',
-    heroImage: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/ifrit.jpg',
     summary: 'أكثر الجان مكراً ودهاءً، متمرس في السحر وحراسة الكنوز المدفونة.',
     body: ['يجمع بين السرعة الخارقة والمكر الشديد، وله قرنان وعينان تشتعلان كالجمر في ظلمات الليل.'],
     sources: [{ title: 'مروج الذهب', author: 'المسعودي', year: '٣٤٦ هـ' }],
@@ -407,7 +407,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'Qutrub',
     category: 'creatures',
     typeLabel: 'مستذئب القبور العربي',
-    heroImage: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/qutrub.jpg',
     summary: 'شيطان لئيم يتربص بالمقابر ليلاً وينبش الجثث ويفترس العابرين المستوحشين.',
     body: ['كائن مريع شابه مستذئب التراث الغربي، اعتقد العرب أنه يتحول بين هيئة الكلب البري والإنسان القبيح.'],
     sources: [{ title: 'حياة الحيوان الكبرى', author: 'الدميري', year: '٨٠٨ هـ' }],
@@ -422,7 +422,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'Al-Hama',
     category: 'creatures',
     typeLabel: 'طائر الثأر الجنائزي',
-    heroImage: 'https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/hama.jpg',
     summary: 'طائر شبحي يخرج من رأس المقتول ظلماً ويظل ينادي فوق قبره: اسقوني دماً.',
     body: ['معتقد جاهلي راسخ يربط بين روح القتيل وطائر خرافي كالبومة لا يهدأ حتى يؤخذ بثأره.'],
     sources: [{ title: 'بلوغ الأرب في أحوال العرب', author: 'الألوسي', year: '١٣٤٢ هـ' }],
@@ -437,7 +437,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'Al-Sada',
     category: 'creatures',
     typeLabel: 'شبح القبر الطائر',
-    heroImage: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/hama.jpg',
     summary: 'قرين الميت في المعتقد الجاهلي الذي يرفرف حول الجثمان ويصيح في الليلة الظلماء.',
     body: ['رديف الهامة في أمثال العرب؛ وقيل إن الصدى عظام الميت إذا بليت طارت في صورة شبح ناعق.'],
     sources: [{ title: 'كتاب الحيوان', author: 'الجاحظ', year: '٢٥٥ هـ' }],
@@ -452,7 +452,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'Dabbat al-Ard',
     category: 'creatures',
     typeLabel: 'الكائن الأخروي العجيب',
-    heroImage: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/jinn.jpg',
     summary: 'كائن ضخم ذو خلقة مركبة يحمل عصا موسى وخاتم سليمان يخرج آخر الزمان.',
     body: ['كائن هائل تصفه المرويات الشعبية بملامح حيوانات شتى، يكلم الناس ويميز المؤمن من غيره بحكمته.'],
     sources: [{ title: 'مروج الذهب', author: 'المسعودي', year: '٣٤٦ هـ' }],
@@ -467,7 +467,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'Faluk Snake',
     category: 'creatures',
     typeLabel: 'الحية الكونية الأسطورية',
-    heroImage: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/harut.jpg',
     summary: 'حية كونية عظيمة ترقد في قاع البحار السفلية تحت الأرضين السبع بحسب الأساطير القديمة.',
     body: ['كائن كوزمولوجي ورد في مرويات قصص الأنبياء والتراث الشعبي، يخافه الوجود لقدرته على ابتلاع الجبال.'],
     sources: [{ title: 'بدائع الزهور في وقائع الدهور', author: 'ابن إياس', year: '٩٣٠ هـ' }],
@@ -480,11 +480,11 @@ export const MYTH_ENTRIES: MythEntry[] = [
   // --- Places (9 stubs) ---
   {
     id: 'waq-waq',
-    name: 'جزر الوقواق',
+    name: 'جزر الواق الواق',
     latinName: 'Waq Waq Islands',
     category: 'places',
     typeLabel: 'أرخبيل العجائب الشرقي',
-    heroImage: 'https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/sinbad.jpg',
     summary: 'جزر غامضة شجرها يثمر نساءً جميلات يصحن إذا سقطن: واق واق!',
     body: ['حاضرة الأساطير البحرية في التراث العربي، ذُكرت في رحلات ابن بطوطة ومخطوطات الإدريسي كأقصى بقاع الشرق.'],
     sources: [{ title: 'عجائب الهند', author: 'بزرك بن شهريار', year: '٣٤٢ هـ' }],
@@ -499,7 +499,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'Mount Qaf',
     category: 'places',
     typeLabel: 'السلسلة الزمردية المحيطة بالكون',
-    heroImage: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/anqa.jpg',
     summary: 'سلسلة جبلية من الزمرد الأخضر تحيط بالمعمورة ويستند إليها قبة السماء.',
     body: ['اعتقد الجغرافيون القدامى أن زرقة السماء ما هي إلا انعكاس لنور جبل قاف المصنوع من الجوهر والزمرد.'],
     sources: [{ title: 'معجم البلدان', author: 'ياقوت الحموي', year: '٦٢٦ هـ' }],
@@ -514,7 +514,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'Well of Barhout',
     category: 'places',
     typeLabel: 'بئر الأرواح الموحشة',
-    heroImage: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/ifrit.jpg',
     summary: 'هوة سحيقة في حضرموت يُعتقد أنها مجمع أرواح الكفار وتفوح منها روائح الكبريت.',
     body: ['بئر مظلمة لا يُقرب قاعها، رُويت عنها حكايات مرعبة عن أصوات سلاسل وصراخ يصدر من جوفها ليلاً.'],
     sources: [{ title: 'معجم البلدان', author: 'ياقوت الحموي', year: '٦٢٦ هـ' }],
@@ -529,7 +529,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'Valley of Abqar',
     category: 'places',
     typeLabel: 'موطن الإلهام الشعري',
-    heroImage: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/jinn.jpg',
     summary: 'وادٍ أسطوري سكنه الجن فنسب العرب إليه كل مفرط في النبوغ والفصاحة فقيل: عبقري.',
     body: ['كان الشعراء يقصدونه طلباً للموهبة، واعتقدوا أن من بات فيه ليلة ألقى عليه شياطين الشعر بديع القول.'],
     sources: [{ title: 'لسان العرب', author: 'ابن منظور', year: '٧١١ هـ' }],
@@ -544,7 +544,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'Great Dam of Marib',
     category: 'places',
     typeLabel: 'مهد الحضارة السبئية ومعجزة العرام',
-    heroImage: 'https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/civ-saba.jpg',
     summary: 'أعظم منشأة مائية هندسية في اليمن القديم حيكت حول انهياره أسطورة فأر العرام ذو الأسنان الحديدية.',
     body: ['شريان مملكة سبأ الذي انهار فسبب سيل العرام وتشتت قبائل قحطان في أرجاء شبه الجزيرة.'],
     sources: [{ title: 'تاريخ الطبري', author: 'محمد بن جرير الطبري', year: '٣١٠ هـ' }],
@@ -559,7 +559,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'City of Brass',
     category: 'places',
     typeLabel: 'حاضرة سليمان المسحورة',
-    heroImage: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/civ-himyar.jpg',
     summary: 'مدينة شيدها الجان لنبي الله سليمان من النحاس الأصفر تلمع أسوارها في قلب الصحراء.',
     body: ['سير إليها موسى بن نصير حملة استكشافية في خلافة عبد الملك بن مروان ودوّنت رحلتها الأسطورية كتب الأخبار.'],
     sources: [{ title: 'ألف ليلة وليلة', author: 'تراث شعبي', year: 'العصر العباسي' }],
@@ -574,7 +574,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'Ghumdan Palace',
     category: 'places',
     typeLabel: 'ناطحة السحاب اليمنية العجيبة',
-    heroImage: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/balqis.jpg',
     summary: 'قصر سبئي من عشرين طابقاً سقفه من رخام شفاف يرى من تحته الطير محلقاً في السماء.',
     body: ['شيده سيف بن ذي يزن أو شرحبيل يفرو، وجعل في أركانه أربعة أسود نحاسية تصفر مع هبوب الريح.'],
     sources: [{ title: 'الإكليل', author: 'الهمداني', year: '٣٣٤ هـ' }],
@@ -589,7 +589,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'Mountain of Smoke',
     category: 'places',
     typeLabel: 'فوهة اللهب البركانية',
-    heroImage: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/civ-thamud.jpg',
     summary: 'مرتفع أسطوري تنبعث من شقوقه ألسنة الدخان والنيران وتُحاك حوله قصص حراس الكنوز.',
     body: ['ربطه الرحالة بالحمم البركانية في حرار الحجاز وحكايات استيطان الجان للأماكن الوعرة.'],
     sources: [{ title: 'صفة جزيرة العرب', author: 'الهمداني', year: '٣٣٤ هـ' }],
@@ -604,7 +604,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'The Empty Quarter (Al-Ahqaf)',
     category: 'places',
     typeLabel: 'بحر الرمال الأسطوري والأحقاف',
-    heroImage: 'https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/civ-aad.jpg',
     summary: 'أعظم مسطح رملي غطى حضارات بائدة وطرقاً تجارية اندثرت تحت الكثبان المهيبة.',
     body: ['مهد قبيلة عاد ومقر أساطير مدن الذهب ومنازل العماليق الغابرة التي طمستها الرياح الهوجاء.'],
     sources: [{ title: 'معجم البلدان', author: 'ياقوت الحموي', year: '٦٢٦ هـ' }],
@@ -621,7 +621,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'Zarqa al-Yamama',
     category: 'seers',
     typeLabel: 'الرائية الحادة البصر الشهيرة',
-    heroImage: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/zarqa.jpg',
     summary: 'امرأة جديسية ذات عينين خارقتين كانت ترى الراكب من مسيرة ثلاثة أيام.',
     body: ['اشتهرت في أخبار طسم وجديس بحدة بصرها العجيبة، وأنذرت قومها حين رأت جيش حسان يسير متستراً بأغصان الشجر ولكنهم كذبوها حتى أهلكهم الغزو.'],
     sources: [{ title: 'الأغاني', author: 'الأصفهاني', year: '٣٥٦ هـ' }],
@@ -639,7 +639,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'Antarah ibn Shaddad',
     category: 'heroes',
     typeLabel: 'فارس بني عبس وأيقونة البطولة',
-    heroImage: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/antarah.jpg',
     summary: 'فارس جاهلي صهرته العبودية فصار أعظم أبطال العرب وبطل ملحمة الفروسية الشعبية.',
     body: ['اشتهر بشجاعته النادرة في حرب داحس والغبراء وعشقه لعبلة، ونُسجت حوله سيرة شعبية مطولة صارع فيها الأسود والغيلان.'],
     sources: [{ title: 'معلقة عنترة وشرح الزوزني', author: 'الزوزني', year: '٤٨٦ هـ' }],
@@ -655,7 +655,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'Luqman and the Seven Eagles',
     category: 'heroes',
     typeLabel: 'المعمر الأسطوري الحكيم',
-    heroImage: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/civ-aad.jpg',
     summary: 'حكيم عاد الذي خُيّر فأعطي عمر سبعة نسور، وكان آخر نسوره يُدعى "لبد".',
     body: ['عاش لقمان حتى فنيت النسور الستة ومات سابعها لبد، فضُرب به المثل في طول البقاء فقيل: "طال الأبد على لبد".'],
     sources: [{ title: 'مروج الذهب', author: 'المسعودي', year: '٣٤٦ هـ' }],
@@ -670,7 +670,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'Sayf ibn Dhi Yazan',
     category: 'heroes',
     typeLabel: 'ملك حمير وفارس الملاحم',
-    heroImage: 'https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/sayf.jpg',
     summary: 'الملك الحميري الذي طرد الأحباش من اليمن وتحولت سيرته إلى ملحمة ساحرة مع ملوك الجان.',
     body: ['امتزجت بطولته التاريخية بالخيال الشعبي في "سيرة سيف" حيث خاض غمار العوالم السفلية وتزوج ملكات الجن.'],
     sources: [{ title: 'السيرة النبوية', author: 'ابن هشام', year: '٢١٣ هـ' }],
@@ -686,7 +686,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'Al-Zeer Salem',
     category: 'heroes',
     typeLabel: 'فارس الانتقام وبطل البسوس',
-    heroImage: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/zir.jpg',
     summary: 'شاعر وفارس ربيعة الذي خاض حرب الأربعين عاماً ثأراً لمقتل أخيه كليب بن ربيعة.',
     body: ['أول من هلهل الشعر ودقق نسجه، تحولت مأساته الثأرية إلى أطول سيرة ملحمية تناقلتها أوتار الربابة الشعبية.'],
     sources: [{ title: 'الأغاني', author: 'الأصفهاني', year: '٣٥٦ هـ' }],
@@ -702,7 +702,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'Kulayb ibn Rabia',
     category: 'kings',
     typeLabel: 'ملك ربيعة وصاحب حمى البسوس',
-    heroImage: 'https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/kulayb.jpg',
     summary: 'عزيز حمى ربيعة الذي قتله جساس بن مرة فاشتعلت حرب البسوس لأربعين عاماً.',
     body: ['كان أعز العرب في الجاهلية وأول من ساد على معدّ بن عدنان، وحمى الروض والماء حتى قال "لا يجير على حماي أحد".'],
     sources: [{ title: 'الأغاني', author: 'الأصفهاني', year: '٣٥٦ هـ' }],
@@ -718,7 +718,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'Taabbata Sharran',
     category: 'sa3aleek',
     typeLabel: 'شاعر وفاتك من أشهر صعاليك العرب',
-    heroImage: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/taabbata.jpg',
     summary: 'ثابت بن جابر الفهمي الفاتك العدّاء الذي زعم مصارعة الغول واحتضانها تحت إبطه.',
     body: ['من أسرع عدائي الجاهلية، شاعراً مقاتلاً خاض الفلوات وخلد أساطير صراعه مع الغيلان في شعره الحماسي.'],
     sources: [{ title: 'كتاب الأغاني', author: 'الأصفهاني', year: '٣٥٦ هـ' }],
@@ -734,7 +734,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'Al-Shanfara',
     category: 'sa3aleek',
     typeLabel: 'صعلوك الفلاة وصاحب لامية العرب',
-    heroImage: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/shanfara.jpg',
     summary: 'شاعر الصعاليك وفارس الصحراء الأسطوري الذي خلد عزلة الذئاب وحرية المفازة.',
     body: ['صاحب "لامية العرب" التي تعد دستور حياة الصعلوك؛ عُرف بعدوه الأسطوري الذي يسبق الخيل وأقسم أن يقتل مئة رجل من بني سلامان.'],
     sources: [{ title: 'شرح لامية العرب', author: 'العكبري', year: '٦١٦ هـ' }],
@@ -750,7 +750,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'Urwa ibn al-Ward',
     category: 'sa3aleek',
     typeLabel: 'أمير الصعاليك وجواد الفقراء',
-    heroImage: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/urwa.jpg',
     summary: 'فارس عبس وشاعر الجود الذي جمع الفقراء والمرضى وأطعمهم مما يغنمه بسيفه.',
     body: ['لُقب بـ"عروة الصعاليك" لأنه كان يؤوي المحتاجين ويبني لهم الأخبية ويقود الغارات لإطعامهم، ورفض حياة الذل والكسل.'],
     sources: [{ title: 'الأغاني', author: 'الأصفهاني', year: '٣٥٦ هـ' }],
@@ -766,7 +766,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'Al-Sulayk ibn al-Sulaka',
     category: 'sa3aleek',
     typeLabel: 'أدلى العرب وأسرع عدائي البادية',
-    heroImage: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/sulayk.jpg',
     summary: 'عدّاء بني سعد ودليل الصحراء الذي ضُرب به المثل في سرعة الركض ومعرفة مسالك الفلوات.',
     body: ['قيل فيه: "أعدى من السليك" لسرعته الفائقة، وكان يغير وحده على رجليه في الفيافي ويعود بالغنائم.'],
     sources: [{ title: 'مجمع الأمثال', author: 'الميداني', year: '٥١٨ هـ' }],
@@ -782,7 +782,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'Al-Harith ibn Zalim',
     category: 'heroes',
     typeLabel: 'فاتك العرب الأسطوري',
-    heroImage: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/jadhima.jpg',
     summary: 'فارس ذو جرأة خارقة لا يتردد في منازلة الملوك؛ ضُرب به المثل فقيل: "أفتك من الحارث بن ظالم".',
     body: ['اغتال خالد بن جعفر بن كلاب ونذر نفسه لحماية هيبته وانتقامه حتى دانت له بوادي غطفان.'],
     sources: [{ title: 'مجمع الأمثال', author: 'الميداني', year: '٥١٨ هـ' }],
@@ -797,7 +797,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'Jadhima al-Abrash',
     category: 'kings',
     typeLabel: 'ملك الحيرة وعظيم تنوخ الأسطوري',
-    heroImage: 'https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/jadhima.jpg',
     summary: 'أول ملوك الحيرة وأعظم أقيالها، صاحب الندمانين الفرقدين الذي خدعته الزباء في قصرها.',
     body: ['ملك تنوخ والعراق في الجاهلية، نادم الفرقدين ترفعاً عن منادمة الإنس، واقتاده طموحه للزواج من الزباء ملكة تدمر فقُتل بحيلتها.'],
     sources: [{ title: 'مروج الذهب', author: 'المسعودي', year: '٣٤٦ هـ' }],
@@ -813,7 +813,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'Al-Zabba (Zenobia)',
     category: 'kings',
     typeLabel: 'ملكة تدمر وصاحبة الحصن الحصين',
-    heroImage: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/zabba.jpg',
     summary: 'الملكة المحاربة التي ثأرت لأبيها وقتلت جذيمة، وخاضت حرباً ضد الرومان حتى سقطت بذكاء قصير.',
     body: ['حكمت تدمر والبادية بقوة وهيبة، وبنت النفق السري بين قصريها وقالت مقولتها الشهيرة: "بيدي لا بيد عمرو".'],
     sources: [{ title: 'تاريخ الطبري', author: 'الطبري', year: '٣١٠ هـ' }],
@@ -829,7 +829,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'Al-Samawal ibn Adiya',
     category: 'kings',
     typeLabel: 'سيد حصن الأبلق ورمز الوفاء العربي',
-    heroImage: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/samawal.jpg',
     summary: 'حاكم تيماء وصاحب حصن الأبلق الذي ضحى بابنه وفاءً لأمانة ودروع امرئ القيس.',
     body: ['رمز الوفاء الأبدي في تراث العرب؛ حاصر الحارث بن ظالم حصنه طالباً دروع امرئ القيس ففضل مقتل ولده على خيانة العهد.'],
     sources: [{ title: 'الشعر والشعراء', author: 'ابن قتيبة', year: '٢٧٦ هـ' }],
@@ -845,7 +845,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'Qasir ibn Saad',
     category: 'kings',
     typeLabel: 'صاحب الحيلة وداهية الثأر لجذيمة',
-    heroImage: 'https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/qasir.jpg',
     summary: 'داهية العرب الذي جدع أنفه ونقل الفرسان في الأحمال ليقتحم حصن الزباء وينتقم لملكه.',
     body: ['صاحب أدهى حيلة حربية في تاريخ العرب القديم؛ ادعى ظلم عمرو وجدع أنفه ونقل السلاح في جوالق الجمال حتى فتح تدمر.'],
     sources: [{ title: 'مجمع الأمثال', author: 'الميداني', year: '٥١٨ هـ' }],
@@ -861,7 +861,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'Amr ibn Muzayqiya',
     category: 'kings',
     typeLabel: 'ملك سبأ الذي قاد الهجرة الكبرى قبيل سيل العرم',
-    heroImage: 'https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/muzayqiya.jpg',
     summary: 'الملك القحطاني الحكيم الذي تنبأ بانهيار سد مأرب وباع أمواله وقاد قبائل الأزد شمالاً.',
     body: ['كان يمزق حلته كل مساء ترفعاً أن يلبسها أحد بعده؛ رأى علامات خراب السد بالجرذ الأعمى ففر بقومه وتفرقت الأزد في البلاد.'],
     sources: [{ title: 'الأنساب', author: 'الصحاري', year: '٥١١ هـ' }],
@@ -877,7 +877,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'Shiqq and Satih',
     category: 'seers',
     typeLabel: 'كاهنا الجاهلية الأسطوريان ومفسرا المنامات الكبرى',
-    heroImage: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/shiqqsatih.jpg',
     summary: 'أغرب كاهني العرب شكلاً؛ كان سطيح جسداً بلا عظام يلف كالحصير وفسرا رؤيا ربيعة بن نصر بظهور النبي.',
     body: ['عاشا دهراً طويلاً وتفردا بهيئة عجيبة وسجع كهانة فذ؛ تنبآ بانتهاء ملك حمير وغزو الأحباش ثم ظهور الإسلام في جزيرة العرب.'],
     sources: [{ title: 'السيرة النبوية', author: 'ابن هشام', year: '٢١٣ هـ' }],
@@ -895,7 +895,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: "Nar al-Sal'",
     category: 'rituals',
     typeLabel: 'طقس إشعال النيران لاستنزال المطر',
-    heroImage: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/civ-madyan.jpg',
     summary: 'طقس جاهلي يربط فيه البدو حطب العشر والسَلَع بأذناب البقر ويشعلونها لجلب الغيث.',
     body: ['كانوا يصعدون بالبقر المشتعلة إلى الجبال تشبيهاً للنيران ببرق السماء طمعاً في استعطاف آلهة المطر والسحاب.'],
     sources: [{ title: 'كتاب الحيوان', author: 'الجاحظ', year: '٢٥٥ هـ' }],
@@ -910,7 +910,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'Atirah of Rajab',
     category: 'rituals',
     typeLabel: 'ذبيحة التعظيم والوفاء بالنذر',
-    heroImage: 'https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/civ-mecca.jpg',
     summary: 'ذبيحة سنوية مقدسة تقدمها العائلات لآلهة القبيلة في أول أيام شهر رجب الحرام.',
     body: ['طقس تعظيمي يقضي بنحر أول مولود من الماشية (الفرع) وسكب دمه على رؤوس الأصنام طلباً للبركة والنماء.'],
     sources: [{ title: 'كتاب الأصنام', author: 'هشام بن الكلبي', year: '٢٠٤ هـ' }],
@@ -925,7 +925,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'Sacred Livestock Taboos',
     category: 'rituals',
     typeLabel: 'طقوس تحريم الأنعام للأصنام',
-    heroImage: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/civ-mecca.jpg',
     summary: 'أعراف ميثولوجية تشق فيها آذان النوق وتُترك حرة ترعى لا تُركب ولا تُحلب نذراً للأوثان.',
     body: ['أنشأ هذه البدع عمرو بن لحي، حيث تمنح الإبل المسيبة حصانة دينية مقدسة وتُهدى إلى سدنة المعابد.'],
     sources: [{ title: 'تفسير الطبري', author: 'ابن جرير الطبري', year: '٣١٠ هـ' }],
@@ -940,7 +940,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'Ornithomancy (Zajar al-Tayr)',
     category: 'rituals',
     typeLabel: 'التكهن والتطير بحركات الكائنات',
-    heroImage: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/anqa.jpg',
     summary: 'استشراف المستقبل عبر إفزاع الطير ومراقبة طيرانه؛ فإن طار يمنة تفاءلوا (سانح) وإن طار يسرة تشاءموا (بارح).',
     body: ['فن كهانة جاهلي ارتبط بالسفر والحروب؛ فكان السائر لا يقدم على رحلته حتى يستطلع رأي الغراب أو العقاب في الدرب.'],
     sources: [{ title: 'بلوغ الأرب', author: 'الألوسي', year: '١٣٤٢ هـ' }],
@@ -955,7 +955,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'Arab Divination and Kahana',
     category: 'rituals',
     typeLabel: 'استنطاق الغيب عبر الأرواح والقرناء',
-    heroImage: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/shiqqsatih.jpg',
     summary: 'طبقة الكهان والعرّافين (مثل سطيح وشق الذئبي) الذين يزعمون اتصالهم بالجان واستراق السمع.',
     body: ['كان الكاهن يُستشار في الأنساب والدماء والجرائم، وينطق بأحكامه في سجع مقفى مبهم ممتلئ بالألغاز والرموز.'],
     sources: [{ title: 'مروج الذهب', author: 'المسعودي', year: '٣٤٦ هـ' }],
@@ -970,7 +970,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'Cleromancy by Azlam',
     category: 'rituals',
     typeLabel: 'قرعة السهام عند كبير الأصنام',
-    heroImage: 'https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/hubal.jpg',
     summary: 'ثلاثة سهام أو سبعة موضوعة عند هبل (أمرني ربي، نهاني ربي، غفل) تُدار قبل الزواج والحروب.',
     body: ['يلجأ إليها القرشيون في المسائل الشائكة، فيدفعون لسادن الكعبة مائة درهم ويجيل السهام ليخرج أمر القدر.'],
     sources: [{ title: 'سيرة ابن إسحاق', author: 'محمد بن إسحاق', year: '١٥١ هـ' }],
@@ -985,7 +985,7 @@ export const MYTH_ENTRIES: MythEntry[] = [
     latinName: 'Hilf al-Fudul and Qasama',
     category: 'rituals',
     typeLabel: 'أيمان النصرة وطقوس التطهير القبلية',
-    heroImage: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=800&q=80',
+    heroImage: '/images/civ-tasm-jadis.jpg',
     summary: 'طقوس غمس الأيدي في الطيب والدم وتحليف خمسين رجلاً عند الركن لطرد اللعنة ونصرة المظلوم.',
     body: ['اجتمعت قريش في دار عبد الله بن جدعان وتعاقدوا ألا يجدوا بمكة مظلوماً إلا نصروه، وغمسوا أيديهم في ماء زمزم والمسك تأكيداً للعهد.'],
     sources: [{ title: 'الروض الأنف', author: 'السهيلي', year: '٥٨١ هـ' }],
@@ -993,28 +993,454 @@ export const MYTH_ENTRIES: MythEntry[] = [
     region: 'دار ابن جدعان بمكة المكرمة',
     related: ['hubal', 'al-lat'],
     tags: ['تاريخ']
+  },
+
+  // --- Personalities (3 long-form premium entries) ---
+  {
+    id: 'dhul-qarnayn',
+    name: 'ذو القرنين',
+    latinName: 'Dhul-Qarnayn',
+    category: 'personalities',
+    typeLabel: 'شخصية قرآنية',
+    entryType: 'شخصية قرآنية',
+    heroImage: 'images/dhul-qarnayn.jpg',
+    summary: 'الملك الممكّن الذي طاف بين مطلع الشمس ومغربها وبنى ردم الحديد والنحاس المذاب بين السدّين.',
+    body: [
+      'تقف شخصية ذي القرنين في منطقة فريدة بين النص القرآني الصريح والموروث الملحمي الذي نسجته كتب الأخبار والتاريخ العام، بوصفه نموذجاً للملك العادل الذي أُعطي من كل شيء سبباً.',
+      'يمتد هذا العمل الطويل عبر ثمانية فصول تستعرض الرحلات الثلاث في سورة الكهف، وتقارن بين تأويلات المفسرين القدامى ومرويات سيرة الإسكندر المنسوبة في الأدب العربي والسرياني.'
+    ],
+    sources: [
+      { title: 'القرآن الكريم — سورة الكهف (الآيات 83–98)', author: 'المصدر النصي الأول', year: 'النص التأسيسي' },
+      { title: 'القرآن الكريم — سورة الأنبياء (الآية 96)', author: 'المصدر النصي الأول', year: 'النص التأسيسي' },
+      { title: 'صحيح البخاري وصحيح مسلم (حديث بعث النار)', author: 'الإمام البخاري والإمام مسلم', year: 'القرن 3 هـ' },
+      { title: 'جامع البيان عن تأويل آي القرآن وتاريخ الرسل والملوك', author: 'محمد بن جرير الطبري', year: 'القرن 4 هـ' },
+      { title: 'الجامع لأحكام القرآن', author: 'أبو عبد الله القرطبي', year: 'القرن 7 هـ' },
+      { title: 'تفسير القرآن العظيم والبداية والنهاية', author: 'إسماعيل بن كثير', year: 'القرن 8 هـ' },
+      { title: 'مروج الذهب ومعادن الجوهر', author: 'علي بن الحسين المسعودي', year: 'القرن 4 هـ' }
+    ],
+    timeline: [
+      { era: 'جاهلية', note: 'تداول أخبار الملوك الفاتحين وسيرهم الشفوية في بوادي الشام واليمن.' },
+      { era: 'صدر الإسلام', note: 'نزول قصة ذي القرنين في سورة الكهف بوصفها عبرة للتمكين والعدل.' },
+      { era: 'العصر العباسي', note: 'مقارنة المفسرين والمؤرخين بين ذي القرنين والإسكندر وكورش وملوك حمير.' }
+    ],
+    region: 'المشرق والمغرب وما بين السدّين',
+    related: ['khidr', 'iram-dhat-al-imad', 'suleiman'],
+    tags: ['تاريخ', 'خرافي'],
+    approxYear: -330,
+    isLongForm: true,
+    isPremium: true,
+    isHistorical: false,
+    requiredSubscription: 'premium_monthly',
+    evidenceLabels: ['نص قرآني', 'أقوال المفسرين', 'إعادة تخيل أدبي'],
+    targetWords: 8000,
+    chapters: [
+          {
+                "id": "dq-ch-1",
+                "index": 0,
+                "title": "الممكّن في الأرض وأسباب المشرق والمغرب",
+                "evidenceLabel": "نص قرآني + أقوال المفسرين",
+                "isAppendix": false,
+                "isFree": true,
+                "estimatedWords": 497,
+                "wordCount": 497,
+                "estimatedReadingMinutes": 3,
+                "contentPending": false,
+                "paragraphs": [
+                      "﴿وَيَسْأَلُونَكَ عَن ذِي الْقَرْنَيْنِ ۖ قُلْ سَأَتْلُو عَلَيْكُم مِّنْهُ ذِكْرًا ۞ إِنَّا مَكَّنَّا لَهُ فِي الْأَرْضِ وَآتَيْنَاهُ مِن كُلِّ شَيْءٍ سَبَبًا﴾.",
+                      "تأمل مطلع القصة في سورة الكهف: لا تبدأ بنسبٍ، ولا بميلادٍ في قصرٍ، ولا بعدد جيشٍ أو اسم أب. تبدأ بسؤالٍ جاء من خارج الجزيرة يمتحنُ به السائلون علمَ الوحي، فجاء الجوابُ على قاعدةٍ لا على ترجمةٍ شخصية: ﴿قُلْ سَأَتْلُو عَلَيْكُم مِّنْهُ ذِكْرًا﴾. والذِّكْر هنا هو القدرُ الحيُّ من السيرة الذي يصنع عبرةً، لا سجلُّ الأنساب الذي يُرضي الفضول.",
+                      "ولذلك لم يُذكر اسمه العَلَم قطّ، وإنما عُرّف بوصفين يحملان القصة كلها على أكتافهما: التمكين، والسبب. أما التمكين — ﴿إِنَّا مَكَّنَّا لَهُ فِي الْأَرْضِ﴾ — فهو القدرةُ المتاحة في الجغرافيا والحكم والإدارة، لكنه تمكينٌ مُسنَدٌ إلى فاعلٍ أعلى: «إنّا». فالملك لم ينتزع الأرض بسيفه وحده، بل مُكِّن له فيها؛ ومن ثَمَّ فهو مؤتَمَنٌ لا مطلَق اليد. وأما السبب — ﴿وَآتَيْنَاهُ مِن كُلِّ شَيْءٍ سَبَبًا﴾ — فقد قال الطبري ومجاهد وابن عباس في الروايات المأثورة: هو العلمُ والمنزلُ والطريقُ والوسيلة التي يتوصّل بها المرءُ إلى ما يريد من بناءٍ أو سفرٍ أو تدبيرٍ أو ترجمة.",
+                      "وهنا تقف قاعدةٌ منهجية لا تتزحزح في قراءة هذا المدخل: ذو القرنين في القرآن ملكٌ صالحٌ مؤيَّدٌ وممكَّن، وليس نبياً يُوحى إليه برسالةٍ أو شريعةٍ مستقلة. وقد ناقش الطبري وابن كثير والقرطبي مسألة نبوته، ورجّح جمهور المحققين — كابن تيمية وابن كثير — أنه كان ملكاً عادلاً مؤمناً بالله واليوم الآخر، وأن قوله تعالى ﴿قُلْنَا يَا ذَا الْقَرْنَيْنِ﴾ إما إلهامٌ في القلب وإما بلسان نبيٍّ في عصره، من غير إثبات نبوةٍ خاصةٍ له. وهذا التفريق مهم: فالتمكين الدنيوي هنا يختبر الملكَ في إدارة القوة والعدل بين الأمم، لا في تبليغ تشريعٍ جديد.",
+                      "ولم يترك المفسرون لقب «ذي القرنين» بلا تأويل. فقد أورد الطبري والقرطبي وجوهاً عدّة في معنى القرنين: قيل إنه بلغ قرني الشمس مشرقها ومغربها، فسمي بهما؛ وقيل كان في رأسه أو تاجه قرنان أو خصلتان من شعر؛ وقيل جمع بين مُلك فارس والروم، أو بين عهدين من الزمان. وأقربُ هذه الوجوه إلى بناء السورة هو المعنى الجغرافي-الرمزي: رجلُ الطرفين والأفقين، الذي لم يقف عند تخوم مملكته بل سلك الأسباب من أقصى الغروب إلى أقصى الشروق.",
+                      "واللافت في هذا المدخل أن القرآن لا يجعل من «السبب» خارقاً سحرياً. فالطريق إلى الغرب والشرق والسدّين لم تُطوَ له الأرضُ بكلمة، بل مشى واتّبع أسباباً ماديةً منظّمة: عدّةً ومؤنَةً وجنوداً ومهندسين وتراجمة. تلك هي البداية التي تجعل القصة قابلةً للفهم البشري ومُلهمةً لكل صانعٍ أو باحث: العظمة لا تعفي من اتخاذ الأسباب.",
+                      "[إعادة تخيل أدبي]\nيقول الحكواتي: وقف ذو القرنين ليلةَ خروجه الأول على شرفةٍ عالية تطل على السهل، وبيده لوحٌ من نحاسٍ نُقشَت عليه خطوطُ الطرق والمياه ومواسمُ الريح. دخل عليه حاجبه وقال: سيدي، الجندُ مستعدون، والخيلُ مسرجة، والمنجمون يسألون عن طالع السفر. فرفع ذو القرنين رأسه عن اللوح وقال: ليس لنا عند النجوم حاجة؛ اسألوا الحدادين كم مطرقةً في العربات، واسألوا الخزّانين كم مكيالَ ماءٍ يكفي ثلاثين يوماً، واسألوا من يقرأ ألسنة الأطراف هل أعدَّ دفاتره. فلما خرج الفجر لم يمشِ القوم وراء تاجٍ لامع، بل مشوا وراء قافلةٍ تعرف كيف تذرع الأرض وتقيس المسافة بالحبل والقدم."
+                ]
+          },
+          {
+                "id": "dq-ch-2",
+                "index": 1,
+                "title": "مغرب الشمس والعين الحمئة وقانون العدل",
+                "evidenceLabel": "نص قرآني + أقوال المفسرين",
+                "isAppendix": false,
+                "isFree": false,
+                "estimatedWords": 524,
+                "wordCount": 524,
+                "estimatedReadingMinutes": 3,
+                "contentPending": false,
+                "paragraphs": [
+                      "﴿فَأَتْبَعَ سَبَبًا ۞ حَتَّىٰ إِذَا بَلَغَ مَغْرِبَ الشَّمْسِ وَجَدَهَا تَغْرُبُ فِي عَيْنٍ حَمِئَةٍ وَوَجَدَ عِندَهَا قَوْمًا ۗ قُلْنَا يَا ذَا الْقَرْنَيْنِ إِمَّا أَن تُعَذِّبَ وَإِمَّا أَن تَتَّخِذَ فِيهِمْ حُسْنًا﴾.",
+                      "هذه هي الرحلة الأولى، وقبلتها المغرب الأقصى حيث تنقطع المسالك وراء الماء واليابسة. انظر إلى الفعل المحوري في الآية: ﴿وَجَدَهَا تَغْرُبُ فِي عَيْنٍ حَمِئَةٍ﴾. لم يقل النص «غَربت الشمسُ في عين»، بل قال ﴿وَجَدَهَا﴾ — أي رآها بعينه وفق موقع ناظره على ساحلٍ أو مصبٍّ في نهاية المعمور يومئذٍ. وقد نبّه المفسرون كالقرطبي وابن كثير والرازي بوضوحٍ تام على أن هذا وصفٌ لمشهد البصر لا لحقيقة الفلك والكون: فالواقف على شاطئ المحيط أو اللُّجّة الواسعة يرى قرص الشمس وهو ينحدر عند خط الأفق كأنه يغوص في صفحة الماء أو الطين الداكن.",
+                      "أما «الحَمِئَة» في القراءة المشهورة فهي المملوءة بالحَمْأة، أي الطين الأسود والرواسب الداكنة عند ضفاف العين أو البحر؛ وفي قراءةٍ أخرى متواترة ﴿حَامِيَةٍ﴾ أي شديدة الحرارة، وقد جمع المفسرون كالطبري بين المعنيين بأنها قد تكون ذات طينٍ أسودَ وماءٍ حارٍّ معاً. لكن أياً كان الموقع الجغرافي الذي بلغه غرباً، فإن النص لا يبني خريطةً كونيةً لغروب الشمس، بل يرسم أفق الرؤية الإنسانية الذي تقف عنده قدرةُ السائرين.",
+                      "عند ذلك الأفق لم يجد ماءً خالياً، بل وجد مجتمعاً بشرياً: ﴿وَوَجَدَ عِندَهَا قَوْمًا﴾. وهنا وضع الاختبار الأخلاقي أمام ذي القرنين بكل ثقله: ﴿إِمَّا أَن تُعَذِّبَ وَإِمَّا أَن تَتَّخِذَ فِيهِمْ حُسْنًا﴾. خُيِّر الملك المنتصر بين البطش والإحسان، فلم يندفع نحو العقاب الجماعي ولم يرفع سيفاً لمجرد الغلبة، بل صاغ قانوناً للعدل يتكرر في كل حكمٍ راشد:",
+                      "﴿قَالَ أَمَّا مَن ظَلَمَ فَسَوْفَ نُعَذِّبُهُ ثُمَّ يُرَدُّ إِلَىٰ رَبِّهِ فَيُعَذِّبُهُ عَذَابًا نُّكْرًا ۞ وَأَمَّا مَنْ آمَنَ وَعَمِلَ صَالِحًا فَلَهُ جَزَاءً الْحُسْنَىٰ ۖ وَسَنَقُولُ لَهُ مِنْ أَمْرِنَا يُسْرًا﴾.",
+                      "تأمّل كيف فصّل بين الأمرين: الظالمُ يُحاسب بظلمه في الدنيا ثم يردّ إلى ربه في الآخرة؛ والمؤمن الصالحُ يُكرم بالجزاء الحسن وبالقول اليسير الذي لا يُرهقه بالضرائب ولا يذلّه بالسلطة. لم يعدهُم بالجنة — فذلك لرب العالمين — بل وعدهم بما يملكه الحاكم العادل: أن يكون أمرُه معهم يُسراً لا عُسراً. وقد استنبط القرطبي من هذه الآيات أن صلاح الحكم يُقاس بقدرته على التمييز بين البريء والمعتدي، وبحفظ كرامة الرعية حين يغيب عنهم الخوف من تعسّف القوي.",
+                      "وبعد أن أرسى القضاء في المغرب، لم يبْنِ هناك قصراً ليقيم فيه إلى آخر عمره. استدار وواصل المسير نحو الجهة المقابلة تماماً: من أفق الشفق إلى أفق الفجر. تلك هي الرحلة التي ستبدأ في الفصل التالي بجملة: ﴿ثُمَّ أَتْبَعَ سَبَبًا﴾.",
+                      "[إعادة تخيل أدبي]\nيقول الحكواتي: وقف ذو القرنين على لسانٍ صخريٍّ يمتد داخل خليجٍ داكنِ الماء، حين لامس القرصُ الأحمر حافةَ اللُّجّة وألقى على الأمواج بريقاً نحاسياً ثقيلاً. التفت أحد قواده وقال مبهوتاً: يا ملك الزمان، أتحسب أن الشمس تنطفئ في هذا الطين الأسود؟ فتبسّم الملك ومدّ أصابعه إلى الأفق وقال: عينُ الإنسان تصدّق ما ينتهي عنده نظرها؛ فإذا سِرنا وراء هذا الأفق يوماً وجدنا الشمسَ لا تزال أعلى من رؤوسنا. ثم التفت إلى أهل الساحل وقد أحاطوا به خائفين يظنون أنه جاء يسترقّهم أو يمحو قراهم، فغمد سيفه في الرمل وقال لمترجمه: قل لهم إن السيف لا يُسلّ على من نام أميناً في بيته، ولا يُغمد عن يدٍ امتدّت بالعدوان على جارها. فلما طلع الفجر كان أطفال الساحل يلعبون حول سيفه المغروس في الرمل كأنه وتدُ خيمةٍ أقامت للأمان."
+                ]
+          },
+          {
+                "id": "dq-ch-3",
+                "index": 2,
+                "title": "مطلع الشمس والقوم الذين لا ستر لهم",
+                "evidenceLabel": "نص قرآني + أقوال المفسرين",
+                "isAppendix": false,
+                "isFree": false,
+                "estimatedWords": 395,
+                "wordCount": 395,
+                "estimatedReadingMinutes": 3,
+                "contentPending": false,
+                "paragraphs": [
+                      "﴿ثُمَّ أَتْبَعَ سَبَبًا﴾.",
+                      "توقّف عند هذه الجملة، فقد تكرّرت في السورة ثلاث مراتٍ بحرفها، كطرقةِ طبلٍ تسبق كل رحلة. لم يقل «ثم سار» ولا «ثم رحل»، بل ﴿أَتْبَعَ سَبَبًا﴾. والسَّبَب في أصل اللغة: الحبل الذي يُتوصَّل به إلى الشيء. فكل رحلةٍ من رحلاته حبلٌ جديد أمسك به، وكل حبلٍ أوصله إلى حيث لا يبلغ الناس. وهذا هو معنى ﴿وَآتَيْنَاهُ مِن كُلِّ شَيْءٍ سَبَبًا﴾: لم يُعطَ الأرض، أُعطي الطريق إليها.",
+                      "﴿حَتَّىٰ إِذَا بَلَغَ مَطْلِعَ الشَّمْسِ وَجَدَهَا تَطْلُعُ عَلَىٰ قَوْمٍ لَّمْ نَجْعَل لَّهُم مِّن دُونِهَا سِتْرًا﴾.",
+                      "بلغ المشرق الأقصى، حيث لا عمران وراءه. وهناك وجد قوماً لا شيء بينهم وبين الشمس: لا بناءٌ يظلّهم، ولا شجرٌ يحجبها، ولا ثوبٌ يقيهم. ذكر المفسرون في «الستر» وجوهاً: أن أرضهم لا تقبل البناء ولا تنبت الشجر، فهم إذا طلعت الشمس دخلوا المغاور والمياه؛ وأنهم لا يعرفون صناعة اللباس؛ وأن الشمس تطلع عليهم عموديةً فلا يظلّ لهم ظل. والقاسم المشترك بين الوجوه كلها: قومٌ مكشوفون للسماء، بلا وسيط.",
+                      "وهنا لطيفةٌ لا ينتبه لها أكثر القرّاء: في المغرب خُيِّر ذو القرنين ﴿إِمَّا أَن تُعَذِّبَ وَإِمَّا أَن تَتَّخِذَ فِيهِمْ حُسْنًا﴾، وفي المشرق لم يُخيَّر. هناك حُكمٌ وتشريع، وهنا وصفٌ ومشاهدة. لماذا؟ لأن قوم المغرب كانوا في دائرة التكليف والرسالة، وقوم المشرق كانوا خارج ما بلغه الخطاب. فالرحلة الأولى رحلة سلطان، والثانية رحلة معرفة. ومن هنا يفهم صانع المحتوى أن البطل في هذه القصة ليس فاتحاً فقط، بل شاهداً؛ وأحياناً يكون أعظم ما يفعله الملك أن يرى ولا يتدخّل.",
+                      "ثم يأتي الختم الذي يوقف الغرور عند حدّه: ﴿كَذَٰلِكَ وَقَدْ أَحَطْنَا بِمَا لَدَيْهِ خُبْرًا﴾. أي: هكذا كان أمره، وقد أحاط علمنا بما عنده من الأسباب والعدد والقدرة. فمهما بلغ من المشرق والمغرب، فأسبابه محصورةٌ معلومةٌ عند الله. بلغ قُرنَي الشمس، ولم يملك الشمس. وهذا هو الدرس الذي يسبق بناء السد: من عرف حدّ قوته، أحسن استعمالها.",
+                      "[إعادة تخيل أدبي]\nيقول الحكواتي: وصل ذو القرنين إلى المشرق قبل الفجر، فلما انشقّ الضوء رأى الناس ينزلون إلى الشقوق كما تنزل السحالي. لم يجرؤ أحدٌ على الوقوف في العراء. نادى كبير مهندسيه وقال: ابنِ لهم مدينةً تظلّهم. فقال المهندس: أستطيع أن أرفع جداراً، لكني لا أستطيع أن أزيح الشمس. فأطرق الملك، ثم قال: فاحفروا لهم مغاورَ أوسع، واجعلوا لها أفواهاً من جهة الشمال، واحفروا بئراً في كل مغارة. قالوا: هذا ليس مُلكاً يا ذا القرنين، هذا حفرٌ في الحجر. فقال: المُلك أن يجد الناس ظلاً لم يكونوا يجدونه. ومضى شرقاً وقد ترك خلفه قوماً لا يعرفون اسمه، وحجراً أبرد من الشمس."
+                ]
+          },
+          {
+                "id": "dq-ch-4",
+                "index": 3,
+                "title": "بين السدين ويأجوج ومأجوج",
+                "evidenceLabel": "نص قرآني + أقوال المفسرين",
+                "isAppendix": false,
+                "isFree": false,
+                "estimatedWords": 556,
+                "wordCount": 556,
+                "estimatedReadingMinutes": 4,
+                "contentPending": false,
+                "paragraphs": [
+                      "﴿ثُمَّ أَتْبَعَ سَبَبًا  حَتَّىٰ إِذَا بَلَغَ بَيْنَ السَّدَّيْنِ وَجَدَ مِن دُونِهِمَا قَوْمًا لَّا يَكَادُونَ يَفْقَهُونَ قَوْلًا﴾.",
+                      "الطريق الثالث: ليس أقصى الغرب ولا أقصى الشرق، بل ثغرةٌ بين جبلين. والسدّان في كلام المفسرين جبلان عظيمان يقومان مقام السور، وقيل سوران قديمان. وأما موضعهما فمختلَفٌ فيه اختلافاً واسعاً: قيل بين أرمينية وأذربيجان عند الباب الذي يُسمّى باب الأبواب، وقيل في أقاصي المشرق قرب الصين، وقيل في القوقاز. والحقّ أن النص لم يعيّن موضعاً، وأن كل تعيينٍ اجتهادٌ لا يقين. ومن الأمانة أن تُرسم الخريطة في تطبيقك عليها علامة استفهام، لا دبّوساً جازماً.",
+                      "وأما القوم: ﴿لَّا يَكَادُونَ يَفْقَهُونَ قَوْلًا﴾. و«لا يكادون» تعني أنهم يفقهون قليلاً، لا أنهم صُمٌّ بكم. وهذا فرقٌ دقيق مهم: لو كانوا لا يفقهون شيئاً لما صحّ ما يأتي بعد. فقد قالوا له كلاماً مركّباً، وعرضوا عليه عقداً فيه شرطٌ وجزاءٌ ومقابلٌ مالي. قومٌ «لا يكادون يفقهون قولاً» يقدّمون عرضاً سياسياً واقتصادياً كاملاً! وهذا يعني أن حاجز اللسان لم يكن حاجز عقلٍ ولا تنظيم؛ كانوا يحتجون ويتعاقدون، ويحتاجون ترجماناً لا وصيّاً.",
+                      "﴿قَالُوا يَا ذَا الْقَرْنَيْنِ إِنَّ يَأْجُوجَ وَمَأْجُوجَ مُفْسِدُونَ فِي الْأَرْضِ فَهَلْ نَجْعَلُ لَكَ خَرْجًا عَلَىٰ أَن تَجْعَلَ بَيْنَنَا وَبَيْنَهُمْ سَدًّا﴾.",
+                      "الخَرْج: المال الذي يُدفع عن الأرض، ضريبةٌ أو أجرة. فهم يعرضون أن يموّلوا الحماية. وهنا يقع أنبل موقفٍ في القصة كلها:",
+                      "﴿قَالَ مَا مَكَّنِّي فِيهِ رَبِّي خَيْرٌ فَأَعِينُونِي بِقُوَّةٍ أَجْعَلْ بَيْنَكُمْ وَبَيْنَهُمْ رَدْمًا﴾.",
+                      "رفض المال، وطلب الأيدي. حوّل العقد من «ادفعوا لأحميكم» إلى «شاركوا فأحميكم». وهذا انقلابٌ في معنى السلطة: لم يجعلهم زبائن حماية، جعلهم شركاء بناء. ومن يقرأ الآية بعين صانع الألعاب يرى فيها ميكانيكا كاملة: لا يُشترى السد بالذهب، بل يُبنى بمساهمة القوم؛ فمن لم يشارك لم يُحمَ.",
+                      "ولاحظ الترقية في اللفظ: هم سألوا سَدّاً، فوعدهم رَدْماً. والردم أوثق من السد؛ لأنه يُملأ بالحجارة والتراب والحديد طبقةً على طبقة حتى يصير كتلةً واحدة، لا جداراً يُنقب. أعطاهم أكثر مما سألوا، ورفض أن يأخذ منهم شيئاً. وهذا هو الفرق بين من يبني ليُذكر ومن يبني ليَحمي.",
+                      "ومن يأجوج ومأجوج؟ جمهور ما ورد في الآثار أنهم من بني آدم، من ذرية يافث بن نوح، قبائلُ كثيرة العدد شديدة البأس، لا ملائكةٌ ولا شياطين. وفي الصحيحين أن الله يقول لآدم يوم القيامة: أخرج بعث النار، فيكون من كل ألفٍ تسعمائةٌ وتسعةٌ وتسعون، وأن هؤلاء من يأجوج ومأجوج. وأما رواية أنهم يحفرون السد كل يومٍ ثم يعود فيُعاد كما كان حتى يقولوا «إن شاء الله» — فهي في السنن، ومختلَفٌ في تصحيحها، فتُروى على أنها روايةٌ لا على أنها حقيقة قاطعة.",
+                      "والمهم لصنّاع المحتوى: الوحش هنا بشريّ. وهذا أشدّ رعباً من كل غولٍ يتشكّل؛ لأن الغول خرافةٌ تُطرد بالذكر، أما القبيلة التي تأكل الأخضر واليابس فتُطرد بالحديد والنار والعمل الجماعي.",
+                      "[إعادة تخيل أدبي]\nيقول الحكواتي: جلس ذو القرنين بين السدين ومعه ترجمانٌ يتعب أكثر مما يتعب الجنود. كان شيخ القوم يشير إلى الجبل ثم إلى الأرض ثم إلى صدره، ويقول كلمةً واحدة يعيدها ثلاثاً. فقال الترجمان: يقول إنهم يخرجون في موسمٍ واحدٍ من السنة، فيأخذون الزرع والناس، ثم يعودون إلى الشِّعب. فقال الملك: وكم بقي من الموسم؟ فقال الشيخ بأصابعه: أربعون يوماً.",
+                      "فأخرج ذو القرنين صرّة ذهبٍ ووضعها بين يديه، وقال: هذا أُجرة من عندي، لا خَرْجٌ من عندكم. ثم ردّ الشيخ الصرّة إليه، وقال كلمةً لم يحتج فيها إلى ترجمان: لا.",
+                      "فقال ذو القرنين لقواده: لا أريد ذهبهم، أريد رجالهم. من حمل حجراً فله سهمٌ في السد، ومن قعد فليس له فيه باب. وفي تلك الليلة أُوقدت نيرانٌ بين الجبلين، وسمع الجبلُ صوتَ ألف مطرقةٍ لا تتكلّم لغةً واحدة، وتفهم بعضها بعضاً."
+                ]
+          },
+          {
+                "id": "dq-ch-5",
+                "index": 4,
+                "title": "بناء الردم: الحديد والنحاس",
+                "evidenceLabel": "نص قرآني + أقوال المفسرين",
+                "isAppendix": false,
+                "isFree": false,
+                "estimatedWords": 968,
+                "wordCount": 968,
+                "estimatedReadingMinutes": 6,
+                "contentPending": false,
+                "paragraphs": [
+                      "﴿ثُمَّ أَتْبَعَ سَبَبًا﴾ هنا لا تفتح طريقاً جديداً على الخريطة فحسب، بل تفتح ورشةً هندسية لم يشهد مثلها وادي الجبلين. بعد أن رفض ذو القرنين الخَرْجَ المالي ودعا القوم إلى المشاركة بالجهد البشري — ﴿فَأَعِينُونِي بِقُوَّةٍ﴾ — لم يتركهم يتخبّطون في عملٍ عشوائي، بل أدار مشروعاً دقيق المراحل يبدأ بالخامات الثقيلة وينتهي بكتلةٍ مسبوكةٍ تردّ الغزاة عن الشِّعب الضيّق.",
+                      "اقرأ الأوامر الثلاثة في الآية السادسة والتسعين، كأنها سجلُّ مهندسٍ ميدانيٍّ يملي خطةً على فرق العمل:",
+                      "﴿آتُونِي زُبَرَ الْحَدِيدِ ۖ حَتَّىٰ إِذَا سَاوَىٰ بَيْنَ الصَّدَفَيْنِ قَالَ انفُخُوا ۖ حَتَّىٰ إِذَا جَعَلَهُ نَارًا قَالَ آتُونِي أُفْرِغْ عَلَيْهِ قِطْرًا﴾.",
+                      "المرحلة الأولى: ﴿زُبَرَ الْحَدِيدِ﴾. والزُّبَر — واحدتها زُبْرة — هي كتلُ الحديد الضخمة المقطَّعة كالأحجار العظيمة أو الصفائح الثقيلة، كما فسرها الطبري والقرطبي وابن كثير. رُصّت تلك الكتلُ الحديدية طبقةً فوق طبقة، وملئت فجواتها بالحجارة والحطب والفحم فيما يصفه المفسرون من تقنيات التعدين والبناء القديم، حتى ارتفع البناءُ وساوى بين «الصَّدَفَين»، وهما وجها الجبلين المتقابلان اللذان تنحصر بينهما الثغرة. ولم يقل النص إنه بنى جداراً رقيقاً يسهل دفعه أو خلخلته، بل ملأ الفراغ كله من السفح إلى أعلى السطوح المتساوية بين قمتي المنحدر، بحيث يصبح السدّ امتداداً للكتلة الجبلية نفسها لا مجرد سورٍ منتصبٍ في فراغ.",
+                      "المرحلة الثانية: ﴿انفُخُوا﴾. نُصبت الكِير والمنافخ على امتداد الجدار الهائل، وأُوقدت النيران في الحطب والفحم المحيط بكتل الحديد أياماً وليالي متواصلة حتى توهجت الزُّبَرُ كلها واحمرّت: ﴿حَتَّىٰ إِذَا جَعَلَهُ نَارًا﴾. لم يكن القصد إذابة الحديد حتى يسيل ويهدم رصّته؛ بل تسخينه إلى درجة الاحمرار والتليين والتمدّد التي تتهيأ عندها السطوح المعدنية للالتحام وتنفتح مسامُّه السطحية لاستقبال المعدن المذاب، كما تتطرد الشوائب الكبريتية والأكاسيد الضعيفة من حواف الكتل قبل مرحلة السبك النهائي.",
+                      "المرحلة الثالثة: ﴿آتُونِي أُفْرِغْ عَلَيْهِ قِطْرًا﴾. وقد نقل الطبري عن ابن عباس وقتادة والسدي ومجاهد أن «القِطْر» هو النحاسُ المذاب — وقيل الرصاصُ والنحاسُ المختلط — يُصهر في مراجل عظيمة حتى يسيل كالماء، ثم يُفرغ من أعلى السد المتوهج فينساب بين شقوق الحديد وفواصل الكتل ويمتزج بطبقاته. ولماذا ينتج عن صبّ النحاس المذاب على كتل الحديد المسخّن بناءٌ أشدّ صلابةً ومنعةً من كلٍّ من المعدنين منفرداً؟ لأن الحديد يملك المتانةَ الهيكلية والصلادة العالية أمام الصدمات، لكن رصّ قطعه مهما دقّ يترك فراغاتٍ ومفاصلَ يمكن نقبها أو فصلها بالإسفين؛ أما النحاس المذاب فيتسلل بسيولته العالية في أصغر المسام والفواصل ويمدّ جسراً معدنياً يغلف الحديد ويحول دون تآكله بالصدأ السريع ويقفل المفاصل، فيبرد الكلُّ متحولاً إلى كتلةٍ مركَّبةٍ مصمتة لا مفاصل فيها للخلع ولا فراغاتٍ للثقب، أصلبَ على الفأس والمطرقة من الحديد المفكك وأقوى من النحاس الليّن وحده.",
+                      "وهنا يتجلّى الفارق الحاسم بين «السَّد» الذي طلبه القوم وبين «الرَّدم» الذي شيّده ذو القرنين. السدُّ قد يكون جداراً قائماً أو حاجزاً مرفوعاً من الحجارة والطين يصدّ السيل أو الخيل ولكنه يظل قابلاً للثقب أو التسلق إن انهار أساسه أو ضعفت مفاصل أحجاره. أما الرَّدم فهو ملءُ الثغرة كلها بترصيص الطبقات وتداخل المعادن والحجارة حتى تصبح جبلًا ثالثاً ملتحماً بالجبلين، لا فراغ وراءه يُغري بالنقب ولا حافة متدرجة تُسعِف المتسلق، ولا فجوة بين البناء وصخر الجبلين يسهل توسيعها بالمعاول.",
+                      "ثم تأتي الآية السابعة والتسعون لتلخّص نتيجة هذه الهندسة في جملتين حاسمتين تقيسان كفاءة التصميم أمام أسلوبَي الهجوم البشريين الممكنين:",
+                      "﴿فَمَا اسْطَاعُوا أَن يَظْهَرُوهُ وَمَا اسْتَطَاعُوا لَهُ نَقْبًا﴾.",
+                      "انظر إلى دقة المقابلة اللغوية التي التفت إليها علماء البلاغة والمفسرون كالزمخشري وابن كثير:\nالأول: ﴿أَن يَظْهَرُوهُ﴾ — أي أن يعلوا على ظهره بالتسلق والارتفاع فوقه، وذلك لعلوّه الهائل واستواء سطحه الصلب الممزوج بالنحاس الأملس الذي لا يثبت فيه حبلٌ ولا قدمٌ ولا سُلَّم.\nالثاني: ﴿وَمَا اسْتَطَاعُوا لَهُ نَقْبًا﴾ — أي أن يثقبوه أو يحفروا فيه نفقاً من أسفله أو منتصفه، وذلك لثخانه العميق واندماج زبر الحديد بالنحاس المذاب الذي يردّ المعاول والمطارق ويفُلّ رؤوسها.\nولم يقتصر الحسم في دلالة «اسطاعوا» (بتخفيف التاء للدلالة على محاولة أخفّ وأسرع كالتسلق) ثم «استطاعوا» (بتكامل حروفها للدلالة على أقصى الجهد والمثابرة الطويلة كالنقب والحفر) على الزخرف اللفظي؛ بل يشير عند المفسرين إلى أنهم عجزوا عن الصعود السريع فوقه وعجزوا كذلك عن الصبر الطويل على نقبه واختراقه.",
+                      "إن الدرس الهندسي والأمني الكامن في هذه الآية هو مبدأ «المنع المزدوج»: أي تحصينٍ يغلق باب التسلق من الأعلى ويترك باب النقب من الأسفل يسقط عند أول حصار، وأي جدارٍ يمنع الحفر دون أن يعلوَ فوق مرمى القفز والسلالم يفتح للغزاة طريقاً من السطح. فالعمارة الحقيقية تحسب أضعف طريقين معاً: قمة الارتفاع وعمق السمك، ثم تقفلهما في تصميمٍ واحد متوازن لا يُغفل الأعلى ولا يترك الأسفل. ومع ذلك، لم ينسَ الباني لحظةً أن هذا المنع المزدوج محدودٌ بمدةٍ يأذن الله ببقائها لا بأبديةٍ يملكها البشر؛ فالهندسة المتقنة واجبُ السبب، والبقاء بيد مالك الأسباب.",
+                      "[إعادة تخيل أدبي]\nيقول الحكواتي: في الليلة التاسعة والثلاثين بعد بدء العمل، لم ينم أحدٌ بين الصدفين. كانت النار في أسفل الوادي تُشبه نهراً أحمرَ يصعد دخانه إلى القمم السوداء، ووقف خمسمئة رجلٍ على المنافخ الجلدية يضغطون الهواء في إيقاعٍ واحد كأن الوادي كله صدرٌ يتنفّس، بينما كانت العربات تفرغ آخر أحمال الفحم اليابس حول الجدار الحديدي المتراصّ. صاح كبير الحدادين وقد احمرّ وجهه من اللهب وتفصّد جبينه بالعرق: يا ذا القرنين، الحديد قد استوى في الجمر وصار لونه لونَ الجمرة الحية، ولو زدنا عليه النفخ لسال وفقد قوامه!",
+                      "فأشار الملك إلى المنصة الخشبية العليا المشدودة إلى صخور الجبلين، حيث أُعدّت اثنتا عشرة بوتقةً عظيمةً يمور فيها القطرُ المذاب كالذهب السائل المتوهج. تقدم العمال في صفين متقابلين من القوم وجنود الملك، وأمسك كلُّ رجلين بمغرفٍ طويلٍ من حديدٍ ملبَّسٍ بالطين الحراري. ولما نادى الملك: أفرغوا بسم الله! انحدر الشلال النحاسي المشتعل فوق كتل الحديد المتوهجة، فسمع الجبلُ أزيزاً يشبه رعدَ السحاب وهو يغوص في الشقوق والحجارة، وتصاعد بخارٌ أصفرُ ثم أبيضُ غطّى الوادي لحظاتٍ حتى كاد يُخفي القمم.",
+                      "وعند الفجر، حين برد المعدنُ وصمتت المنافخ، لمس شيخُ القوم وجهَ الردم بيده المتشققة: لم يكن بارداً كالحجر ولا متصدعاً كالحديد الخام، بل أملسَ مصقولاً كمرآةٍ سوداء تميل إلى الحمرة، تندمج في الجبلين حتى لا تعرف أين ينتهي الصخر وأين يبدأ الحديد. لم يرفع أحدٌ قوساً، ولم يقل أحدٌ انتهينا؛ بل نظر ذو القرنين إلى أعلى القمة الصامتة وتمتم بصوتٍ لا يسمعه إلا القريبون: قد كُفِينا ما نخاف اليوم، وبقي ما يشاء ربُّنا غداً."
+                ]
+          },
+          {
+                "id": "dq-ch-6",
+                "index": 5,
+                "title": "من هو ذو القرنين؟ الأقوال التاريخية",
+                "evidenceLabel": "أقوال المفسرين + تحليل تاريخي",
+                "isAppendix": false,
+                "isFree": false,
+                "estimatedWords": 880,
+                "wordCount": 880,
+                "estimatedReadingMinutes": 5,
+                "contentPending": false,
+                "paragraphs": [
+                      "من هو ذو القرنين في تاريخ الملوك والدول؟ هذا هو السؤال الذي تلاحقت عليه كتب التفسير والتاريخ منذ القرون الأولى، فاختلفت فيه أنظار العلماء والباحثين، وتوزّعت بين ثلاثة أقوالٍ كبرى، لكلٍّ منها وجاهته الظاهرة ومكمن ضعفه الذي يمنع الجزم المطلق. والمنهج الأمين هنا يبدأ بقاعدةٍ واضحة: القرآن الكريم لم يذكر اسمَ هذا الملك، ولم يُسمِّ قومه ولا عصره ولا لغته، وإنما ساق سيرته للعبرة والميزان؛ ولذلك فكل تعيينٍ تاريخي لشخصه يظلّ في دائرة الترجيح والاجتهاد، لا في دائرة القطع واليقين، ومن هنا تترك الموسوعة هذا الباب مفتوحاً بأمانةٍ علمية.",
+                      "القول الأول: كورش الكبير (كورش الثاني الأخميني، مؤسس الإمبراطورية الفارسية في القرن السادس قبل الميلاد).\nوقد شاع هذا الترجيح في العصر الحديث ولا سيما في دراسة أبي الكلام آزاد الشهيرة «ذي القرنين»، ووافقه عليه عددٌ من المفسرين والمؤرخين المعاصرين. ومرتكزات هذا القول متعددة وجذابة:\nأولها أن كورش عُرف تاريخياً بدولةٍ عادلة متسامحة مع الشعوب والأديان مقارنةً ببطش ملوك بابل وآشور، وبوحدة مملكتي فارس وميديا؛\nوثانيها ما ورد في رؤيا دانيال في التراث الكتابي عن الكبش ذي القرنين الذي نطح غرباً وشمالاً وجنوباً وبُشِّر بأنه ملك مادي وفارس، وكذلك تمثاله المجنّح المعروف في «باسارغاد» ذو التاج المزوَّد بقرنين بارزين؛\nوثالثها أن حملات كورش امتدّت بالفعل نحو الغرب حتى بحر إيجة وسواحل الأناضول والبحر المتوسط، ونحو الشرق حتى أطراف آسيا الوسطى والهند، ونحو الشمال قرب ممرّات القوقاز حيث شُيّدت تحصيناتٌ لردّ هجمات قبائل السكيثيين والغزاة الشماليين، كما حظي في الموروث العبري بلقب الملك المنقذ الذي أعاد المسبيين.\nغير أن لهذا الترجيح نقاط ضعفٍ لا يغفلها المؤرخ المدقّق: فأولاً، عقيدة كورش الدينية في المصادر المسمارية — مثل أسطوانة كورش في بابل — تُظهر تودّده لمعابد الآلهة البابلية كـ«مردوخ» في سياسته الرسمية، مما يصعب معه الجزم بتوحيده الخالص بالصورة التي تصفها سورة الكهف، وإن تأوّل أنصار هذا القول تلك النصوص بأنها لغةٌ سياسية صاغها الكهنة والكتبة البابليون لا عقيدة الملك الشخصية؛ وثانياً، لا يوجد دليلٌ أثريٌّ قاطع يربط كورش ببناء ردمٍ من كتل الحديد والنحاس المذاب بين جبلين على النحو الموصوف؛ وثالثاً، أن المسافة الزمنية والسياقية بين مملكة كورش وبين التقاليد الإخبارية الأولى تجعل المطابقة ظنيةً لا برهانية.",
+                      "القول الثاني: الإسكندر الأكبر المقدوني (القرن الرابع قبل الميلاد).\nوهذا هو القول الذي مال إليه كثيرٌ من المتقدمين في روايات الأخبار والتواريخ العامة، وتداوله عددٌ من المفسرين ناقلين أخباراً عن بلاد اليونان وفتوحات الإسكندر في الشرق، ثم صارت سيرته في التراث الملحمي تمتزج باسم ذي القرنين في مؤلفاتٍ مثل «تاريخ الرسل والملوك» للطبري و«مروج الذهب» للمسعودي، مع تنبيه عددٍ من المحققين أنفسهم على التباس الأسماء واشتباه الروايات المنقولة عن أهل الكتاب.\nغير أن نقد هذا القول من جهة النص القرآني والتاريخي حاسمٌ وقويّ؛ فقد فصّل ذلك علماء كابن تيمية وابن كثير والفخر الرازي وغيرهم. فالإسكندر المقدوني، بنص التاريخ اليوناني الموثق، كان وثنياً على الديانة الإغريقية المتعددة الآلهة، تتلمذ على فلسفة أرسطو الوثنية وقرّب القرابين لآلهة الأولمب في معابدها، بل ادّعى في مصر في معبد سيوة أن الإله آمون أبوه وتُقِّدَ له التبجيل الألوهي؛ كما امتدّ ملكه مدةً قصيرة نحو عشر سنوات لم يظهر فيها نموذج الملك التقيِّ المؤمن بالبعث والحساب الذي يرفض المال ويعلن «هذا رحمةٌ من ربي». وقد بيّن ابن كثير وابن تيمية أن خلط بعض الإخباريين بين «الإسكندر المقدوني» وبين ملكٍ مؤمنٍ سابقٍ عليه لُقِّب بذي القرنين أو تشابه اللقب في التواريخ السريانية هو من أبرز أسباب وقوع الالتباس في الكتب القديمة.",
+                      "القول الثالث: ملكٌ حميريٌّ يمني (مثل الصعب بن ذي مرائد أو غيره من ملوك حمير القدامى).\nوقد نُقل هذا الرأي في طائفةٍ من كتب الأخبار والأنساب عند الهمداني وابن هشام ووهب بن منبه والسيوطي، وارتكز أنصاره على دلالةٍ لغوية وتاريخية قوية عند أهل اللغة العربية: وهي أن صيغة «ذو» في الألقاب الملكية سمةٌ أصيلةٌ لملوك حِمْيَر وأقيال اليمن، مثل «ذي يزن»، و«ذي نواس»، و«ذي رُعين»، و«ذي جدن»، و«ذي كلاع». كما استشهدوا بكثرة ذكر ذي القرنين في الشعر الجاهلي والإسلامي المبكر على لسان شعراء اليمن ومفاخرات القحطانيين على أنه من آبائهم الأقدمين الذين بلغوا المشارق والمغارب، وربطوه بنسب التبابعة الذين توارثت العرب أخبار رحلاتهم البعيدة.\nبيد أن نقطة الضعف الجوهرية في هذا القول أن النقوش المسندية السبئية والحميرية المكتشفة حتى اليوم — وهي ثرية بالتفاصيل العسكرية والسياسية — لم تذكر ملكاً يمنياً فتح أقصى مغرب الشمس ومشرقها أو شيّد ردماً من الحديد والنحاس المذاب بين سدّين خارج الجزيرة، وأن كثيراً من المرويات اليمنية في ذلك دخلتها المفاخرة القبلية وروايات القصاصين في القرون اللاحقة لتثبيت الشرف القحطاني أمام المفاخرات العدنانية.",
+                      "وإذن: ثلاثةُ مساراتٍ للتأويل — فارسيٌّ أخميني، ومقدونيٌّ مغلوطُ الخلط، ويمنيٌّ حميري — لكلٍّ منها أسبابه في الذاكرة الثقافية وشواهده التي تتفاوت قوةً وضعفاً، إلى جانب أقوالٍ فرعيةٍ أخرى ذكرت ملكاً قديماً في عهد إبراهيم عليه السلام. لكن القاعدة المنهجية تبقى أعلى من الترجيحات كلها: النصُّ القرآني حجب الاسمَ عمداً حتى تظل القصةُ ميزاناً للعدل والتمكين والتواضع لا تمجيداً لشخصٍ أو سلالة بعينها، وتُبقي هذه الموسوعةُ باب الهوية وموقع السدّ مفتوحَين على البحث التاريخي بلا جزمٍ لم يأذن به الدليل.",
+                      "ومن ثمّ يلاحظ القارئ الواعي أن لكل قولٍ من هذه الأقوال الثلاثة زاويةً التقطت طرفاً من الصورة: فكورش الكبير التقط شبهاً في سياسة العدل والانفتاح على الشعوب والاتجاهات الجغرافية الثلاثة وفي رمزية القرنين؛ والملك الحميري التقط البُعد اللغوي الأصيل للقب «ذو» ومكانة التبابعة في الذاكرة العربية قبل الإسلام؛ بينما يعكس اقتران الاسم بالإسكندر الأكبر مساراً انتقالياً متأخراً في التدوين السرياني واليوناني أكثر مما يعكس عقيدة النص القرآني. وبجمع هذه الأدلة وميزانها، يظهر أن الترجيح لا يعني القطع، وأن السكوت عن الاسم في السورة ليس نقصاً في الخبر بل قصدٌ تربويٌّ يحمي القصة من التحوّل إلى سيرةٍ حزبيةٍ أو إقليمية."
+                ]
+          },
+          {
+                "id": "dq-ch-7",
+                "index": 6,
+                "title": "ذو القرنين في الشعر والتراث الشعبي",
+                "evidenceLabel": "تراث شعبي",
+                "isAppendix": false,
+                "isFree": false,
+                "estimatedWords": 675,
+                "wordCount": 675,
+                "estimatedReadingMinutes": 4,
+                "contentPending": false,
+                "paragraphs": [
+                      "ما إن سكت الوحي عن تسمية ذي القرنين وترك اسمه طيَّ الحكمة، حتى التقط الشعراءُ والقُصّاصُ والرحالة الخيطَ وأنسجوا حول الملك الغامض عالماً موازياً من المفاخرة والأعاجيب. وفي التراث العربي مساران واضحان لهذه الحياة الأدبية المتأخرة: مسارُ الشعر الجاهلي والأموي، ومسارُ القصص الشعبي وسير الملاحم وجغرافيا العجائب. ومن أمانة القراءة أن نفصل بدقة بين هذا الأثر الأدبي البديع وبين أصل النص القرآني الرصين.",
+                      "في الشعر القديم، صار ذو القرنين مضرب المثل في امتداد السلطان وبلوغ أقاصي الأرض التي لا تطؤها الخيل. وقد أورد ابن هشام في «التيجان» والمبرد وأصحاب الحماسات أبياتاً منسوبةً إلى شعراء الجاهلية وصدر الإسلام — ولا سيما شعراء اليمن والأزد وحمير كأمرئ القيس أو بعض شعراء التبابعة في المرويات النسبية — يفخرون فيها بـ«الصعب ذي القرنين» الذي سار إلى الظلمات أو ضرب بأطناب ملكه مشرق الشمس ومغربها. وفي العصر الأموي، التقط شعراء البلاط كجرير والفرزدق والأخطل وهِمْيان السعدي وذو الرمة صورةَ الملك الذي ذلّل الممالك والبحار، فشبّهوا الخلفاء الفاتحين بذي القرنين حين يبلغون تخوم السند أو ما وراء النهر أو الأندلس، كما استعار العباسيون المعنى نفسه في مديح المأمون والمعتصم، وصار اللقبُ في البلاغة العربية علامةً على السعة الجغرافية المطلقة والقدرة على تطويع المفاوز لا على شخصيةٍ تاريخية بعينها.",
+                      "أما في التراث القصصي، فقد وقع تلاقحٌ واسع بين قصة ذي القرنين وبين «سيرة الإسكندر» اليونانية المعروفة بـ«رواية الإسكندر» المنسوبة قديماً إلى كاليسثينيس المنحول. انتقلت هذه السيرة من الإسكندرية إلى السريانية والبهلوية والعربية، وأضيف إليها مع الزمن نفسٌ روائيٌّ شرقي، فصار القصاصون ينسبون إلى «الإسكندر ذي القرنين» رحلاتٍ لم يذكرها القرآن ولا التاريخ الموثق: كدخوله «أرض الظلمات» بحثاً عن «عين الحياة» وماء الخلود بصحبة الخضر، أو لقائه بالملائكة على جبل قاف، أو مشاهدته لأشجارٍ تنطق بمصيره، أو خوضه البحار في تابوتٍ من زجاج ليرى قاع المحيط، أو صعوده إلى السماء محمولاً على النسور. هذا المزج الأدبي تحوّل عبر القرون إلى ما يشبه ملحمة الباحث عن الخلود والغرائب التي تغري السامع في مجالس السمر، مع أن النص القرآني يقدّم ذَا القرنين في صورةٍ مضادةٍ تماماً: ملكٌ عمليٌّ منضبط، لا يطارد الخلود ولا ينشغل بالعجائب لذاتها، بل يقيم العدل في المغرب، ويكفّ عن التدخل غير المبرّر في المشرق، ويبني مع الناس سداً يحفظ حياتهم اليومية في الشِّعب.",
+                      "ولم تسلم خرائط الجغرافيا الشعبية من جاذبية القصة. فقد تحوّل «سد ذي القرنين» إلى معلمٍ أسطوريٍّ في كتب «المسالك والممالك» و«عجائب المخلوقات». وأشهرُ تلك الحكايات ما رواه ابن خرداذبة في القرن الثالث الهجري ثم نقله القزويني وابن الأثير والمسعودي وغيرهم عن بعثة «سلاّم الترجمان» التي أرسلها الخليفة العباسي الواثق بالله بعد أن رأى في منامه أن السد قد انفتح. سافر سلاّم — بحسب الخبر — أشهراً طويلة عبر بلاد الخزر وأرمينية وتركستان، ووصف جبلاً أسودَ وسداً من لبنات الحديد المشدود بالنحاس، وأبواباً وأقفالاً ضخمة يضرب عليها حرسُ القرى بالمطارق في كل جمعة ليعلم أهلُ الداخل أن وراء السد حرّاساً يترقبون. ورغم طرافة هذا السرد وإدخاله المتعة والتشويق على الجغرافيا الكلاسيكية، فقد نقد المؤرخون المحققون تفاصيله وبينوا أنه أقرب إلى تقاليد أدب الرحلات والخيال الجغرافي منه إلى التوثيق الأثري القاطع، كما ظل موضع السد نفسه يتنقل في خرائطهم بين القوقاز وآسيا الوسطى بلا قرار.",
+                      "وهكذا يقف أمامنا ذو القرنين في صورتين متمايزتين يجب أن لا تختلطا في ذهن القارئ ولا في خطة المبدع: صورةٌ في النص التأسيسي، موجزةٌ صارمة، يدور مدارها حول التمكين والسبب والعدل والعمل الجماعي وحدود القوة؛ وصورةٌ أخرى في الشعر والسير والرحلات الشعبية، مفتوحةُ الخيال على الغرائب والأسفار الأسطورية والبحث عن ينابيع المجهول. فإذا استلهم الكاتبُ أو المبدعُ من السير الشعبية ألوانها وحكاياتها، فليعلم أن الروح الأصلية للقصة لا تسكن في غواصات الزجاج ولا في أشجار الكلام، بل في ملكٍ عرف متى يمضي ومتى يبني ومتى ينسب الفضل إلى ربه.",
+                      "وقد تجاوز هذا الأثر الشعبي حدود الشعر وأدب الرحلات إلى فنون المنمنمات والمجالس القصصية في القرون الوسطى؛ فقد صوّر الرسامون والمورخون في إيران والأناضول وبلاد الرافدين مشاهد «إسكندر ذي القرنين» وهو يشرف على بناء سدٍّ من الحديد والرصاص أمام قبائل متوحشة أو يبحر في أقاصي البحار، فاختلطت ريشة الفنان بخيال القاص وأخبار سلاّم الترجمان. وهنا تشتدّ الحاجة إلى وظيفة «الوسوم المعرفية» التي تعتمدها هذه الموسوعة: أن نستمتع بثراء التراث الشعبي والشعري بوصفه مرآةً لخيال الأمم، من غير أن نُسقط أعاجيبه على النص القرآني أو نحاسب الوحي بما أبدعه الشعراء والقُصّاص."
+                ]
+          },
+          {
+                "id": "dq-ch-8",
+                "index": 7,
+                "title": "يأجوج ومأجوج ونهاية العالم في النص",
+                "evidenceLabel": "نص قرآني + حديث + أقوال المفسرين",
+                "isAppendix": false,
+                "isFree": false,
+                "estimatedWords": 753,
+                "wordCount": 753,
+                "estimatedReadingMinutes": 5,
+                "contentPending": false,
+                "paragraphs": [
+                      "لو وقف القارئ عند الآية السابعة والتسعين التي أعلنت عجز يأجوج ومأجوج عن التسلق والنقب، لظنَّ أن القصة انتهت بنصرٍ هندسيٍّ أبديٍّ يصمد إلى الأبد. لكن ذَا القرنين نفسه لم يقل ذلك؛ بل أعلن من فوره، والحديدُ والنحاس لم يبردا بعد، أن هذا السدَّ مصمَّمٌ على التوقيت والانقضاء، لا على البقاء السرمدي.",
+                      "اقرأ الآية الثامنة والتسعين، فهي ذروة الحكمة الأخلاقية في القصة كلها:",
+                      "﴿قَالَ هَٰذَا رَحْمَةٌ مِّن رَّبِّي ۖ فَإِذَا جَاءَ وَعْدُ رَبِّي جَعَلَهُ دَكَّاءَ ۖ وَكَانَ وَعْدُ رَبِّي حَقًّا﴾.",
+                      "انتقل بالكلام من «أنا» و«جهدي» إلى «رحمةٌ من ربي». كل تلك الجبال الحديدية والمنافخ وأنهار القطر المذاب، وصفها بانيها بأنها «رحمةٌ» منه تعالى لأنها دفعت الأذى عن قومٍ مستضعفين؛ ثم أتبعها بحقيقة النهاية: ﴿فَإِذَا جَاءَ وَعْدُ رَبِّي جَعَلَهُ دَكَّاءَ﴾. و«الدكّاء» في لسان المفسرين — كالطبري وابن كثير — هي الأرضُ المستويةُ المنبسطة التي دُكَّت جبالُها وبناؤها حتى صارت سواءً مع السهل، لا أثر فيها لحاجزٍ ولا لعلوٍّ. فالمهندسُ الأكبر في القصة يخبرنا أن كل حصنٍ ماديٍّ يبنيه البشر له عمرٌ افتراضي في مشيئة الله، وأن دوام السلام ليس مرهوناً بصلابة المعدن بل بأمر مالك الزمان؛ فالسدُّ منذ لحظة اكتماله يحمل في صلبه موعدَ سقوطه لا وثيقة خلوده.",
+                      "ومع أن بعض الآيات تصف مشهد الردم حين يصمت اليوم، فإن سورة الأنبياء تعود لترسم لحظة الانهيار في آخر الزمان:",
+                      "﴿حَتَّىٰ إِذَا فُتِحَتْ يَأْجُوجُ وَمَأْجُوجُ وَهُم مِّن كُلِّ حَدَبٍ يَنسِلُونَ﴾ (الأنبياء: 96).",
+                      "فهذا الفتحُ حتمٌ عند اقتراب الساعة، حين تخرج تلك القبائل البشرية الكثيفة من كل مرتفعٍ وتلٍّ كالسيل المنحدر الذي لا يصده شيء، وتتسارع أمواجها في الأرض بعد أن يزول الحاجز المادي الذي أمسكها دهراً.",
+                      "وفي السنة النبوية الصحيحة نجد ركيزتين لفهم طبيعة يأجوج ومأجوج ومآلهما، ينبغي التفريق بين درجاتهما من حيث التوثيق.\nالأولى: حديث «بعث النار» المتفق عليه في الصحيحين (صحيح البخاري وصحيح مسلم)، حيث يخبر النبي صلى الله عليه وسلم أن الله يقول لآدم يوم القيامة: «أخرج بعث النار»، فيُخرج من كل ألفٍ تسعمائةً وتسعةً وتسعين؛ وحين ثقل ذلك على الصحابة وتغيرت وجوههم طمأنهم النبي قائلاً: «أبشروا، فإن منكم واحداً ومن يأجوج ومأجوج ألفاً». وهذا الحديثُ الصحيح الثابت يؤكد على نحوٍ قاطعٍ أن يأجوج ومأجوج أممٌ وقبائلُ بشرية كثيرةُ العدد من بني آدم (ويُذكر في كتب التفسير والتاريخ عند الطبري وابن كثير أنهم من ذرية يافث بن نوح عليه السلام)، وليسوا مردةً ولا شياطين ولا وحوشاً خرافيةً من وراء الطبيعة؛ كما ورد في صحيح البخاري أيضاً استشهاد النبي صلى الله عليه وسلم بأنه فُتِحَ من ردم يأجوج ومأجوج مثلُ حلقة الأصبعين إشارةً إلى اقتراب الفتن وأشراط الساعة.",
+                      "أما الثانية: فهي رواية الحفر اليومي للسد، المروية عن أبي هريرة رضي الله عنه في السنن (عند الترمذي وابن ماجه والحاكم)، وفيها أن يأجوج ومأجوج يحفرون السد كل يوم حتى يكادوا يخرقونه أو يروا شعاع الشمس، فيقول كبيرهم: ارجعوا فسنحفره غداً، فيعيده الله أشدَّ مما كان، حتى يبلغوا أجلهم المقدر فيقول قائلهم: سنحفره غداً إن شاء الله، فيعودون فيجدونه على هيئته التي تركوه عليها فيثقبونه ويخرجون. وهنا لا بد من أمانة النقل العلمي: فقد اختلف المحدثون والمحققون في تصحيح هذه الرواية وإسنادها مرفوعاً إلى النبي صلى الله عليه وسلم؛ فصحّحها طائفةٌ من العلماء كالحاكم وابن حبان وعددٍ من المتأخرين نظراً لثقة رجالها، وأعلّها آخرون من نقاد الحديث بالوقف على كعب الأحبار أو الانقطاع أو الاضطراب في رفعها في بعض طرقها؛ ولذلك تُذكر في الموسوعة بوصفها روايةً واردةً في السنن ومختلَفاً في تصحيحها ورفعها، لا بوصفها حقيقةً مقطوعاً بها في تفاصيل الحفر اليومي.",
+                      "إن المعنى الأعمق لخاتمة السد يربط الفصلَ الأول بالفصل الأخير في حلقةٍ محكمةٍ متوازنة: بدأ ذو القرنين بأخذ الأسباب المادية دون أن يغفل أن التمكين من الله؛ واختتم عمله ببناء أقوى ردمٍ عرفته المعمورة دون أن يغترّ ببقائه، مقرّاً بأن السدَّ رحمةٌ مؤقتةٌ تزول حين يأذن الله بمجيء وعده. وبذلك ينكسر غرور القوة الهندسية والسياسية معاً، وتبقى القصة شهادةً على أن العظمة الحقيقية ليست في بناء جدارٍ لا يسقط أبداً، بل في حماية الناس ما دام الجدار قائماً، والتواضع للحق حين يزول.",
+                      "ومما ينبه عليه المفسرون والمحققون كذلك في ختام هذا المشهد أن النص القرآني يربط بين اندكاك الردم وبين زوال الوهم البشري بالخلود؛ إذ تعقب الآية الثامنة والتسعين مباشرةً آياتٌ تصوّر موج الخلق يوم القيامة وتداعي الحجب: ﴿وَتَرَكْنَا بَعْضَهُمْ يَوْمَئِذٍ يَمُوجُ بَعْضٍ ۖ وَنُفِخَ فِي الصُّورِ فَجَمَعْنَاهُمْ جَمْعًا﴾ [الكهف: 99]. فإذا انهدم الحاجز الذي فصل بين الأمم دهراً عند مجيء وعد الله، اختلطت الصفوف وعادت البشرية كلها إلى مشهد الحساب الأكبر. وهكذا تظلُّ ثنائيةُ القصة واضحةً على طول السورة: ذو القرنين أخذ بأقصى الأسباب المتاحة في زمانه، لكنه لم يزعم لحظةً أن عمله يغالب المشيئة الإلهية أو يلغي سنّة النهاية؛ وقبائل يأجوج ومأجوج — على كثرتها البشرية الهائلة التي أشار إليها حديث بعث النار — محكومةٌ كذلك بالموعد الذي يأذن فيه الله بالفتح والانسياب في آخر الزمان."
+                ]
+          },
+          {
+                "id": "dq-app-a",
+                "index": 8,
+                "title": "عجائب ونصوص",
+                "evidenceLabel": "نصوص ومقتطفات",
+                "isAppendix": true,
+                "isFree": false,
+                "estimatedWords": 594,
+                "wordCount": 594,
+                "estimatedReadingMinutes": 4,
+                "contentPending": false,
+                "paragraphs": [
+                      "يجمع هذا الملحق النصوص القرآنية التأسيسية لقصة ذي القرنين مرتّبةً كما وردت في المصحف، متبوعةً بأقوال المفسرين والمؤرخين المنسوبة إلى أصحابها ومصادرها التي اعتمدتها فصول الموسوعة:",
+                      "أولاً — النصوص القرآنية (سورة الكهف: 83–98، وسورة الأنبياء: 96):\n• ﴿وَيَسْأَلُونَكَ عَن ذِي الْقَرْنَيْنِ ۖ قُلْ سَأَتْلُو عَلَيْكُم مِّنْهُ ذِكْرًا ۞ إِنَّا مَكَّنَّا لَهُ فِي الْأَرْضِ وَآتَيْنَاهُ مِن كُلِّ شَيْءٍ سَبَبًا ۞ فَأَتْبَعَ سَبَبًا﴾ [الكهف: 83–85].\n• ﴿حَتَّىٰ إِذَا بَلَغَ مَغْرِبَ الشَّمْسِ وَجَدَهَا تَغْرُبُ فِي عَيْنٍ حَمِئَةٍ وَوَجَدَ عِندَهَا قَوْمًا ۗ قُلْنَا يَا ذَا الْقَرْنَيْنِ إِمَّا أَن تُعَذِّبَ وَإِمَّا أَن تَتَّخِذَ فِيهِمْ حُسْنًا ۞ قَالَ أَمَّا مَن ظَلَمَ فَسَوْفَ نُعَذِّبُهُ ثُمَّ يُرَدُّ إِلَىٰ رَبِّهِ فَيُعَذِّبُهُ عَذَابًا نُّكْرًا ۞ وَأَمَّا مَنْ آمَنَ وَعَمِلَ صَالِحًا فَلَهُ جَزَاءً الْحُسْنَىٰ ۖ وَسَنَقُولُ لَهُ مِنْ أَمْرِنَا يُسْرًا﴾ [الكهف: 86–88].\n• ﴿ثُمَّ أَتْبَعَ سَبَبًا ۞ حَتَّىٰ إِذَا بَلَغَ مَطْلِعَ الشَّمْسِ وَجَدَهَا تَطْلُعُ عَلَىٰ قَوْمٍ لَّمْ نَجْعَل لَّهُم مِّن دُونِهَا سِتْرًا ۞ كَذَٰلِكَ وَقَدْ أَحَطْنَا بِمَا لَدَيْهِ خُبْرًا﴾ [الكهف: 89–91].\n• ﴿ثُمَّ أَتْبَعَ سَبَبًا ۞ حَتَّىٰ إِذَا بَلَغَ بَيْنَ السَّدَّيْنِ وَجَدَ مِن دُونِهِمَا قَوْمًا لَّا يَكَادُونَ يَفْقَهُونَ قَوْلًا ۞ قَالُوا يَا ذَا الْقَرْنَيْنِ إِنَّ يَأْجُوجَ وَمَأْجُوجَ مُفْسِدُونَ فِي الْأَرْضِ فَهَلْ نَجْعَلُ لَكَ خَرْجًا عَلَىٰ أَن تَجْعَلَ بَيْنَنَا وَبَيْنَهُمْ سَدًّا ۞ قَالَ مَا مَكَّنِّي فِيهِ رَبِّي خَيْرٌ فَأَعِينُونِي بِقُوَّةٍ أَجْعَلْ بَيْنَكُمْ وَبَيْنَهُمْ رَدْمًا﴾ [الكهف: 92–95].\n• ﴿آتُونِي زُبَرَ الْحَدِيدِ ۖ حَتَّىٰ إِذَا سَاوَىٰ بَيْنَ الصَّدَفَيْنِ قَالَ انفُخُوا ۖ حَتَّىٰ إِذَا جَعَلَهُ نَارًا قَالَ آتُونِي أُفْرِغْ عَلَيْهِ قِطْرًا ۞ فَمَا اسْطَاعُوا أَن يَظْهَرُوهُ وَمَا اسْتَطَاعُوا لَهُ نَقْبًا ۞ قَالَ هَٰذَا رَحْمَةٌ مِّن رَّبِّي ۖ فَإِذَا جَاءَ وَعْدُ رَبِّي جَعَلَهُ دَكَّاءَ ۖ وَكَانَ وَعْدُ رَبِّي حَقًّا﴾ [الكهف: 96–98].\n• ﴿حَتَّىٰ إِذَا فُتِحَتْ يَأْجُوجُ وَمَأْجُوجُ وَهُم مِّن كُلِّ حَدَبٍ يَنسِلُونَ﴾ [الأنبياء: 96].",
+                      "ثانياً — أقوال المفسرين والمؤرخين المنسوبة إلى مصادرها:\n• محمد بن جرير الطبري (ت 310هـ) — «جامع البيان عن تأويل آي القرآن»: فسّر «السبب» بأنه المنازل والطرق والآلات التي يُتوصّل بها إلى المراد؛ وأوضح في «زُبر الحديد» أنها قطع الحديد العظام، وفي «القطر» أنه النحاس المذاب الذي يُصَبّ على الحديد بعد إحمائه حتى يلتحم.\n• محمود بن عمر الزمخشري (ت 538هـ) — «الكشاف»: نبّه إلى دقة التفريق الصرفي بين «اسطاعوا» لخفة محاولة الصعود على ظهر الردم وبين «استطاعوا» للجهد المتطاول في ثقبه ونقبه.\n• فخر الدين الرازي (ت 606هـ) — «مفاتيح الغيب»: قرّر بوضوح أن مغرب الشمس في عين حمئة هو ما يظهر في عين الرائي عند شاطئ البحر المحيط، كما ناقش مسألة الملكية والنبوة وأثبت أن الإلهام أو النصيحة الملكية لا تستلزم إثبات نبوة مستقلة.\n• أبو عبد الله القرطبي (ت 671هـ) — «الجامع لأحكام القرآن»: نبّه إلى أن قوله ﴿تَغْرُبُ فِي عَيْنٍ حَمِئَةٍ﴾ محمولٌ على منتهى رأي العين وبصر الناظر لا على أن الشمس تغوص في طين الأرض حقيقة؛ وفصّل اختلاف الأقوال في «القوم الذين لم نجعل لهم من دونها ستراً» بين عدم ثبات البناء في أرضهم وبين دخولهم الأسراب والمغاور عند اشتداد الضحى.\n• إسماعيل بن كثير (ت 774هـ) — «تفسير القرآن العظيم» و«البداية والنهاية»: رجّح أن ذا القرنين ملكٌ صالحٌ مؤيّد وليس الإسكندر المقدوني، منبهاً إلى أن الإسكندر كان وثنياً تتلمذ لأرسطو، بينما كان ذو القرنين مؤمناً بالله والبعث؛ وأكد أن يأجوج ومأجوج من بني آدم من ذرية يافث بن نوح استناداً إلى صحيح الآثار.\n• علي بن الحسين المسعودي (ت 346هـ) — «مروج الذهب ومعادن الجوهر»: نقل تنوّع الروايات الشعبية والتاريخية المتداولة في العصر العباسي حول لقب ذي القرنين وتداخل أخباره مع سير الفاتحين ومواضع السد في المخيال الجغرافي.\n• أبو الكلام آزاد (ت 1958م) — دراسة «ذو القرنين»: قدّم قراءةً تاريخيةً مقارنةً رجّحت انطباق الأوصاف القرآنية — في التوحيد والرحلات الثلاث ودفع غارات القبائل الشمالية — على كورش الكبير الأخميني، مستشهداً بنقوش باسارغاد ورؤيا دانيال، مع بقاء هذا القول عند المحققين في دائرة الترجيح التاريخي لا القطع النصي."
+                ]
+          },
+          {
+                "id": "dq-app-b",
+                "index": 9,
+                "title": "عدّة المبدع",
+                "evidenceLabel": "أدوات إبداعية",
+                "isAppendix": true,
+                "isFree": false,
+                "estimatedWords": 387,
+                "wordCount": 387,
+                "estimatedReadingMinutes": 3,
+                "contentPending": false,
+                "paragraphs": [
+                      "صُمِّمت هذه العُدّة لكتّاب القصص ومصمّمي الألعاب الراغبين في استلهام بنية قصة ذي القرنين مع الالتزام بأمانة النص وأخلاقياته المعرفية؛ وهي تلخّص ستَّ ركائز تفاعلية للألعاب وأربعَ بذورٍ سرديةً للكتابة الإبداعية:",
+                      "أولاً — ستُّ ميكانيكياتٍ تفاعلية لصنّاع الألعاب:\n1) اقتصاد المشاركة لا شراء الحماية: حين عرض القوم الخَرْجَ رفض الملك الذهب وطلب الأيدي العاملة. في التصميم التفاعلي، لا يُشترى البناء الدفاعي بالعملة ولا يُوكل لمرتزقة؛ كل عشيرةٍ لا تشارك بحجارتها وجهدها لا يُبنى عندها بابُ نجاة.\n2) معادلة المنع المزدوج (التسلّق مقابل النقب): حددت الآية 97 خطَّي فشلٍ واضحين: ﴿يَظْهَرُوهُ﴾ من الأعلى و﴿نَقْبًا﴾ من الأسفل. إذا ركّز اللاعب على الارتفاع وأغفل سماكة الأساس والصبّ المعدني انهار الردم من تحته؛ وإذا حصّن العمق وترك السطح خالياً تسلله الغزاة من القمة.\n3) عدّاد الموسم ذو الأربعين يوماً: يعيش القوم بين السدين تحت ساعةٍ تنازليةٍ قبل خروج يأجوج ومأجوج من الشِّعب، مما يفرض إدارةً دقيقة للحطب وزُبر الحديد والمنافخ وسبائك القِطْر المذاب.\n4) ميكانيكا الترجمان وحاجز اللسان: القوم «لا يكادون يفقهون قولاً»، فيعتمد اللاعب على وسيطٍ يترجم لغة الإشارة والمفردات الجزئية؛ وأي خطأٍ في الترجمة يقلب ميثاق الشراكة إلى سوء فهمٍ مميت.\n5) أفق الرؤية لا الفلك الكوني: تتشكل خريطة الرحلات وفق موقع الناظر — العين الداكنة عند الغروب، والأرض المفتوحة بلا ظلٍّ عند الشروق — مع وضع علامة استفهام صادقة على موضع السد بدلاً من دبوسٍ جغرافيٍّ جازم.\n6) الحاجز المكتوب عليه الزوال: في طور نهاية اللعبة، لا يُكافأ اللاعب على أسطورة خلودٍ مستحيل، بل على صموده الأخلاقي وترك رحمةٍ تنفع الناس حتى يأتي وعد دكّ السد.",
+                      "ثانياً — أربعةُ منطلقاتٍ سرديةٍ لكتّاب القصص:\n1) دفتر الترجمان المجهول: حكاية مترجمٍ بين السدين يكتشف أن كلمة «لا» حين ردّ الشيخ صرّة الذهب كانت أبلغ من كل خطب القصور.\n2) ليلة إفراغ القِطر: سردٌ درامي من منظور كبير الحدادين الذي يراقب انصهار النحاس فوق زُبر الحديد الحمراء ويدرك أن أمان وادٍ كاملٍ معلّق بدقة لحظة الصبّ.\n3) متحف الهويات الثلاث: حوارٌ فلسفي بين ثلاثة مؤرخين — يدافع كلٌّ منهم عن كورش أو الإسكندر أو الملك الحميري — أمام نصٍّ صامت يرفض أن يحمل اسم أيٍّ منهم.\n4) العالم بعد الرحيل: قصة أحفاد قوم المشرق الذين يكبرون في ظلّ المغاور المحفورة والآبار دون أن يعرفوا اسم الملك الذي شقّ لهم الصخر ثم مضى.",
+                      "قاعدة العمل الإبداعي: اجعل التمييز بين «النص القرآني» و«أقوال المفسرين» و«إعادة التخيل الأدبي» مرئياً في كل فصلٍ ومشهد، ولا تمنح الخريطة يقيناً جغرافياً لم يأذن به الدليل."
+                ]
+          }
+    ],
+    metadata: {
+          "chaptersCount": 10,
+          "totalWords": 6284,
+          "estimatedReadingMinutes": 35,
+          "quotes": [
+                {
+                      "text": "﴿إِنَّا مَكَّنَّا لَهُ فِي الْأَرْضِ وَآتَيْنَاهُ مِن كُلِّ شَيْءٍ سَبَبًا﴾",
+                      "source": "القرآن الكريم — سورة الكهف: 84",
+                      "type": "نص حرفي"
+                },
+                {
+                      "text": "﴿قَالَ مَا مَكَّنِّي فِيهِ رَبِّي خَيْرٌ فَأَعِينُونِي بِقُوَّةٍ أَجْعَلْ بَيْنَكُمْ وَبَيْنَهُمْ رَدْمًا﴾",
+                      "source": "القرآن الكريم — سورة الكهف: 95",
+                      "type": "نص حرفي"
+                },
+                {
+                      "text": "﴿فَمَا اسْطَاعُوا أَن يَظْهَرُوهُ وَمَا اسْتَطَاعُوا لَهُ نَقْبًا ۞ قَالَ هَٰذَا رَحْمَةٌ مِّن رَّبِّي ۖ فَإِذَا جَاءَ وَعْدُ رَبِّي جَعَلَهُ دَكَّاءَ ۖ وَكَانَ وَعْدُ رَبِّي حَقًّا﴾",
+                      "source": "القرآن الكريم — سورة الكهف: 97–98",
+                      "type": "نص حرفي"
+                },
+                {
+                      "text": "يقول الله تعالى لآدم يوم القيامة: أخرج بعث النار، فيكون من كل ألفٍ تسعمائةٌ وتسعةٌ وتسعون، وأبشروا فإن منكم واحداً ومن يأجوج ومأجوج ألفاً",
+                      "source": "صحيح البخاري وصحيح مسلم (حديث بعث النار — بأسلوب المصدر)",
+                      "type": "بأسلوب المصدر"
+                },
+                {
+                      "text": "إن قوله تعالى «وجدها تغرب في عين حمئة» محمولٌ على منتهى بصر الناظر عند الساحل، لا على أن قرص الشمس يغوص في طين الأرض حقيقةً",
+                      "source": "الجامع لأحكام القرآن — القرطبي (بأسلوب المصدر)",
+                      "type": "بأسلوب المصدر"
+                },
+                {
+                      "text": "السَّبَب في الأصل الحبلُ الذي يُتوصّل به إلى الشيء، ثم أُطلق على كل علمٍ ومنزلٍ وطريقٍ يُبلغ به الغاية؛ والزُّبرُ هي قطعُ الحديد العظام، والقِطرُ هو النحاس المذاب",
+                      "source": "جامع البيان — الطبري (بأسلوب المصدر)",
+                      "type": "بأسلوب المصدر"
+                }
+          ],
+          "motifs": [
+                "أتبَعَ سبباً (حبل الوصول والطريق)",
+                "أفق الرؤية في مغرب الشمس ومطلعها",
+                "القوم المكشوفون بلا ستر",
+                "شراكة العمل لا شراء الحماية",
+                "الردم المسبوك بالحديد والنحاس المذاب",
+                "المنع المزدوج (لا تسلّق ولا نقب)",
+                "الحصن المؤقت الذي يندكّ عند وعد الله"
+          ],
+          "themes": [
+                "السلطان تحت التكليف الأخلاقي",
+                "حدود القوة وتواضع الممكّن",
+                "الكرامة في المشاركة لا التبعية",
+                "الفصل بين الدليل النصي والاجتهاد التاريخي",
+                "مآل الحصون البشرية أمام سنن الزوال"
+          ],
+          "cast": [
+                "ذو القرنين (الملك الممكّن العادل)",
+                "قوم المغرب (بين الظالم والمؤمن)",
+                "قوم المشرق (المكشوفون للسماء بلا ستر)",
+                "القوم بين السدين (أصحاب العرض والعمل)",
+                "الترجمان الوسيط بين الألسنة",
+                "قبائل يأجوج ومأجوج البشرية",
+                "كبير مهندسي وحدّادي الردم"
+          ],
+          "gameHooks": [
+                "اقتصاد المشاركة لا الذهب: يرفض اللاعب-الملك جزية القوم ويُبنى كل متر من الردم بمقدار الأيدي العاملة التي تشارك في نقل الحجر والحديد؛ من قعد عن العمل لم يُبنَ أمام أرضه باب",
+                "معادلة المنع المزدوج (التسلّق مقابل النقب): للردم شريطا صمود منفصلان لعلوّه (منع التسلّق/الظهور) وسماكته (منع الثقب/النقب)، وإهمال أي شقٍّ منهما يفتح ثغرة غزو مختلفة",
+                "عدّاد الموسم المحدود (40 يوماً): ساعة تنازلية قبل خروج يأجوج ومأجوج من الشِّعب تفرض إدارة دقيقة للخشب وزُبر الحديد والمنافخ وسبائك النحاس المذاب",
+                "ميكانيكا الترجمان وحاجز اللسان: حوارات القوم بين السدين تأتي بإشاراتٍ ومفرداتٍ جزئية، وعلى اللاعب تنسيق الترجمان لفهم مواعيد الموسم وتوقيع ميثاق الشراكة دون سوء تأويل",
+                "أفق الإدراك المتراجع (أفق البصر والناظر): عالم الخريطة يتشكل وفق ما يراه الملك من تخوم الرؤية (المغرب عند العين الداكنة، والمشرق بلا ظل)، مع علامة استفهام حقيقية على موضع السد لا دبوس جغرافي قاطع",
+                "الحاجز المكتوب عليه السقوط (المكتوب عليه الزوال): في طور نهاية العالم، لا يكافأ اللاعب على حصنٍ أبدي، بل على صموده القيمي وترك رحمةٍ تنفع الناس إلى أن يحين وعد زواله"
+          ],
+          "writingHooks": [
+                "ملف الترجمان المجهول: حكاية مترجمٍ عجوزٍ بين السدين يكاد ينهار من جهد ترجمة لغة الإشارة، ليكتشف أن كلمة «لا» حين ردّ الشيخ صرّة الذهب كانت أبلغ من كل خطب الملوك",
+                "ليلة إفراغ القِطر: سردٌ درامي من منظور كبير الحدادين الذي يراقب تحول كتل الحديد الحمراء إلى سبيكةٍ صماء، ويدرك أن أمان القوم معلّق بلحظة سيلان النحاس",
+                "متحف الهويات الثلاث: حوارٌ فلسفي بين ثلاثة مؤرخين يمثل كلٌّ منهم قولاً (كورش، الإسكندر، الملك الحميري) أمام نصٍّ صامت يرفض أن يحمل اسم أيٍّ منهم",
+                "العالم بعد الرحيل: قصة قوم المشرق بعد أن مضى ذو القرنين وحفر لهم المغاور الشمالية والآبار؛ يكبر أحفادهم في الظل البارد دون أن يعرفوا اسم الملك الذي شقّ لهم الصخر ثم تركهم ومضى"
+          ]
+    }
+  },
+  {
+    id: 'sinbad',
+    name: 'السندباد البحري',
+    latinName: 'Sinbad the Sailor',
+    category: 'personalities',
+    typeLabel: 'بطل خيالي',
+    entryType: 'بطل خيالي',
+    heroImage: 'images/sinbad.jpg',
+    summary: 'رحّالة ألف ليلة وليلة الذي عبر أهوال البحر الهندي في سبع رحلات خالدة من بغداد إلى أقاصي الجزر.',
+    body: [
+      'تُعدّ حكايات السندباد البحري ذروة الأدب البحري العربي في العصر العباسي؛ إذ تلتقي فيها ملامح الرحلات التجارية من البصرة وسيراف بخيال العجائب الشرقية.',
+      'تنقسم هذه الموسوعة الطويلة إلى الرحلات السبع الكاملة، بدءاً من الجزيرة التي ظنها البحارة يابسة فإذا هي ظهر حوت عظيم.'
+    ],
+    sources: [
+      { title: 'ألف ليلة وليلة — الليالي 536–566', author: 'التراث السردي العربي', year: 'العصر العباسي – المملوكي' },
+      { title: 'أخبار الصين والهند', author: 'سليمان التاجر وأبو زيد السيرافي', year: 'القرن 3–4 هـ' },
+      { title: 'عجائب الهند برّه وبحره وجزائره', author: 'بزرك بن شهريار', year: 'القرن 4 هـ' }
+    ],
+    timeline: [
+      { era: 'العصر العباسي', note: 'تدوين حكايات البحارة العرب في المحيط الهندي وبلورة دورة الرحلات السبع.' },
+      { era: 'العصر العباسي', note: 'انصهار دورة السندباد في متن ألف ليلة وليلة بوصفها ملحمة التاجر المغامر.' }
+    ],
+    region: 'البصرة وبحار الهند وسرنديب',
+    related: ['al-anqa', 'ibn-battuta', 'iram-dhat-al-imad'],
+    tags: ['خرافي', 'تاريخ'],
+    approxYear: 850,
+    isLongForm: true,
+    isPremium: true,
+    isHistorical: false,
+    requiredSubscription: 'premium_monthly',
+    evidenceLabels: ['خيال أدبي'],
+    targetWords: 10000,
+    chapters: LONG_FORM_ENTRIES.find((e) => e.id === 'sinbad')?.chapters || []
+  },
+  {
+    id: 'ibn-battuta',
+    name: 'ابن بطوطة',
+    latinName: 'Ibn Battuta',
+    category: 'personalities',
+    typeLabel: 'رحّالة تاريخي',
+    entryType: 'رحّالة تاريخي',
+    heroImage: 'images/ibn-battuta.jpg',
+    summary: 'أمير الرحّالين الذي قطع قرابة ثلاثين عاماً بين أفريقيا وآسيا وأوروبا الشرقية، وأملى «تحفة النظار في غرائب الأمصار».',
+    body: [
+      'في الثاني من رجب سنة ٧٢٥هـ (١٣٢٥م)، غادر الشاب الطنجي محمد بن عبد الله اللواتي، المعروف بابن بطوطة، مسقط رأسه قاصداً الحج وحيداً، ولم يكن يدري أن الغياب سيمتد تسعاً وعشرين سنة متصلة.',
+      'يرسم هذا العمل الطويل خط سير الرحلة التاريخية في ١٢ فصلاً وملحقين، مع تمييز دقيق بين الوقائع الموثقة تاريخياً، وعجائب الرواية التي استمع إليها أو سجلها، ومساحة إعادة التخيل الأدبي.'
+    ],
+    sources: [
+      { title: 'تحفة النظار في غرائب الأمصار وعجائب الأسفار', author: 'ابن بطوطة (بتدوين ابن جزي الكلبي)', year: '٧٥٦ هـ / ١٣٥٥م' },
+      { title: 'الدرر الكامنة في أعيان المائة الثامنة', author: 'ابن حجر العسقلاني', year: 'القرن 9 هـ' }
+    ],
+    timeline: [
+      { era: 'العصر العباسي', note: 'القرن 8 هـ (١٣٢٥م): الخروج من طنجة عبر المغرب الأوسط وإفريقية نحو مصر والشام والحجاز.' },
+      { era: 'العصر العباسي', note: 'القرن 8 هـ (١٣٣٣–١٣٤٧م): القضاء في سلطنة دلهي ثم الإبحار إلى المالديف وسرنديب وموانئ الصين.' },
+      { era: 'العصر العباسي', note: 'القرن 8 هـ (١٣٥٥م): الاستقرار في فاس وإملاء الرحلة على ابن جزي الكلبي بأمر السلطان أبي عنان.' }
+    ],
+    region: 'طنجة إلى الصين ومالي والأندلس',
+    related: ['sinbad', 'dhul-qarnayn'],
+    tags: ['تاريخ'],
+    approxYear: 1325,
+    isLongForm: true,
+    isPremium: true,
+    isHistorical: true,
+    requiredSubscription: 'premium_monthly',
+    evidenceLabels: ['موثق تاريخياً', 'من عجائب روايته', 'إعادة تخيل أدبي'],
+    targetWords: 11000,
+    chapters: LONG_FORM_ENTRIES.find((e) => e.id === 'ibn-battuta')?.chapters || []
   }
 ];
 
+const mergeLongFormWithSeed = (longConverted: MythEntry, seedEntry?: MythEntry): MythEntry => {
+  if (!seedEntry) return longConverted;
+  const hasFullSeedChapters =
+    Array.isArray(seedEntry.chapters) &&
+    seedEntry.chapters.length >= (longConverted.chapters?.length ?? 0) &&
+    seedEntry.chapters.some((ch) => !ch.contentPending && ch.paragraphs.length > 0 && ch.index > 0);
+  return {
+    ...longConverted,
+    sources: seedEntry.sources.length >= longConverted.sources.length ? seedEntry.sources : longConverted.sources,
+    chapters: hasFullSeedChapters ? seedEntry.chapters : longConverted.chapters,
+    metadata: seedEntry.metadata ?? longConverted.metadata,
+  };
+};
+
 export const getEntryById = (id: string): MythEntry | undefined => {
+  const seedEntry = MYTH_ENTRIES.find((entry) => entry.id === id);
   const longEntry = LONG_FORM_ENTRIES.find((entry) => entry.id === id);
-  if (longEntry) return toLibraryMythEntry(longEntry);
+  if (longEntry) return mergeLongFormWithSeed(toLibraryMythEntry(longEntry), seedEntry);
   const fromMyths = (mythsJson as unknown as MythEntry[]).find((entry) => entry.id === id);
   if (fromMyths) return fromMyths;
-  return MYTH_ENTRIES.find((entry) => entry.id === id);
+  return seedEntry;
+};
+
+const normalizeCategoryKey = (category: string): string => {
+  if (category === 'الشخصيات' || category === 'شخصيات') return 'personalities';
+  return category;
 };
 
 export const getEntriesByCategory = (category: string): MythEntry[] => {
+  const normalized = normalizeCategoryKey(category);
   const map = new Map<string, MythEntry>();
   for (const entry of MYTH_ENTRIES) {
-    if (entry.category === category) map.set(entry.id, entry);
+    if (normalizeCategoryKey(entry.category) === normalized) map.set(entry.id, entry);
   }
   for (const entry of (mythsJson as unknown as MythEntry[])) {
-    if (entry.category === category) map.set(entry.id, entry);
+    if (normalizeCategoryKey(entry.category) === normalized) map.set(entry.id, entry);
   }
   for (const longEntry of LONG_FORM_ENTRIES) {
-    const converted = toLibraryMythEntry(longEntry);
-    if (converted.category === category) map.set(converted.id, converted);
+    const converted = mergeLongFormWithSeed(toLibraryMythEntry(longEntry), map.get(longEntry.id));
+    if (normalizeCategoryKey(converted.category) === normalized) map.set(converted.id, converted);
   }
   return Array.from(map.values());
 };
@@ -1028,7 +1454,7 @@ export const getAllEntries = (): MythEntry[] => {
     map.set(entry.id, entry);
   }
   for (const longEntry of LONG_FORM_ENTRIES) {
-    const converted = toLibraryMythEntry(longEntry);
+    const converted = mergeLongFormWithSeed(toLibraryMythEntry(longEntry), map.get(longEntry.id));
     map.set(converted.id, converted);
   }
   return Array.from(map.values());

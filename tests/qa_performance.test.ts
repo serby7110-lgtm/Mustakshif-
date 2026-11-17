@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 
-test('STEP 1: Counts - 62 myths, 10 civilizations, 15 deep stories, 52 public images', () => {
+test('STEP 1: Counts - 62 myths, 10 civilizations, 17 deep stories, 52 public images', () => {
   const myths = JSON.parse(fs.readFileSync('src/data/myths.json', 'utf8'));
   const civs = JSON.parse(fs.readFileSync('src/data/civilizations.json', 'utf8'));
   const stories = JSON.parse(fs.readFileSync('src/data/stories.json', 'utf8'));
@@ -11,7 +11,7 @@ test('STEP 1: Counts - 62 myths, 10 civilizations, 15 deep stories, 52 public im
 
   assert.equal(myths.length, 62, 'Total myths must be exactly 62');
   assert.equal(civs.length, 10, 'Total civilizations must be exactly 10');
-  assert.equal(Object.keys(stories).length, 15, 'Total deep stories must be 15');
+  assert.equal(Object.keys(stories).length, 17, 'Total deep stories must be 17');
   assert.ok(images.length >= 52, `Total images must be at least 52 (found ${images.length})`);
 });
 

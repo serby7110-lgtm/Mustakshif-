@@ -11,6 +11,11 @@ import storiesData from './stories.json';
 export interface DeepChapter {
   title: string;
   text: string;
+  evidenceLabel?: string;
+  source?: string;
+  isAppendix?: boolean;
+  wordCount?: number;
+  estimatedReadingMinutes?: number;
 }
 
 export interface DeepQuote {
@@ -20,7 +25,11 @@ export interface DeepQuote {
 }
 
 export interface DeepStory {
-  chapters?: { title: string; text: string }[];
+  source?: string;
+  chapters?: DeepChapter[];
+  chaptersCount?: number;
+  totalWords?: number;
+  estimatedReadingMinutes?: number;
   quotes?: { text: string; source: string; type: string }[];
   motifs?: string[];
   themes?: string[];

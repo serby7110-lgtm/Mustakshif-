@@ -8,8 +8,8 @@ test('QA Audit: Gradle minSdk, compileSdk, targetSdk, versioning, desugaring', (
   assert.ok(gradle.includes('minSdk = 21'), 'minSdk must be 21');
   assert.ok(gradle.includes('targetSdk = 35'), 'targetSdk must be 35');
   assert.ok(gradle.includes('compileSdk = 35'), 'compileSdk must be 35');
-  assert.ok(gradle.includes('versionCode = 2'), 'versionCode must be 2');
-  assert.ok(gradle.includes('versionName = "1.1.0"'), 'versionName must be 1.1.0');
+  assert.ok(gradle.includes('versionCode = 3'), 'versionCode must be 3');
+  assert.ok(gradle.includes('versionName = "1.4.0"'), 'versionName must be 1.4.0');
   assert.ok(gradle.includes('isCoreLibraryDesugaringEnabled = true'), 'Desugaring must be enabled');
   assert.ok(gradle.includes('desugar_jdk_libs'), 'desugar_jdk_libs dependency must exist');
   assert.ok(gradle.includes('useSupportLibrary = true'), 'vectorDrawables.useSupportLibrary must be true');

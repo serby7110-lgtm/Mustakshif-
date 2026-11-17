@@ -8,6 +8,7 @@
  */
 
 import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react';
+import i18n from '../i18n';
 import { ThemeColors, lightPalette, darkPalette } from './tokens';
 import { storage, ThemeMode } from '../data/storage';
 import {
@@ -37,7 +38,9 @@ function safeGetStoredTheme(): string | null {
     if (typeof window !== 'undefined' && window.localStorage) {
       return window.localStorage.getItem('mustakshif_theme_mode_v1');
     }
-  } catch {}
+  } catch (err) {
+    console.warn('[ThemeContext] Failed to read stored theme:', err);
+  }
   return null;
 }
 
@@ -58,24 +61,37 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const [autoDecision, setAutoDecision] = useState<AutoDarkDecision>(() =>
     evaluateAutoDarkMode(null)
   );
+  const [activeLang, setActiveLang] = useState<string>(() => i18n.resolvedLanguage || i18n.language || 'ar');
+
+  useEffect(() => {
+    const handleLangChanged = (lng: string) => {
+      setActiveLang(lng || 'ar');
+    };
+    i18n.on('languageChanged', handleLangChanged);
+    return () => {
+      i18n.off('languageChanged', handleLangChanged);
+    };
+  }, []);
 
   const isDark = theme === 'dark' || (theme as string) === 'darkTeal';
 
   // Apply classes to document root on start and whenever theme changes
   useEffect(() => {
-    const root = document.documentElement;
-    const body = document.body;
+    if (typeof document !== 'undefined') {
+      const root = document.documentElement;
+      const body = document.body;
 
-    if (isDark) {
-      root.classList.add('dark', 'dark-teal');
-      body.classList.add('dark', 'dark-teal');
-      root.setAttribute('data-theme', 'dark');
-      root.style.colorScheme = 'dark';
-    } else {
-      root.classList.remove('dark', 'dark-teal');
-      body.classList.remove('dark', 'dark-teal');
-      root.setAttribute('data-theme', 'light');
-      root.style.colorScheme = 'light';
+      if (isDark) {
+        root.classList.add('dark', 'dark-teal');
+        body.classList.add('dark', 'dark-teal');
+        root.setAttribute('data-theme', 'dark');
+        root.style.colorScheme = 'dark';
+      } else {
+        root.classList.remove('dark', 'dark-teal');
+        body.classList.remove('dark', 'dark-teal');
+        root.setAttribute('data-theme', 'light');
+        root.style.colorScheme = 'light';
+      }
     }
 
     storage.setThemeMode(theme);
@@ -170,6 +186,20 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     return isDark ? darkPalette : lightPalette;
   }, [isDark]);
 
+  const localizedAutoDarkDescription = useMemo(() => {
+    if (!autoDecision?.descriptionKey) {
+      return i18n.t('theme.autoSunDefault', {
+        lng: activeLang,
+        defaultValue: autoDecision?.description || 'توقيت الغروب والشروق',
+      });
+    }
+    return i18n.t(autoDecision.descriptionKey, {
+      ...(autoDecision.descriptionParams ?? {}),
+      lng: activeLang,
+      defaultValue: autoDecision.description,
+    });
+  }, [autoDecision, activeLang]);
+
   const value = useMemo(
     () => ({
       theme: (isDark ? 'dark' : 'light') as ThemeMode,
@@ -180,11 +210,11 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
       isAutoDark,
       toggleAutoDark,
       setAutoDark,
-      autoDarkDescription: autoDecision.description,
+      autoDarkDescription: localizedAutoDarkDescription,
       autoDarkReason: isAutoDark ? autoDecision.reason : null,
       currentLux,
     }),
-    [isDark, tokens, toggleTheme, setTheme, isAutoDark, toggleAutoDark, setAutoDark, autoDecision, currentLux]
+    [isDark, tokens, toggleTheme, setTheme, isAutoDark, toggleAutoDark, setAutoDark, localizedAutoDarkDescription, autoDecision.reason, currentLux]
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
@@ -204,7 +234,7 @@ export const useTheme = (): ThemeContextValue => {
       isAutoDark: false,
       toggleAutoDark: () => {},
       setAutoDark: () => {},
-      autoDarkDescription: 'توقيت الغروب والشروق',
+      autoDarkDescription: i18n.t('theme.autoSunDefault', { defaultValue: 'توقيت الغروب والشروق' }),
       autoDarkReason: null,
       currentLux: null,
     };

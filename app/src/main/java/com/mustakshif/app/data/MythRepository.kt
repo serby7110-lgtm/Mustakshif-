@@ -4,6 +4,7 @@ import android.content.Context
 import org.json.JSONArray
 import java.io.BufferedReader
 import java.io.InputStreamReader
+import kotlin.math.ceil
 
 data class MythModel(
     val id: String,
@@ -20,18 +21,40 @@ data class MythModel(
     val isHistorical: Boolean = false,
     val entryType: String = typeLabel,
     val evidenceLabels: List<String> = emptyList(),
-    val targetWords: Int = 0
+    val targetWords: Int = 0,
+    val sourcesCount: Int = 0
 )
 
 /**
  * Offline-first repository that loads local mythology encyclopedia data
  * from packaged assets (myths.json + long_form_entries.json).
- * Completely works on API 21 without network.
+ * Completely works on API 21 without network and includes ALL entries (free + isPremium)
+ * in category lists, library, and search results.
  */
 class MythRepository(private val context: Context) {
 
     private var cachedMyths: List<MythModel>? = null
     private var cachedLongFormEntries: List<LongFormEntry>? = null
+
+    private fun countWords(text: String): Int {
+        val trimmed = text.trim()
+        if (trimmed.isEmpty()) return 0
+        return trimmed.split(Regex("\\s+")).count { it.isNotBlank() }
+    }
+
+    private fun computeReadingTimeMinutes(
+        body: List<String>,
+        chapters: List<LongFormChapter> = emptyList(),
+        quotes: List<String> = emptyList()
+    ): Int {
+        val bodyWords = body.sumOf { countWords(it) }
+        val chapterWords = chapters.sumOf { ch ->
+            countWords(ch.title) + ch.paragraphs.sumOf { countWords(it) }
+        }
+        val quoteWords = quotes.sumOf { countWords(it) }
+        val total = bodyWords + chapterWords + quoteWords
+        return ceil(total / 180.0).toInt().coerceAtLeast(1)
+    }
 
     fun getMyths(): List<MythModel> {
         cachedMyths?.let { return it }
@@ -50,6 +73,12 @@ class MythRepository(private val context: Context) {
                 for (j in 0 until bodyArray.length()) {
                     bodyList.add(bodyArray.getString(j))
                 }
+                val sourcesArray = obj.optJSONArray("sources") ?: JSONArray()
+                val evidenceArray = obj.optJSONArray("evidenceLabels") ?: JSONArray()
+                val evidenceList = mutableListOf<String>()
+                for (j in 0 until evidenceArray.length()) {
+                    evidenceList.add(evidenceArray.getString(j))
+                }
 
                 mythsList.add(
                     MythModel(
@@ -60,8 +89,14 @@ class MythRepository(private val context: Context) {
                         summary = obj.optString("summary", ""),
                         body = bodyList,
                         region = obj.optString("region", "شبه الجزيرة العربية"),
-                        readingTimeMinutes = obj.optInt("readingTimeMinutes", 3),
-                        heroImage = obj.optString("heroImage", "")
+                        readingTimeMinutes = computeReadingTimeMinutes(bodyList),
+                        heroImage = obj.optString("heroImage", ""),
+                        isLongForm = obj.optBoolean("isLongForm", false),
+                        isPremium = obj.optBoolean("isPremium", false),
+                        isHistorical = obj.optBoolean("isHistorical", false),
+                        entryType = obj.optString("entryType", obj.optString("typeLabel", "")),
+                        evidenceLabels = evidenceList,
+                        sourcesCount = sourcesArray.length()
                     )
                 )
             }
@@ -69,33 +104,55 @@ class MythRepository(private val context: Context) {
             // Graceful fallback if asset read fails
         }
 
-        // Merge registered premium long-form entries so Library displays all entries offline
+        // Merge registered premium long-form entries so categories, library, and search include ALL entries
         for (longEntry in getLongFormEntries()) {
-            if (mythsList.none { it.id == longEntry.id }) {
-                mythsList.add(
-                    MythModel(
-                        id = longEntry.id,
-                        name = longEntry.name,
-                        typeLabel = longEntry.entryType,
-                        category = longEntry.category,
-                        summary = longEntry.summary,
-                        body = longEntry.body,
-                        region = longEntry.region,
-                        readingTimeMinutes = (longEntry.targetWords / 180).coerceAtLeast(15),
-                        heroImage = longEntry.heroImage,
-                        isLongForm = longEntry.isLongForm,
-                        isPremium = longEntry.isPremium,
-                        isHistorical = longEntry.isHistorical,
-                        entryType = longEntry.entryType,
-                        evidenceLabels = longEntry.evidenceLabels,
-                        targetWords = longEntry.targetWords
-                    )
-                )
+            val existingIdx = mythsList.indexOfFirst { it.id == longEntry.id }
+            val model = MythModel(
+                id = longEntry.id,
+                name = longEntry.name,
+                typeLabel = longEntry.entryType,
+                category = longEntry.categoryKey,
+                summary = longEntry.summary,
+                body = longEntry.body,
+                region = longEntry.region,
+                readingTimeMinutes = computeReadingTimeMinutes(longEntry.body, longEntry.chapters),
+                heroImage = longEntry.heroImage,
+                isLongForm = longEntry.isLongForm,
+                isPremium = longEntry.isPremium,
+                isHistorical = longEntry.isHistorical,
+                entryType = longEntry.entryType,
+                evidenceLabels = longEntry.evidenceLabels,
+                targetWords = longEntry.targetWords,
+                sourcesCount = longEntry.evidenceLabels.size
+            )
+            if (existingIdx >= 0) {
+                mythsList[existingIdx] = model
+            } else {
+                mythsList.add(model)
             }
         }
 
         cachedMyths = mythsList
         return mythsList
+    }
+
+    fun getEntriesByCategory(category: String): List<MythModel> {
+        val key = if (category == "الشخصيات" || category == "شخصيات") "personalities" else category
+        return getMyths().filter { it.category == key }
+    }
+
+    fun getDocumentedCount(category: String): Int {
+        return getEntriesByCategory(category).count { it.sourcesCount > 0 || it.evidenceLabels.isNotEmpty() }
+    }
+
+    fun searchEntries(query: String): List<MythModel> {
+        val q = query.trim()
+        if (q.isEmpty()) return emptyList()
+        return getMyths().filter { entry ->
+            entry.name.contains(q, ignoreCase = true) ||
+                entry.summary.contains(q, ignoreCase = true) ||
+                entry.region.contains(q, ignoreCase = true)
+        }
     }
 
     fun getLongFormEntries(): List<LongFormEntry> {

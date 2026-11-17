@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   BookOpen,
   Lock,
@@ -6,6 +6,8 @@ import {
   Sparkles,
   CheckCircle2,
   Award,
+  RotateCcw,
+  Check,
 } from 'lucide-react';
 import { Card } from '../primitives/Card';
 import {
@@ -15,43 +17,92 @@ import {
 } from '../../data/longForm';
 import { storage } from '../../data/storage';
 import { useTheme } from '../../theme/ThemeContext';
+import { logAnalyticsEvent } from '../../lib/firebase';
+import {
+  SUBSCRIPTION_BENEFITS,
+  startPremiumSubscriptionPurchase,
+  restorePremiumPurchases,
+} from '../../services/subscription';
+import { useI18n } from '../../i18n/i18n';
+import { isDocumentedEvidenceLabel } from '../../content';
 
 export interface LongFormReaderSectionProps {
   entry: LongFormEntryData;
   bodyTextSizeClass: string;
+  isPremiumActive?: boolean;
+  onPremiumChange?: (active: boolean) => void;
+  onOpenSubscription?: () => void;
 }
 
 export const LongFormReaderSection: React.FC<LongFormReaderSectionProps> = ({
   entry,
   bodyTextSizeClass,
+  isPremiumActive,
+  onPremiumChange,
 }) => {
   const { tokens, isDark } = useTheme();
-  const [hasPremiumMonthly, setHasPremiumMonthly] = useState<boolean>(() =>
+  const { t, lang, dir } = useI18n();
+  const [localHasPremiumMonthly, setLocalHasPremiumMonthly] = useState<boolean>(() =>
     storage.hasPremiumMonthly()
   );
+  const hasPremiumMonthly = isPremiumActive ?? localHasPremiumMonthly;
+
+  const [subDetails, setSubDetails] = useState(() => storage.getSubscriptionDetails());
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const entryId = entry?.id ?? '';
+  const chapters = useMemo(
+    () => (Array.isArray(entry?.chapters) ? entry.chapters : []),
+    [entry]
+  );
+
   const [chapterProgressMap, setChapterProgressMap] = useState<Record<string, number>>(() =>
     storage.getLongFormChapterProgressMap()
   );
   const [resumeState, setResumeState] = useState(() =>
-    storage.getLongFormResumeState(entry.id)
+    entryId ? storage.getLongFormResumeState(entryId) : null
   );
   const [selectedChapterIdx, setSelectedChapterIdx] = useState<number>(
-    () => storage.getLongFormResumeState(entry.id)?.lastChapterIndex ?? 0
+    () => (entryId ? storage.getLongFormResumeState(entryId)?.lastChapterIndex : undefined) ?? 0
   );
 
+  useEffect(() => {
+    const syncEntitlement = () => {
+      const next = storage.hasPremiumMonthly();
+      setLocalHasPremiumMonthly(next);
+      setSubDetails(storage.getSubscriptionDetails());
+    };
+    window.addEventListener('mustakshif:entitlement-changed', syncEntitlement);
+    return () => window.removeEventListener('mustakshif:entitlement-changed', syncEntitlement);
+  }, []);
+
+  useEffect(() => {
+    if (entry?.isPremium && !hasPremiumMonthly && entryId) {
+      logAnalyticsEvent('paywall_view', { source: `entry:${entryId}` });
+    }
+  }, [entryId, entry?.isPremium, hasPremiumMonthly]);
+
+  useEffect(() => {
+    if (!toastMessage) return;
+    const t = setTimeout(() => setToastMessage(null), 3000);
+    return () => clearTimeout(t);
+  }, [toastMessage]);
+
   const overallProgress = useMemo(() => {
-    if (!entry.chapters.length) return 0;
-    const sum = entry.chapters.reduce((acc, ch) => {
-      return acc + (chapterProgressMap[`${entry.id}:${ch.id}`] || 0);
+    if (!chapters.length || !entryId) return 0;
+    const sum = chapters.reduce((acc, ch) => {
+      const chId = ch?.id ?? '';
+      return acc + (chapterProgressMap[`${entryId}:${chId}`] || 0);
     }, 0);
-    return Math.round(sum / entry.chapters.length);
-  }, [entry, chapterProgressMap]);
+    return Math.round(sum / chapters.length);
+  }, [entryId, chapters, chapterProgressMap]);
 
   const handleMarkChapterProgress = (ch: LongFormChapter, percent: number) => {
-    storage.setLongFormChapterProgress(entry.id, ch.id, ch.index, ch.title, percent);
+    if (!entryId || !ch) return;
+    storage.setLongFormChapterProgress(entryId, ch.id ?? '', ch.index ?? 0, ch.title ?? '', percent);
     setChapterProgressMap(storage.getLongFormChapterProgressMap());
-    setResumeState(storage.getLongFormResumeState(entry.id));
-    setSelectedChapterIdx(ch.index);
+    setResumeState(storage.getLongFormResumeState(entryId));
+    setSelectedChapterIdx(ch.index ?? 0);
   };
 
   const handleResume = () => {
@@ -64,12 +115,26 @@ export const LongFormReaderSection: React.FC<LongFormReaderSectionProps> = ({
   };
 
   const handleActivatePremium = () => {
-    storage.setPremiumMonthly(true);
-    setHasPremiumMonthly(true);
+    const res = startPremiumSubscriptionPurchase();
+    setToastMessage(res.message);
+    if (res.success) {
+      setLocalHasPremiumMonthly(true);
+      setSubDetails(storage.getSubscriptionDetails());
+      onPremiumChange?.(true);
+    }
+  };
+
+  const handleRestorePurchases = () => {
+    const res = restorePremiumPurchases();
+    setToastMessage(res.message);
+    const activeNow = storage.hasPremiumMonthly();
+    setLocalHasPremiumMonthly(activeNow);
+    setSubDetails(storage.getSubscriptionDetails());
+    onPremiumChange?.(activeNow);
   };
 
   const getEvidenceColors = (label: string) => {
-    const isDocumented = label === 'موثق تاريخياً' || label === 'نص قرآني' || label === 'نص ديني';
+    const isDocumented = isDocumentedEvidenceLabel(label);
     if (isDocumented) {
       return {
         bg: isDark ? 'rgba(127, 209, 174, 0.2)' : 'rgba(127, 209, 174, 0.28)',
@@ -84,15 +149,38 @@ export const LongFormReaderSection: React.FC<LongFormReaderSectionProps> = ({
     };
   };
 
-  const mainChapters = entry.chapters.filter((c) => !c.isAppendix).length;
-  const appendicesCount = entry.chapters.filter((c) => c.isAppendix).length;
+  const mainChapters = chapters.filter((c) => !c?.isAppendix).length;
+  const appendicesCount = chapters.filter((c) => c?.isAppendix).length;
+  const numberLocale = lang === 'ar' ? 'ar-EG' : lang;
+  const safeTargetWords = Number.isFinite(entry?.targetWords) ? (entry.targetWords ?? 0) : 0;
 
   return (
     <section
-      aria-label="الموسوعة الطويلة والفصول"
-      className="space-y-4 pt-1 text-right"
-      dir="rtl"
+      aria-label={t('longForm.sectionAria')}
+      className="space-y-4 pt-1 text-start"
+      dir={dir}
     >
+      {toastMessage && (
+        <div
+          role="status"
+          aria-live="polite"
+          style={{
+            backgroundColor: tokens.card,
+            borderColor: tokens.border,
+            color: tokens.textPrimary,
+          }}
+          className="fixed top-16 left-1/2 -translate-x-1/2 z-50 px-5 py-2.5 rounded-2xl border shadow-xl flex items-center gap-2.5 backdrop-blur-md"
+        >
+          <div
+            style={{ backgroundColor: 'rgba(61, 220, 151, 0.2)' }}
+            className="w-6 h-6 rounded-full flex items-center justify-center shrink-0"
+          >
+            <Check size={14} style={{ color: '#0E5C4D' }} />
+          </div>
+          <span className="text-xs font-bold">{toastMessage}</span>
+        </div>
+      )}
+
       {/* Top Meta + Badges + Resume Card */}
       <Card
         variant="white"
@@ -110,25 +198,27 @@ export const LongFormReaderSection: React.FC<LongFormReaderSectionProps> = ({
               className="px-2.5 py-0.5 rounded-full text-[11px] font-bold inline-flex items-center gap-1"
             >
               <BookOpen size={11} />
-              <span>طويلة</span>
+              <span>{t('longForm.longPill')}</span>
             </span>
             <span
               style={{
-                backgroundColor: tokens.coolBlueTint,
-                color: tokens.coolBlueAccent,
-                borderColor: tokens.border,
+                backgroundColor: '#4A90D9',
+                color: '#FFFFFF',
               }}
-              className="px-2.5 py-0.5 rounded-full text-[11px] font-bold border inline-flex items-center gap-1"
+              className="px-2.5 py-0.5 rounded-full text-[11px] font-bold inline-flex items-center gap-1"
             >
               <Award size={11} />
-              <span>Premium</span>
+              <span>{t('longForm.premiumPill')}</span>
             </span>
             <span
               style={{ color: tokens.textSecondary }}
               className="text-[11px] font-['Cairo',sans-serif]"
             >
-              الهدف: {entry.targetWords.toLocaleString('ar-EG')} كلمة • {mainChapters} فصول
-              {appendicesCount > 0 ? ` + ${appendicesCount} ملاحق` : ''}
+              {t('longForm.wordGoal', {
+                words: safeTargetWords.toLocaleString(numberLocale),
+                chapters: mainChapters,
+              })}
+              {appendicesCount > 0 ? t('longForm.appendices', { count: appendicesCount }) : ''}
             </span>
           </div>
 
@@ -159,46 +249,60 @@ export const LongFormReaderSection: React.FC<LongFormReaderSectionProps> = ({
           <div className="text-xs" style={{ color: tokens.textSecondary }}>
             {resumeState ? (
               <span>
-                آخر موضع: <strong style={{ color: tokens.textPrimary }}>{resumeState.lastChapterTitle}</strong> ({resumeState.chapterProgressPercent}%)
+                {t('longForm.lastPosition')}{' '}
+                <strong style={{ color: tokens.textPrimary }}>
+                  {chapters[resumeState.lastChapterIndex]?.title ?? resumeState.lastChapterTitle ?? ''}
+                </strong>{' '}
+                ({Number.isFinite(resumeState.chapterProgressPercent) ? resumeState.chapterProgressPercent : 0}%)
               </span>
             ) : (
-              <span>الفصل الأول متاح مجاناً للجميع؛ بقية الفصول عبر اشتراك premium_monthly.</span>
+              <span>{t('longForm.freeChapterNote')}</span>
             )}
           </div>
-          <button
-            type="button"
-            onClick={handleResume}
-            style={{
-              backgroundColor: tokens.deepAccent,
-              color: isDark ? '#0B2420' : '#FFFFFF',
-            }}
-            className="px-4 py-2 rounded-xl text-xs font-bold inline-flex items-center gap-1.5 cursor-pointer hover:opacity-90 min-h-[38px]"
-          >
-            <Play size={13} />
-            <span>{resumeState ? 'استئناف القراءة' : 'ابدأ الفصل الأول مجاناً'}</span>
-          </button>
+          {chapters.length > 0 && (
+            <button
+              type="button"
+              onClick={handleResume}
+              style={{
+                backgroundColor: tokens.deepAccent,
+                color: isDark ? '#0B2420' : '#FFFFFF',
+              }}
+              className="px-4 py-2 rounded-xl text-xs font-bold inline-flex items-center gap-1.5 cursor-pointer hover:opacity-90 min-h-[38px]"
+            >
+              <Play size={13} />
+              <span>{resumeState ? t('longForm.resume') : t('longForm.startFree')}</span>
+            </button>
+          )}
         </div>
       </Card>
 
       {/* Chapter Cards */}
       <div className="space-y-3.5">
-        {entry.chapters.map((chapter) => {
-          const unlocked = isChapterUnlocked(entry, chapter.index, hasPremiumMonthly);
-          const chProgress = chapterProgressMap[`${entry.id}:${chapter.id}`] || 0;
-          const evColors = getEvidenceColors(chapter.evidenceLabel);
-          const isSelected = selectedChapterIdx === chapter.index;
+        {chapters.length === 0 ? (
+          <Card variant="white" elevation="subtle" className="p-5 rounded-[20px] text-xs font-['Cairo',sans-serif]">
+            <span style={{ color: tokens.textSecondary }}>{t('article.noStoryYet')}</span>
+          </Card>
+        ) : chapters.map((chapter, mapIdx) => {
+          const chIndex = chapter?.index ?? mapIdx;
+          const chId = chapter?.id ?? `ch-${mapIdx}`;
+          const unlocked = isChapterUnlocked(entry, chIndex, hasPremiumMonthly);
+          const chProgress = chapterProgressMap[`${entryId}:${chId}`] || 0;
+          const chEvidence = chapter?.evidenceLabel || 'خيال أدبي';
+          const evColors = getEvidenceColors(chEvidence);
+          const isSelected = selectedChapterIdx === chIndex;
+          const paragraphs = Array.isArray(chapter?.paragraphs) ? chapter.paragraphs : [];
 
           return (
             <Card
-              key={chapter.id}
-              id={`long-chapter-${chapter.index}`}
+              key={chId}
+              id={`long-chapter-${chIndex}`}
               variant="white"
               elevation="card"
-              padded="lg"
+              padded={false}
               style={{
                 borderColor: isSelected ? tokens.deepAccent : tokens.border,
               }}
-              className="rounded-[20px] space-y-3 border transition-all"
+              className="rounded-[20px] px-4 py-5 space-y-3 border transition-all"
             >
               {/* Chapter Top Pills: Evidence + Free/Lock Status */}
               <div className="flex items-center justify-between flex-wrap gap-2">
@@ -210,7 +314,7 @@ export const LongFormReaderSection: React.FC<LongFormReaderSectionProps> = ({
                   }}
                   className="px-2.5 py-0.5 rounded-full text-[11px] font-bold border"
                 >
-                  {chapter.evidenceLabel}
+                  {chEvidence}
                 </span>
 
                 <div className="flex items-center gap-2">
@@ -219,7 +323,7 @@ export const LongFormReaderSection: React.FC<LongFormReaderSectionProps> = ({
                       style={{ color: tokens.textSecondary }}
                       className="text-[11px] font-bold"
                     >
-                      ملحق
+                      {t('longForm.appendix')}
                     </span>
                   )}
                   <span
@@ -227,28 +331,28 @@ export const LongFormReaderSection: React.FC<LongFormReaderSectionProps> = ({
                       backgroundColor:
                         chapter.index === 0 || chapter.isFree
                           ? 'rgba(127, 209, 174, 0.25)'
-                          : tokens.coolBlueTint,
+                          : '#4A90D9',
                       color:
                         chapter.index === 0 || chapter.isFree
                           ? tokens.deepAccent
-                          : tokens.coolBlueAccent,
+                          : '#FFFFFF',
                     }}
                     className="px-2.5 py-0.5 rounded-full text-[11px] font-bold inline-flex items-center gap-1"
                   >
                     {chapter.index === 0 || chapter.isFree ? (
                       <>
                         <Sparkles size={11} />
-                        <span>فصل أول مجاني</span>
+                        <span>{t('longForm.freeChapterBadge')}</span>
                       </>
                     ) : unlocked ? (
                       <>
                         <CheckCircle2 size={11} />
-                        <span>مفتوح (Premium)</span>
+                        <span>{t('longForm.unlockedBadge')}</span>
                       </>
                     ) : (
                       <>
-                        <Lock size={11} />
-                        <span>مقفل — premium_monthly</span>
+                        <Lock size={12} strokeWidth={1.9} />
+                        <span>{t('longForm.lockedBadge')}</span>
                       </>
                     )}
                   </span>
@@ -260,14 +364,14 @@ export const LongFormReaderSection: React.FC<LongFormReaderSectionProps> = ({
                 style={{ color: tokens.deepAccent }}
                 className="font-['Aref_Ruqaa',serif] text-lg font-bold leading-snug"
               >
-                {chapter.title}
+                {chapter?.title ?? ''}
               </h4>
 
               {/* Per-Chapter Progress Bar */}
               {chProgress > 0 && (
                 <div className="space-y-1">
                   <div className="flex items-center justify-between text-[11px]" style={{ color: tokens.textSecondary }}>
-                    <span>تقدم الفصل</span>
+                    <span>{t('longForm.chapterProgress')}</span>
                     <span className="font-mono font-bold">{chProgress}%</span>
                   </div>
                   <div
@@ -285,16 +389,16 @@ export const LongFormReaderSection: React.FC<LongFormReaderSectionProps> = ({
                 </div>
               )}
 
-              {/* Chapter Body or Premium Lock Box */}
+              {/* Chapter Body or Premium Lock Card */}
               {unlocked ? (
                 <div className="space-y-3">
-                  {chapter.paragraphs.length > 0 ? (
+                  {paragraphs.length > 0 ? (
                     <div
                       style={{ color: tokens.textPrimary }}
-                      className={`space-y-3 font-['Cairo',sans-serif] text-justify ${bodyTextSizeClass}`}
+                      className={`space-y-3 font-['Cairo',sans-serif] text-start ${bodyTextSizeClass}`}
                     >
-                      {chapter.paragraphs.map((p, pIdx) => (
-                        <p key={pIdx}>{p}</p>
+                      {paragraphs.map((p, pIdx) => (
+                        <p key={pIdx}>{p ?? ''}</p>
                       ))}
                     </div>
                   ) : (
@@ -305,7 +409,7 @@ export const LongFormReaderSection: React.FC<LongFormReaderSectionProps> = ({
                       }}
                       className="p-3 rounded-xl text-xs"
                     >
-                      هيكل الفصل جاهز — سيتم إضافة النص الكامل في الدفعات القادمة.
+                      {t('longForm.pendingNotice')}
                     </div>
                   )}
 
@@ -321,33 +425,69 @@ export const LongFormReaderSection: React.FC<LongFormReaderSectionProps> = ({
                       className="px-3.5 py-1.5 rounded-xl border text-xs font-bold inline-flex items-center gap-1.5 cursor-pointer"
                     >
                       <CheckCircle2 size={13} />
-                      <span>{chProgress >= 100 ? 'مكتمل 100%' : 'تسجيل إكمال الفصل'}</span>
+                      <span>{chProgress >= 100 ? t('longForm.completed100') : t('longForm.markComplete')}</span>
                     </button>
                   </div>
                 </div>
               ) : (
                 <div
                   style={{
-                    backgroundColor: tokens.coolBlueTint,
-                    borderColor: tokens.border,
+                    backgroundColor: isDark ? 'rgba(74, 144, 217, 0.14)' : '#E8F1FB',
+                    borderColor: '#4A90D9',
                   }}
-                  className="p-4 rounded-2xl border space-y-2.5"
+                  className="p-4 rounded-2xl border space-y-3"
                 >
-                  <div className="flex items-center gap-2 text-xs font-bold" style={{ color: tokens.textPrimary }}>
-                    <Lock size={14} style={{ color: tokens.coolBlueAccent }} />
-                    <span>هذا الفصل متاح لمشتركي باقة premium_monthly (الفصل الأول مجاني للمعاينة).</span>
+                  <div className="flex items-center gap-2 text-xs sm:text-sm font-bold" style={{ color: tokens.textPrimary }}>
+                    <Lock size={16} strokeWidth={1.9} style={{ color: '#4A90D9' }} />
+                    <span>{t('longForm.chapter2LockTitle')}</span>
                   </div>
-                  <button
-                    type="button"
-                    onClick={handleActivatePremium}
-                    style={{
-                      backgroundColor: tokens.coolBlueAccent,
-                      color: '#FFFFFF',
-                    }}
-                    className="px-4 py-2 rounded-xl text-xs font-bold cursor-pointer hover:opacity-90 min-h-[38px]"
-                  >
-                    تفعيل premium_monthly وفتح الفصول
-                  </button>
+
+                  {/* Benefits list */}
+                  <ul className="space-y-1.5">
+                    {SUBSCRIPTION_BENEFITS.map((benefit, idx) => (
+                      <li
+                        key={benefit}
+                        style={{ color: tokens.textPrimary }}
+                        className="flex items-center gap-2 text-xs font-medium"
+                      >
+                        <CheckCircle2 size={14} style={{ color: '#3DDC97' }} className="shrink-0" />
+                        <span>{t(`longForm.benefit${idx + 1}`, { defaultValue: benefit })}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  {/* Localized Play price */}
+                  <div className="text-xs font-bold font-mono" style={{ color: '#4A90D9' }}>
+                    {subDetails?.price || '$2.99'} / {t('subscription.monthly')} ({subDetails?.productId ?? 'mustakshif_premium_monthly'})
+                  </div>
+
+                  {/* Action Buttons: اشترك الآن + استعادة المشتريات */}
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <button
+                      type="button"
+                      onClick={handleActivatePremium}
+                      style={{
+                        backgroundColor: '#4A90D9',
+                        color: '#FFFFFF',
+                      }}
+                      className="flex-1 px-4 py-2.5 rounded-xl text-xs font-bold cursor-pointer hover:opacity-90 min-h-[42px]"
+                    >
+                      {t('longForm.subscribeNow') || 'اشترك الآن'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleRestorePurchases}
+                      style={{
+                        backgroundColor: tokens.card,
+                        color: isDark ? '#7FB2E8' : '#4A90D9',
+                        borderColor: '#4A90D9',
+                      }}
+                      className="flex-1 px-4 py-2.5 rounded-xl border text-xs font-bold cursor-pointer hover:opacity-90 min-h-[42px] inline-flex items-center justify-center gap-1.5"
+                    >
+                      <RotateCcw size={13} />
+                      <span>{t('longForm.restorePurchases') || 'استعادة المشتريات'}</span>
+                    </button>
+                  </div>
                 </div>
               )}
             </Card>

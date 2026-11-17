@@ -28,7 +28,6 @@ import {
 } from 'lucide-react';
 
 import { useTheme } from '../theme/ThemeContext';
-import { legacyAr as ar } from '../i18n/legacyAr';
 import { storage } from '../data/storage';
 import { getAllEntries } from '../data/seed';
 import { MythEntry } from '../data/types';
@@ -50,19 +49,33 @@ import {
 } from '../utils/studioHooks';
 
 import { useI18n } from '../i18n/i18n';
+import { getLocalizedDeepStory, getLocalizedEntry, localizeEvidenceLabel } from '../content';
+import { copyTextSafely } from '../utils/clipboard';
 export interface StudioScreenProps {
   onSelectEntry: (entry: MythEntry) => void;
 }
 
 export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => {
-  const { t } = useI18n();
+  const { t, lang, dir } = useI18n();
   const { tokens, isDark } = useTheme();
 
-  // All myth entries and deep stories
-  const allMythEntries = useMemo(() => getAllEntries(), []);
-  const deepStories = storiesData as unknown as DeepStoriesMap;
+  // Raw myth entries lookup + localized lists
+  const rawMythEntries = useMemo(() => (getAllEntries() ?? []).filter(Boolean), []);
+  const allMythEntries = useMemo(
+    () => rawMythEntries.map((m) => getLocalizedEntry(m, lang)),
+    [rawMythEntries, lang]
+  );
+  const rawStoriesMap = (storiesData ?? {}) as unknown as DeepStoriesMap;
+  const deepStories = useMemo(() => {
+    const out: DeepStoriesMap = {};
+    for (const [key, story] of Object.entries(rawStoriesMap)) {
+      const loc = getLocalizedDeepStory(story, key, lang);
+      if (loc) out[key] = loc;
+    }
+    return out;
+  }, [rawStoriesMap, lang]);
 
-  // Aggregate all hooks once
+  // Aggregate all hooks once per language
   const allHooks = useMemo(
     () => getAggregatedHooks(deepStories, allMythEntries),
     [deepStories, allMythEntries]
@@ -71,22 +84,28 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
   // Extract all unique themes
   const allThemes = useMemo(() => extractAllThemes(deepStories), [deepStories]);
 
+  // Reset theme & quote filter when language changes
+  useEffect(() => {
+    setSelectedTheme('all');
+    setQuoteTypeFilter('all');
+  }, [lang]);
+
   // Filters State
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedTheme, setSelectedTheme] = useState<string>('all');
 
   // Starred / Favorite Hooks State (persisted to storage)
   const [starredHookIds, setStarredHookIds] = useState<string[]>(() =>
-    storage.getFavoriteHooks()
+    storage.getFavoriteHooks() ?? []
   );
 
   // Starred / Favorite Quotes State (persisted to storage)
   const [starredQuoteIds, setStarredQuoteIds] = useState<string[]>(() =>
-    storage.getFavoriteQuotes()
+    storage.getFavoriteQuotes() ?? []
   );
 
   // Quotes Section Filters State
-  const [quoteTypeFilter, setQuoteTypeFilter] = useState<string>('all');
+  const [quoteTypeFilter, setQuoteTypeFilter] = useState<'all' | 'verbatim' | 'styled'>('all');
   const [quoteSearchQuery, setQuoteSearchQuery] = useState<string>('');
   const [copiedQuoteId, setCopiedQuoteId] = useState<string | null>(null);
 
@@ -94,7 +113,7 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [copiedHookId, setCopiedHookId] = useState<string | null>(null);
 
-  // مولّد فكرة حكاية State
+  // Story idea generator state
   const [generatedPrompt, setGeneratedPrompt] = useState<string | null>(null);
 
   const handleGenerateStoryIdea = () => {
@@ -105,42 +124,26 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
 
     const hookPool: string[] = [];
     Object.values(deepStories).forEach((ds) => {
-      if (ds.writingHooks) hookPool.push(...ds.writingHooks);
-      if (ds.storyHooks) hookPool.push(...ds.storyHooks);
-      if (ds.gameHooks) hookPool.push(...ds.gameHooks);
+      if (!ds) return;
+      if (Array.isArray(ds.writingHooks)) hookPool.push(...ds.writingHooks);
+      if (Array.isArray(ds.storyHooks)) hookPool.push(...ds.storyHooks);
+      if (Array.isArray(ds.gameHooks)) hookPool.push(...ds.gameHooks);
     });
     const randomHook = hookPool.length > 0
       ? hookPool[Math.floor(Math.random() * hookPool.length)]
-      : 'سر قديم يتوارثه الرعاة في ظلمات الليل';
+      : t('studio.generatorConflict');
 
-    const regions = [
-      myth1.region,
-      myth2.region,
-      'وادي عبقر',
-      'مشارف إرم ذات العماد',
-      'كثبان الربع الخالي',
-      'حصن الأبلق في تيماء',
-      'جبل قاف الأسطوري',
-      'بئر برهوت المظلم',
-      'سد مأرب العظيم',
-      'مضارب نجد وتهامة',
-    ].filter(Boolean);
-    const randomRegion = regions[Math.floor(Math.random() * regions.length)];
+    const regions = [myth1?.region, myth2?.region].filter((r): r is string => Boolean(r));
+    const randomRegion = regions[Math.floor(Math.random() * regions.length)] || '';
 
-    const promptText = `التقيا عند ${randomRegion}: ${myth1.name} و${myth2.name}، وبينهما خيط: «${randomHook}».`;
+    const promptText = `${randomRegion ? `${randomRegion} — ` : ''}${myth1?.name || ''} & ${myth2?.name || ''}: «${randomHook}»`;
     setGeneratedPrompt(promptText);
   };
 
   const handleCopyGeneratedPrompt = async () => {
     if (!generatedPrompt) return;
-    try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(generatedPrompt);
-      }
-      setToastMessage('تم نسخ فكرة الحكاية بنجاح 📜');
-    } catch {
-      setToastMessage('تم نسخ فكرة الحكاية بنجاح 📜');
-    }
+    const copied = await copyTextSafely(generatedPrompt);
+    setToastMessage(copied ? t('studio.copiedToast') : t('common.copyError'));
   };
 
   // Save starred hooks to storage whenever updated
@@ -185,102 +188,106 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
     [deepStories, allMythEntries]
   );
 
+  const isVerbatimType = (qType: string) =>
+    qType === 'نص حرفي' || qType === localizeEvidenceLabel('نص حرفي', lang);
+
   // Filtered quotes based on type filter and normalized search query
-  const filteredQuotes = useMemo(
-    () => filterQuotes(allQuotes, quoteTypeFilter, quoteSearchQuery, normalizeArabic),
-    [allQuotes, quoteTypeFilter, quoteSearchQuery]
-  );
+  const filteredQuotes = useMemo(() => {
+    const searched = filterQuotes(allQuotes, 'all', quoteSearchQuery, normalizeArabic);
+    if (quoteTypeFilter === 'all') return searched;
+    return searched.filter((q) =>
+      quoteTypeFilter === 'verbatim' ? isVerbatimType(q.type) : !isVerbatimType(q.type)
+    );
+  }, [allQuotes, quoteTypeFilter, quoteSearchQuery, lang]);
 
   // Toggle favorite status of a hook
   const handleToggleStar = (hookId: string) => {
-    setStarredHookIds((prev) =>
-      prev.includes(hookId) ? prev.filter((id) => id !== hookId) : [...prev, hookId]
-    );
+    setStarredHookIds((prev) => {
+      const list = prev ?? [];
+      return list.includes(hookId) ? list.filter((id) => id !== hookId) : [...list, hookId];
+    });
   };
 
   // Toggle favorite status of a quote
   const handleToggleStarQuote = (quoteId: string) => {
-    setStarredQuoteIds((prev) =>
-      prev.includes(quoteId) ? prev.filter((id) => id !== quoteId) : [...prev, quoteId]
-    );
+    setStarredQuoteIds((prev) => {
+      const list = prev ?? [];
+      return list.includes(quoteId) ? list.filter((id) => id !== quoteId) : [...list, quoteId];
+    });
   };
 
   // Copy individual hook to clipboard
   const handleCopyHook = async (hook: AggregatedHook) => {
-    const textToCopy = `${hook.text} — ${hook.mythName}`;
-    try {
-      if (typeof navigator !== 'undefined' && navigator.clipboard) {
-        await navigator.clipboard.writeText(textToCopy);
-      }
+    const textToCopy = `${hook?.text ?? ''} — ${hook?.mythName ?? ''}`;
+    const copied = await copyTextSafely(textToCopy);
+    if (copied) {
       setCopiedHookId(hook.id);
-      setToastMessage(ar.studio.copiedToast);
+      setToastMessage(t('studio.copiedToast'));
       setTimeout(() => {
         setCopiedHookId((prev) => (prev === hook.id ? null : prev));
       }, 2000);
-    } catch {
-      setToastMessage(ar.studio.copiedToast);
+    } else {
+      setToastMessage(t('common.copyError'));
     }
   };
 
   // Copy individual quote to clipboard: text + " — " + source
   const handleCopyQuote = async (quote: AggregatedQuote) => {
     const textToCopy = formatQuoteForCopy(quote);
-    try {
-      if (typeof navigator !== 'undefined' && navigator.clipboard) {
-        await navigator.clipboard.writeText(textToCopy);
-      }
+    const copied = await copyTextSafely(textToCopy);
+    if (copied) {
       setCopiedQuoteId(quote.id);
-      setToastMessage(ar.studio.quotesCopiedToast);
+      setToastMessage(t('studio.quotesCopiedToast'));
       setTimeout(() => {
         setCopiedQuoteId((prev) => (prev === quote.id ? null : prev));
       }, 2000);
-    } catch {
-      setToastMessage(ar.studio.quotesCopiedToast);
+    } else {
+      setToastMessage(t('common.copyError'));
     }
   };
 
   // Export all starred hooks as one plain-text list (hook + myth name)
   const handleExportSelected = async () => {
-    const starredHooksList = allHooks.filter((h) => starredHookIds.includes(h.id));
+    const starredHooksList = allHooks.filter((h) => (starredHookIds ?? []).includes(h.id));
 
     if (starredHooksList.length === 0) {
-      setToastMessage(ar.studio.noSelectedToast);
+      setToastMessage(t('studio.noSelectedToast'));
       return;
     }
 
     const exportContent = formatHooksForExport(starredHooksList);
 
-    // 1. Copy to clipboard
-    try {
-      if (typeof navigator !== 'undefined' && navigator.clipboard) {
-        await navigator.clipboard.writeText(exportContent);
-      }
-    } catch {
-      // Fallback if clipboard fails
-    }
+    // 1. Copy to clipboard (best-effort)
+    const copied = await copyTextSafely(exportContent);
 
     // 2. Download as .txt file
+    let downloaded = false;
+    let url: string | null = null;
     try {
       const blob = new Blob([exportContent], { type: 'text/plain;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
+      url = URL.createObjectURL(blob);
       const downloadLink = document.createElement('a');
       downloadLink.href = url;
-      downloadLink.download = 'افكار_الاستوديو_المختارة.txt';
+      downloadLink.download = 'mustakshif_studio_ideas.txt';
       document.body.appendChild(downloadLink);
       downloadLink.click();
       document.body.removeChild(downloadLink);
-      URL.revokeObjectURL(url);
-    } catch {
-      // Fallback
+      downloaded = true;
+    } catch (err) {
+      console.warn('[StudioScreen] Export file download failed:', err);
+    } finally {
+      if (url) {
+        URL.revokeObjectURL(url);
+      }
     }
 
-    // 3. Show verbatim required toast: "تم تصدير أفكارك"
-    setToastMessage(ar.studio.exportToast);
+    // 3. Show honest feedback toast
+    setToastMessage(copied || downloaded ? t('studio.exportToast') : t('common.copyError'));
   };
 
   // Navigate to myth Article
   const handleNavigateToMyth = (mythId: string) => {
-    const myth = resolveMythForStoryKey(mythId, allMythEntries);
+    const myth = resolveMythForStoryKey(mythId, rawMythEntries);
     if (myth) {
       onSelectEntry(myth);
     }
@@ -296,7 +303,7 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
   const hasNoResults = gameHooks.length === 0 && writingHooks.length === 0;
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-200">
+    <div className="space-y-6 animate-in fade-in duration-200" dir={dir}>
       {/* Toast Notification */}
       {toastMessage && (
         <div
@@ -345,25 +352,25 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
               }}
             >
               <Sparkles size={12} />
-              <span>مختبر السرد والتصميم</span>
+              <span>{t('studio.hooksTab')}</span>
             </div>
             <h2
               style={{ color: tokens.deepAccent }}
               className="text-2xl font-bold font-['Aref_Ruqaa',serif] leading-tight"
             >
-              {ar.studio.title}
+              {t('studio.title')}
             </h2>
             <p style={{ color: tokens.textSecondary }} className="text-xs leading-relaxed max-w-sm">
-              {ar.studio.subtitle}
+              {t('studio.subtitle')}
             </p>
           </div>
 
-          {/* Action: تصدير المختار */}
+          {/* Action */}
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={handleExportSelected}
-              aria-label={ar.studio.exportSelected}
+              aria-label={t('studio.exportSelected')}
               style={{
                 backgroundColor: tokens.deepAccent,
                 color: isDark ? '#0B2420' : '#FFFFFF',
@@ -371,8 +378,8 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl font-bold text-xs shadow-md hover:opacity-90 transition-all active:scale-95 cursor-pointer min-h-[44px]"
             >
               <Download size={15} />
-              <span>{ar.studio.exportSelected}</span>
-              {starredHookIds.length > 0 && (
+              <span>{t('studio.exportSelected')}</span>
+              {(starredHookIds ?? []).length > 0 && (
                 <span
                   style={{
                     backgroundColor: isDark ? '#0B2420' : '#FFFFFF',
@@ -380,7 +387,7 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
                   }}
                   className="px-1.5 py-0.2 rounded-full text-[10px] font-extrabold"
                 >
-                  {starredHookIds.length}
+                  {(starredHookIds ?? []).length}
                 </span>
               )}
             </button>
@@ -388,7 +395,7 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
         </div>
       </section>
 
-      {/* مولّد فكرة حكاية Generator Card */}
+      {/* Story Idea Generator Card */}
       <section
         style={{
           backgroundColor: tokens.card,
@@ -412,10 +419,10 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
                 style={{ color: tokens.deepAccent }}
                 className="font-['Aref_Ruqaa',serif] text-xl font-bold leading-tight"
               >
-                مولّد فكرة حكاية
+                {t('studio.ideaGenerator')}
               </h3>
               <p style={{ color: tokens.textSecondary }} className="text-xs">
-                امزج أسطورتين مع خيط سردي وموقع تراثي لإلهام روايتك أو لعبتك
+                {t('studio.generatorSubtitle')}
               </p>
             </div>
           </div>
@@ -430,7 +437,7 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
             className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl font-bold text-xs shadow-md hover:opacity-90 active:scale-95 transition-all cursor-pointer min-h-[44px]"
           >
             <Sparkles size={15} />
-            <span>{generatedPrompt ? 'توليد فكرة جديدة' : 'ولّد فكرة حكاية'}</span>
+            <span>{t('studio.generateIdea')}</span>
           </button>
         </div>
 
@@ -444,7 +451,7 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
           >
             <p
               style={{ color: tokens.textPrimary }}
-              className="font-['Amiri',serif] text-base sm:text-lg leading-relaxed text-right font-medium"
+              className="font-['Amiri',serif] text-base sm:text-lg leading-relaxed text-start font-medium"
             >
               {generatedPrompt}
             </p>
@@ -457,7 +464,7 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
                 className="inline-flex items-center gap-1.5 text-xs font-bold hover:underline cursor-pointer min-h-[36px]"
               >
                 <RotateCcw size={14} />
-                <span>إعادة التوليد</span>
+                <span>{t('studio.generateIdea')}</span>
               </button>
 
               <button
@@ -471,7 +478,7 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold shadow-2xs hover:opacity-90 transition-all cursor-pointer min-h-[36px]"
               >
                 <Copy size={14} />
-                <span>نسخ الفكرة</span>
+                <span>{t('studio.copyIdea')}</span>
               </button>
             </div>
           </div>
@@ -484,7 +491,7 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
         <div>
           <div className="flex items-center justify-between mb-2 px-1">
             <span style={{ color: tokens.textSecondary }} className="text-xs font-semibold">
-              التصنيف:
+              {t('studio.categoryFilterLabel')}
             </span>
             {isFilterActive && (
               <button
@@ -493,7 +500,7 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
                 style={{ color: tokens.deepAccent }}
                 className="text-[11px] underline cursor-pointer hover:opacity-80"
               >
-                إعادة التعيين
+                {t('library.resetFilters')}
               </button>
             )}
           </div>
@@ -506,9 +513,7 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
                   type="button"
                   onClick={() => setSelectedCategory(cat.id)}
                   style={{
-                    backgroundColor: isActive
-                      ? (isDark ? tokens.deepAccent : tokens.deepAccent)
-                      : tokens.card,
+                    backgroundColor: isActive ? tokens.deepAccent : tokens.card,
                     color: isActive
                       ? (isDark ? '#0B2420' : '#FFFFFF')
                       : tokens.textSecondary,
@@ -516,7 +521,7 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
                   }}
                   className="shrink-0 px-3 py-1.5 rounded-2xl text-xs font-bold border transition-all cursor-pointer hover:opacity-90 active:scale-95"
                 >
-                  {cat.label}
+                  {t(`studio.cat.${cat.id}`)}
                 </button>
               );
             })}
@@ -534,7 +539,7 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
           <Layers size={16} style={{ color: tokens.deepAccent }} className="shrink-0" />
           <div className="flex-1 flex items-center justify-between gap-2 min-w-0">
             <label htmlFor="theme-filter-select" style={{ color: tokens.textSecondary }} className="text-xs font-medium shrink-0">
-              الثيم السردي:
+              {t('studio.themeFilterLabel')}
             </label>
             <select
               id="theme-filter-select"
@@ -547,7 +552,7 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
               }}
               className="flex-1 text-xs py-1.5 px-3 rounded-xl border focus:outline-hidden font-['Cairo',sans-serif] cursor-pointer"
             >
-              <option value="all">{ar.studio.allThemesOption}</option>
+              <option value="all">{t('studio.allThemesOption')}</option>
               {allThemes.map((theme) => (
                 <option key={theme} value={theme}>
                   {theme}
@@ -581,7 +586,7 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
             style={{ color: tokens.textPrimary }}
             className="text-sm font-bold font-['Aref_Ruqaa',serif]"
           >
-            {ar.studio.emptyMessage}
+            {t('studio.emptyMessage')}
           </p>
           <button
             type="button"
@@ -592,7 +597,7 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
             }}
             className="px-4 py-2 rounded-xl text-xs font-bold hover:opacity-80 transition-all cursor-pointer"
           >
-            عرض جميع الأفكار
+            {t('library.resetFilters')}
           </button>
         </div>
       ) : (
@@ -632,7 +637,7 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
 
               <div className="space-y-3">
                 {gameHooks.map((hook) => {
-                  const isStarred = starredHookIds.includes(hook.id);
+                  const isStarred = (starredHookIds ?? []).includes(hook.id);
                   const isCopied = copiedHookId === hook.id;
 
                   return (
@@ -651,7 +656,7 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
                         style={{ color: tokens.textPrimary }}
                         className="text-xs leading-relaxed font-medium"
                       >
-                        {hook.text}
+                        {hook?.text ?? ''}
                       </p>
 
                       {/* Card Bottom Meta & Actions */}
@@ -670,11 +675,11 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
                             color: tokens.deepAccent,
                           }}
                           className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[11px] font-bold hover:opacity-80 transition-all cursor-pointer min-h-[32px]"
-                          title="عرض الأسطورة الكاملة"
+                          title={t('article.readStory')}
                         >
                           <BookOpen size={12} />
-                          <span>{hook.mythName}</span>
-                          <ChevronLeft size={12} />
+                          <span>{hook?.mythName ?? ''}</span>
+                          <ChevronLeft size={12} className={dir === 'ltr' ? 'rotate-180' : ''} />
                         </button>
 
                         {/* Action buttons: Star & Copy */}
@@ -682,11 +687,11 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
                           <button
                             type="button"
                             onClick={() => handleToggleStar(hook.id)}
-                            aria-label={isStarred ? 'إزالة من المفضلة' : 'إضافة إلى المفضلة'}
+                            aria-label={isStarred ? t('article.bookmarkRemove') : t('article.bookmarkAdd')}
                             style={{
-                              color: isStarred ? '#E5A93C' : tokens.textSecondary,
+                              color: isStarred ? tokens.coolBlueAccent : tokens.textSecondary,
                               backgroundColor: isStarred
-                                ? (isDark ? 'rgba(229, 169, 60, 0.2)' : 'rgba(229, 169, 60, 0.15)')
+                                ? (isDark ? 'rgba(127, 178, 232, 0.2)' : 'rgba(74, 144, 217, 0.14)')
                                 : 'transparent',
                             }}
                             className="p-2 rounded-xl transition-all hover:scale-105 active:scale-95 cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center"
@@ -697,7 +702,7 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
                           <button
                             type="button"
                             onClick={() => handleCopyHook(hook)}
-                            aria-label="نسخ الفكرة"
+                            aria-label={t('studio.copyBtn')}
                             style={{
                               color: isCopied ? tokens.deepAccent : tokens.textSecondary,
                               backgroundColor: isCopied
@@ -752,7 +757,7 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
 
               <div className="space-y-3">
                 {writingHooks.map((hook) => {
-                  const isStarred = starredHookIds.includes(hook.id);
+                  const isStarred = (starredHookIds ?? []).includes(hook.id);
                   const isCopied = copiedHookId === hook.id;
 
                   return (
@@ -771,7 +776,7 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
                         style={{ color: tokens.textPrimary }}
                         className="text-xs leading-relaxed font-medium"
                       >
-                        {hook.text}
+                        {hook?.text ?? ''}
                       </p>
 
                       {/* Card Bottom Meta & Actions */}
@@ -790,11 +795,11 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
                             color: tokens.coolBlueAccent,
                           }}
                           className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[11px] font-bold hover:opacity-80 transition-all cursor-pointer min-h-[32px]"
-                          title="عرض الأسطورة الكاملة"
+                          title={t('article.readStory')}
                         >
                           <BookOpen size={12} />
-                          <span>{hook.mythName}</span>
-                          <ChevronLeft size={12} />
+                          <span>{hook?.mythName ?? ''}</span>
+                          <ChevronLeft size={12} className={dir === 'ltr' ? 'rotate-180' : ''} />
                         </button>
 
                         {/* Action buttons: Star & Copy */}
@@ -802,11 +807,11 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
                           <button
                             type="button"
                             onClick={() => handleToggleStar(hook.id)}
-                            aria-label={isStarred ? 'إزالة من المفضلة' : 'إضافة إلى المفضلة'}
+                            aria-label={isStarred ? t('article.bookmarkRemove') : t('article.bookmarkAdd')}
                             style={{
-                              color: isStarred ? '#E5A93C' : tokens.textSecondary,
+                              color: isStarred ? tokens.coolBlueAccent : tokens.textSecondary,
                               backgroundColor: isStarred
-                                ? (isDark ? 'rgba(229, 169, 60, 0.2)' : 'rgba(229, 169, 60, 0.15)')
+                                ? (isDark ? 'rgba(127, 178, 232, 0.2)' : 'rgba(74, 144, 217, 0.14)')
                                 : 'transparent',
                             }}
                             className="p-2 rounded-xl transition-all hover:scale-105 active:scale-95 cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center"
@@ -817,7 +822,7 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
                           <button
                             type="button"
                             onClick={() => handleCopyHook(hook)}
-                            aria-label="نسخ الفكرة"
+                            aria-label={t('studio.copyBtn')}
                             style={{
                               color: isCopied ? tokens.deepAccent : tokens.textSecondary,
                               backgroundColor: isCopied
@@ -845,7 +850,7 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
         className="border-t my-8"
       />
 
-      {/* SECTION 3: منتزه الاقتباسات (Quote Promenade) */}
+      {/* SECTION 3: Quote Promenade */}
       <section className="space-y-4 pt-1 pb-4">
         {/* Section Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-1">
@@ -864,13 +869,13 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
                 style={{ color: tokens.textPrimary }}
                 className="font-['Aref_Ruqaa',serif] text-xl font-bold leading-tight"
               >
-                {ar.studio.quotesSectionTitle}
+                {t('studio.quotesSectionTitle')}
               </h3>
               <p
                 style={{ color: tokens.textSecondary }}
                 className="text-[11px] font-medium"
               >
-                {ar.studio.quotesSubtitle}
+                {t('studio.quotesSubtitle')}
               </p>
             </div>
           </div>
@@ -882,7 +887,7 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
             }}
             className="self-start sm:self-auto px-2.5 py-0.5 rounded-full text-[11px] font-semibold border"
           >
-            {filteredQuotes.length} من {allQuotes.length} اقتباس
+            {t('studio.quotesCount', { count: filteredQuotes.length })} / {allQuotes.length}
           </span>
         </div>
 
@@ -901,18 +906,18 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
               type="text"
               value={quoteSearchQuery}
               onChange={(e) => setQuoteSearchQuery(e.target.value)}
-              placeholder={ar.studio.quotesSearchPlaceholder}
+              placeholder={t('studio.quotesSearchPlaceholder')}
               style={{
                 color: tokens.textPrimary,
               }}
               className="w-full bg-transparent text-xs py-1.5 focus:outline-hidden placeholder:text-neutral-400 font-['Cairo',sans-serif]"
-              dir="rtl"
+              dir={dir}
             />
             {quoteSearchQuery && (
               <button
                 type="button"
                 onClick={() => setQuoteSearchQuery('')}
-                aria-label="مسح البحث"
+                aria-label={t('home.clearSearch')}
                 style={{ color: tokens.textSecondary }}
                 className="p-1 rounded-lg hover:opacity-80 cursor-pointer"
               >
@@ -921,12 +926,12 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
             )}
           </div>
 
-          {/* Type Filter Chips: الكل / نص حرفي / بأسلوب المصدر */}
+          {/* Type Filter Chips */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
             {[
-              { id: 'all', label: t('map.all'), isAdaptive: false },
-              { id: 'نص حرفي', label: ar.studio.quotesFilterLiteral, isAdaptive: false },
-              { id: 'بأسلوب المصدر', label: ar.studio.quotesFilterAdaptive, isAdaptive: true },
+              { id: 'all' as const, label: t('studio.quotesFilterAll'), isAdaptive: false },
+              { id: 'verbatim' as const, label: t('studio.quotesFilterLiteral'), isAdaptive: false },
+              { id: 'styled' as const, label: t('studio.quotesFilterAdaptive'), isAdaptive: true },
             ].map((chip) => {
               const isActive = quoteTypeFilter === chip.id;
               return (
@@ -978,7 +983,7 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
               style={{ color: tokens.textPrimary }}
               className="text-xs font-bold font-['Aref_Ruqaa',serif]"
             >
-              {ar.studio.quotesEmptyMessage}
+              {t('studio.quotesEmptyMessage')}
             </p>
             {(quoteSearchQuery || quoteTypeFilter !== 'all') && (
               <button
@@ -993,16 +998,16 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
                 }}
                 className="px-3 py-1.5 rounded-xl text-xs font-bold hover:opacity-80 transition-all cursor-pointer mt-1"
               >
-                مسح عوامل التصفية
+                {t('library.resetFilters')}
               </button>
             )}
           </div>
         ) : (
           <div className="space-y-3.5">
             {filteredQuotes.map((quote) => {
-              const isStarred = starredQuoteIds.includes(quote.id);
+              const isStarred = (starredQuoteIds ?? []).includes(quote.id);
               const isCopied = copiedQuoteId === quote.id;
-              const isLiteral = quote.type === 'نص حرفي';
+              const isLiteral = isVerbatimType(quote?.type ?? '');
 
               return (
                 <div
@@ -1017,7 +1022,6 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
                 >
                   {/* Top card row: Type pill and actions */}
                   <div className="flex items-center justify-between gap-2">
-                    {/* Type pill: "نص حرفي" mint / "بأسلوب المصدر" blue */}
                     <span
                       style={{
                         backgroundColor: isLiteral
@@ -1030,7 +1034,7 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
                       }}
                       className="px-2.5 py-0.5 rounded-full text-[11px] font-bold border"
                     >
-                      {quote.type}
+                      {localizeEvidenceLabel(quote?.type || 'نص حرفي', lang)}
                     </span>
 
                     {/* Star & Copy action buttons */}
@@ -1038,15 +1042,15 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
                       <button
                         type="button"
                         onClick={() => handleToggleStarQuote(quote.id)}
-                        aria-label={isStarred ? 'إزالة الاقتباس من المفضلة' : 'حفظ الاقتباس في المفضلة'}
+                        aria-label={isStarred ? t('article.bookmarkRemove') : t('article.bookmarkAdd')}
                         style={{
-                          color: isStarred ? '#E5A93C' : tokens.textSecondary,
+                          color: isStarred ? tokens.coolBlueAccent : tokens.textSecondary,
                           backgroundColor: isStarred
-                            ? (isDark ? 'rgba(229, 169, 60, 0.2)' : 'rgba(229, 169, 60, 0.15)')
+                            ? (isDark ? 'rgba(127, 178, 232, 0.2)' : 'rgba(74, 144, 217, 0.14)')
                             : 'transparent',
                         }}
                         className="p-1.5 rounded-xl transition-all hover:scale-105 active:scale-95 cursor-pointer min-h-[32px] min-w-[32px] flex items-center justify-center"
-                        title={isStarred ? 'في المفضلة' : 'إضافة للمفضلة'}
+                        title={isStarred ? t('article.saved') : t('article.save')}
                       >
                         <Star size={15} className={isStarred ? 'fill-current' : ''} />
                       </button>
@@ -1054,7 +1058,7 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
                       <button
                         type="button"
                         onClick={() => handleCopyQuote(quote)}
-                        aria-label="نسخ الاقتباس"
+                        aria-label={t('article.copyQuote')}
                         style={{
                           color: isCopied ? tokens.deepAccent : tokens.textSecondary,
                           backgroundColor: isCopied
@@ -1062,22 +1066,22 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
                             : 'transparent',
                         }}
                         className="p-1.5 rounded-xl transition-all hover:scale-105 active:scale-95 cursor-pointer min-h-[32px] min-w-[32px] flex items-center justify-center"
-                        title="نسخ الاقتباس والمصدر"
+                        title={t('article.copyQuote')}
                       >
                         {isCopied ? <Check size={15} /> : <Copy size={15} />}
                       </button>
                     </div>
                   </div>
 
-                  {/* Quote text in serif Arabic style (Amiri) */}
+                  {/* Quote text */}
                   <blockquote
                     style={{
                       color: tokens.textPrimary,
-                      borderRightColor: isLiteral ? tokens.deepAccent : tokens.coolBlueAccent,
+                      borderInlineStartColor: isLiteral ? tokens.deepAccent : tokens.coolBlueAccent,
                     }}
-                    className="font-['Amiri',serif] text-sm sm:text-base leading-relaxed pr-3 border-r-2 my-1"
+                    className="font-['Amiri',serif] text-sm sm:text-base leading-relaxed ps-3 border-s-2 my-1"
                   >
-                    «{quote.text}»
+                    «{quote?.text ?? ''}»
                   </blockquote>
 
                   {/* Source line beneath quote and myth navigation */}
@@ -1087,7 +1091,7 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
                   >
                     <div className="flex items-center gap-1.5 text-xs">
                       <span style={{ color: tokens.textSecondary }} className="font-medium text-[11px]">
-                        المصدر: {quote.source}
+                        {t('article.sourceLabel')} {quote?.source || t('common.unknownAuthor')}
                       </span>
                     </div>
 
@@ -1102,11 +1106,11 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
                         color: tokens.deepAccent,
                       }}
                       className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[11px] font-bold hover:opacity-80 transition-all cursor-pointer min-h-[28px]"
-                      title="عرض الأسطورة الكاملة"
+                      title={t('article.readStory')}
                     >
                       <BookOpen size={11} />
-                      <span>{quote.mythName}</span>
-                      <ChevronLeft size={11} />
+                      <span>{quote?.mythName ?? ''}</span>
+                      <ChevronLeft size={11} className={dir === 'ltr' ? 'rotate-180' : ''} />
                     </button>
                   </div>
                 </div>

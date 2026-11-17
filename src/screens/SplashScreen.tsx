@@ -11,6 +11,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Logo } from '../components/primitives/Logo';
+import { useI18n } from '../i18n/i18n';
 
 export interface SplashScreenProps {
   onFinish?: () => void;
@@ -21,15 +22,14 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
   onFinish,
   durationMs = 1500,
 }) => {
+  const { t, lang, dir } = useI18n();
   const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
-    // Begin smooth fade-out slightly before duration ends
     const fadeOutTimer = setTimeout(() => {
       setIsClosing(true);
     }, Math.max(0, durationMs - 250));
 
-    // Complete transition and trigger onFinish
     const finishTimer = setTimeout(() => {
       onFinish?.();
     }, durationMs);
@@ -42,11 +42,12 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
 
   return (
     <div
-      dir="rtl"
-      lang="ar"
+      /* dir="rtl" default */
+      dir={dir}
+      lang={lang}
       role="status"
       aria-live="polite"
-      aria-label="شاشة التحميل لمستكشف"
+      aria-label={t('splash.ariaLabel')}
       className={`fixed inset-0 z-50 bg-[#FFFFFF] flex flex-col items-center justify-center p-6 select-none transition-opacity duration-300 ease-in-out ${
         isClosing ? 'opacity-0 pointer-events-none' : 'opacity-100'
       }`}
@@ -59,14 +60,14 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
           <Logo size={100} className="relative z-10" />
         </div>
 
-        {/* App Title in Decorative Arabic Display Font (Aref Ruqaa) in Deep Teal */}
+        {/* App Title */}
         <h1 className="font-['Aref_Ruqaa',serif] text-4xl sm:text-5xl font-bold text-[#0E5C4D] tracking-wide leading-tight mb-2">
-          مستكشف
+          {t('splash.title')}
         </h1>
 
-        {/* Tagline in Muted Gray-Teal Font */}
+        {/* Tagline */}
         <p className="font-['Cairo',sans-serif] text-sm sm:text-base font-medium text-[#6B7C78] tracking-normal">
-          موسوعة الأساطير والحضارات العربية
+          {t('splash.tagline') || 'موسوعة الأساطير والحضارات العربية'}
         </p>
 
         {/* Minimal geometric accent bar */}

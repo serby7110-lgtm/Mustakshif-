@@ -44,7 +44,7 @@ export const legacyAr = {
     rituals: 'مقتنيات وطقوس',
     ritualsSub: 'النيران والقرابين والكهانة',
     places: 'أماكن وممالك',
-    placesSub: 'إرم وقاف وجزر الوقواق',
+    placesSub: 'إرم وقاف وجزر الواق الواق',
     heroes: 'فرسان وأبطال',
     heroesSub: 'سير الشجاعة والملاحم القديمة',
     personalities: 'الشخصيات',

@@ -34,7 +34,7 @@ test('All entries strictly adhere to the MythEntry schema', () => {
     assert.ok(entry.name && entry.name.trim().length > 0, `Missing name for ${entry.id}`);
     assert.ok(validCategories.has(entry.category), `Invalid category ${entry.category} for ${entry.id}`);
     assert.ok(entry.typeLabel && entry.typeLabel.trim().length > 0, `Missing typeLabel for ${entry.id}`);
-    assert.ok(entry.heroImage && (entry.heroImage.startsWith('http') || entry.heroImage.startsWith('/src/assets/')), `Missing or invalid heroImage for ${entry.id}`);
+    assert.ok(entry.heroImage && (entry.heroImage.startsWith('http') || entry.heroImage.startsWith('/src/assets/') || entry.heroImage.startsWith('images/') || entry.heroImage.startsWith('/images/')), `Missing or invalid heroImage for ${entry.id}`);
     assert.ok(entry.summary && entry.summary.trim().length > 0, `Missing summary for ${entry.id}`);
     assert.ok(Array.isArray(entry.body) && entry.body.length > 0, `Missing body for ${entry.id}`);
     assert.ok(Array.isArray(entry.sources) && entry.sources.length > 0, `Missing sources for ${entry.id}`);

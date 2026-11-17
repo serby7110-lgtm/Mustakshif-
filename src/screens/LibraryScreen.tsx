@@ -33,7 +33,6 @@ import mythsData from '../data/myths.json';
 import { LONG_FORM_ENTRIES, toLibraryMythEntry } from '../data/longForm';
 import { hasDeepStory } from '../data/storyTypes';
 import { getEstimatedReadingTime, formatReadingTime } from '../utils/readingTime';
-import { legacyAr as ar } from '../i18n/legacyAr';
 import { normalizeArabic } from '../utils/arabicSearch';
 import { useTheme } from '../theme/ThemeContext';
 import { storage } from '../data/storage';
@@ -46,9 +45,10 @@ import {
   getReadingStatus,
 } from '../utils/libraryAndProfile';
 import { SurpriseMeButton } from '../components/primitives/SurpriseMeButton';
+import { LockedHeroImage, PremiumPill } from '../components/primitives/LockedMediaBadges';
 import { useDebounce } from '../hooks/useDebounce';
-
 import { useI18n } from '../i18n/i18n';
+import { getLocalizedEntry } from '../content';
 export interface LibraryScreenProps {
   onSelectEntry: (entry: MythEntry) => void;
   savedIds?: string[];
@@ -56,13 +56,16 @@ export interface LibraryScreenProps {
   onToggleSave?: (id: string, e?: React.MouseEvent) => void;
   onClearHistory?: () => void;
   onExploreClick?: () => void;
+  isPremiumActive?: boolean;
 }
 
 export const LibraryScreen: React.FC<LibraryScreenProps> = ({
   onSelectEntry,
+  isPremiumActive,
 }) => {
-  const { t, dir } = useI18n();
+  const { t, lang, dir } = useI18n();
   const { tokens, isDark } = useTheme();
+  const effectivePremium = isPremiumActive ?? storage.hasPremiumMonthly();
 
   // Segmented control: 'myths' | 'studio'
   const [activeSegment, setActiveSegment] = useState<'myths' | 'studio'>('myths');
@@ -102,15 +105,28 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
     storage.setLibraryViewMode(mode);
   };
 
-  // All entries from myths.json merged with long-form entries
-  const allMyths = useMemo(() => {
-    const base = mythsData as unknown as MythEntry[];
-    const seen = new Set(base.map((m) => m.id));
-    const longFormExtras = LONG_FORM_ENTRIES.filter((lf) => !seen.has(lf.id)).map(
-      toLibraryMythEntry
-    );
-    return [...base, ...longFormExtras];
+  // All raw entries from myths.json merged with long-form entries
+  const rawAllMyths = useMemo(() => {
+    const base = Array.isArray(mythsData) ? (mythsData as unknown as MythEntry[]) : [];
+    const seen = new Set(base.map((m) => m?.id).filter((id): id is string => Boolean(id)));
+    const longFormExtras = (Array.isArray(LONG_FORM_ENTRIES) ? LONG_FORM_ENTRIES : [])
+      .filter((lf) => lf?.id && !seen.has(lf.id))
+      .map(toLibraryMythEntry);
+    return [...base.filter(Boolean), ...longFormExtras];
   }, []);
+
+  const rawById = useMemo(() => {
+    const map = new Map<string, MythEntry>();
+    rawAllMyths.forEach((m) => {
+      if (m?.id) map.set(m.id, m);
+    });
+    return map;
+  }, [rawAllMyths]);
+
+  // Localized entries for display
+  const allMyths = useMemo(() => {
+    return rawAllMyths.map((m) => getLocalizedEntry(m, lang));
+  }, [rawAllMyths, lang]);
 
   // Calculate counts for each reading status
   const statusCounts = useMemo(() => {
@@ -119,6 +135,7 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
     let completed = 0;
 
     for (const m of allMyths) {
+      if (!m?.id) continue;
       const st = getReadingStatus(m.id, progressMap);
       if (st === 'reading') reading++;
       else if (st === 'completed') completed++;
@@ -128,26 +145,33 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
     return { all: allMyths.length, unread, reading, completed };
   }, [allMyths, progressMap]);
 
-  // Search filtering with 300ms debounced query and normalized index
+  // Search filtering across both localized & raw Arabic fields
   const searchFilteredMyths = useMemo(() => {
     const q = debouncedSearchQuery.trim();
     if (!q) return allMyths;
     const normQ = normalizeArabic(q);
+    const lowerQ = q.toLowerCase();
     return allMyths.filter((entry) => {
-      const normName = normalizeArabic(entry.name);
-      const normSummary = normalizeArabic(entry.summary || '');
-      const latin = (entry.latinName || '').toLowerCase();
-      const tags = (entry.tags || []).map((t) => normalizeArabic(t));
-      const normRegion = normalizeArabic(entry.region || '');
+      if (!entry) return false;
+      const raw = rawById.get(entry.id);
+      const normName = normalizeArabic(entry.name ?? '');
+      const normSummary = normalizeArabic(entry.summary ?? '');
+      const latin = (entry.latinName ?? '').toLowerCase();
+      const tags = (Array.isArray(entry.tags) ? entry.tags : []).map((tg) => normalizeArabic(tg));
+      const normRegion = normalizeArabic(entry.region ?? '');
+      const rawText = raw
+        ? normalizeArabic(`${raw.name ?? ''} ${raw.summary ?? ''} ${raw.region ?? ''} ${(Array.isArray(raw.tags) ? raw.tags : []).join(' ')}`)
+        : '';
       return (
         normName.includes(normQ) ||
         normSummary.includes(normQ) ||
         normRegion.includes(normQ) ||
-        latin.includes(q.toLowerCase()) ||
-        tags.some((t) => t.includes(normQ))
+        latin.includes(lowerQ) ||
+        tags.some((tg) => tg.includes(normQ)) ||
+        rawText.includes(normQ)
       );
     });
-  }, [allMyths, debouncedSearchQuery]);
+  }, [allMyths, rawById, debouncedSearchQuery]);
 
   // Status filtering
   const statusFilteredMyths = useMemo(() => {
@@ -196,13 +220,13 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
             style={{ color: tokens.deepAccent }}
             className="font-['Aref_Ruqaa',serif] text-2xl sm:text-3xl font-bold leading-tight"
           >
-            {ar.library.title}
+            {t('library.title')}
           </h2>
           <p
             style={{ color: tokens.textSecondary }}
             className="text-xs font-['Cairo',sans-serif] mt-0.5"
           >
-            جميع الأساطير والخرافات الموثقة ({allMyths.length} أسطورة)
+            {t('library.subtitle', { count: allMyths.length })}
           </p>
         </div>
         <div
@@ -272,7 +296,7 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
         >
           <div
             style={{ color: tokens.deepAccent }}
-            className="pr-3.5 pl-2"
+            className="ps-3.5 pe-2"
           >
             <Search size={18} strokeWidth={2.2} />
           </div>
@@ -280,19 +304,19 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="ابحث في جميع الأساطير (بالاسم، الملخص، أو الكلمات الدلالية)..."
+            placeholder={t('library.searchPlaceholder')}
             style={{
               color: tokens.textPrimary,
             }}
-            className="w-full py-3 pl-10 pr-1 text-sm bg-transparent outline-none font-['Cairo',sans-serif] min-h-[44px]"
+            className="w-full py-3 pe-10 ps-1 text-sm bg-transparent outline-none font-['Cairo',sans-serif] min-h-[44px]"
           />
           {searchQuery && (
             <button
               type="button"
               onClick={() => setSearchQuery('')}
               style={{ color: tokens.textSecondary }}
-              className="absolute left-3 p-1 rounded-full hover:opacity-80 cursor-pointer"
-              aria-label="مسح البحث"
+              className="absolute end-3 p-1 rounded-full hover:opacity-80 cursor-pointer"
+              aria-label={t('home.clearSearch')}
             >
               <X size={16} />
             </button>
@@ -301,9 +325,9 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
         {searchQuery.trim() && (
           <div
             style={{ color: tokens.textSecondary }}
-            className="mt-1 text-[11px] pr-2"
+            className="mt-1 text-[11px] ps-2"
           >
-            عرض {finalSortedMyths.length} من أصل {allMyths.length} أسطورة
+            {t('library.resultsShown', { shown: finalSortedMyths.length, total: allMyths.length })}
           </div>
         )}
       </div>
@@ -312,7 +336,6 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
       <div className="space-y-2.5">
         {/* Reading Status Filter Chips */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar -mx-1 px-1">
-          {/* الكل */}
           <button
             type="button"
             onClick={() => setStatusFilter('all')}
@@ -327,11 +350,10 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
             }}
             className="shrink-0 px-3 py-1.5 rounded-2xl text-xs font-bold border transition-all cursor-pointer hover:opacity-90 active:scale-95"
           >
-            <span>{t('map.all')}</span>
-            <span className="text-[10px] mr-1 opacity-80">({statusCounts.all})</span>
+            <span>{t('library.statusAll')}</span>
+            <span className="text-[10px] ms-1 opacity-80">({statusCounts.all})</span>
           </button>
 
-          {/* لم أقرأ */}
           <button
             type="button"
             onClick={() => setStatusFilter('unread')}
@@ -346,11 +368,10 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
             }}
             className="shrink-0 px-3 py-1.5 rounded-2xl text-xs font-bold border transition-all cursor-pointer hover:opacity-90 active:scale-95"
           >
-            <span>لم أقرأ</span>
-            <span className="text-[10px] mr-1 opacity-80">({statusCounts.unread})</span>
+            <span>{t('library.statusUnread')}</span>
+            <span className="text-[10px] ms-1 opacity-80">({statusCounts.unread})</span>
           </button>
 
-          {/* أقرأ الآن */}
           <button
             type="button"
             onClick={() => setStatusFilter('reading')}
@@ -366,11 +387,10 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
             className="shrink-0 px-3 py-1.5 rounded-2xl text-xs font-bold border transition-all cursor-pointer hover:opacity-90 active:scale-95 flex items-center gap-1"
           >
             <Clock size={12} />
-            <span>أقرأ الآن</span>
-            <span className="text-[10px] mr-1 opacity-80">({statusCounts.reading})</span>
+            <span>{t('library.statusReading')}</span>
+            <span className="text-[10px] ms-1 opacity-80">({statusCounts.reading})</span>
           </button>
 
-          {/* انتهيت */}
           <button
             type="button"
             onClick={() => setStatusFilter('completed')}
@@ -386,8 +406,8 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
             className="shrink-0 px-3 py-1.5 rounded-2xl text-xs font-bold border transition-all cursor-pointer hover:opacity-90 active:scale-95 flex items-center gap-1"
           >
             <CheckCircle2 size={12} />
-            <span>انتهيت</span>
-            <span className="text-[10px] mr-1 opacity-80">({statusCounts.completed})</span>
+            <span>{t('library.statusCompleted')}</span>
+            <span className="text-[10px] ms-1 opacity-80">({statusCounts.completed})</span>
           </button>
         </div>
 
@@ -403,7 +423,7 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
           >
             <ArrowUpDown size={14} style={{ color: tokens.deepAccent }} />
             <span style={{ color: tokens.textSecondary }} className="text-[11px] font-medium shrink-0">
-              {t('library.sort') || 'الترتيب:'}
+              {t('library.sort')}:
             </span>
             <select
               value={sortBy}
@@ -413,7 +433,7 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
                 color: tokens.textPrimary,
               }}
               className="text-xs font-bold focus:outline-none cursor-pointer font-['Cairo',sans-serif]"
-              aria-label="خيارات الترتيب"
+              aria-label={t('library.sort')}
             >
               <option value="latest">{t('library.newest')}</option>
               <option value="mostRead">{t('library.mostRead')}</option>
@@ -429,12 +449,12 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
             }}
             className="flex items-center p-0.5 rounded-xl border shadow-xs"
             role="group"
-            aria-label="طريقة العرض"
+            aria-label={t('library.viewGrid')}
           >
             <button
               type="button"
               onClick={() => handleToggleViewMode('grid')}
-              aria-label="عرض شبكي"
+              aria-label={t('library.viewGrid')}
               aria-pressed={viewMode === 'grid'}
               style={{
                 backgroundColor: viewMode === 'grid'
@@ -443,14 +463,14 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
                 color: viewMode === 'grid' ? tokens.deepAccent : tokens.textSecondary,
               }}
               className="p-1.5 rounded-lg transition-all cursor-pointer hover:opacity-80"
-              title="عرض شبكي"
+              title={t('library.viewGrid')}
             >
               <LayoutGrid size={16} />
             </button>
             <button
               type="button"
               onClick={() => handleToggleViewMode('list')}
-              aria-label="عرض قائمة"
+              aria-label={t('library.viewList')}
               aria-pressed={viewMode === 'list'}
               style={{
                 backgroundColor: viewMode === 'list'
@@ -459,7 +479,7 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
                 color: viewMode === 'list' ? tokens.deepAccent : tokens.textSecondary,
               }}
               className="p-1.5 rounded-lg transition-all cursor-pointer hover:opacity-80"
-              title="عرض قائمة"
+              title={t('library.viewList')}
             >
               <List size={16} />
             </button>
@@ -475,13 +495,7 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
             style={{ color: tokens.textPrimary }}
             className="font-['Aref_Ruqaa',serif] text-lg font-bold"
           >
-            لا توجد أساطير مطابقة لخيارات التصفية
-          </p>
-          <p
-            style={{ color: tokens.textSecondary }}
-            className="text-xs"
-          >
-            جرّب تغيير حالة القراءة أو إفراغ خانة البحث.
+            {t('library.emptyResults')}
           </p>
           <button
             type="button"
@@ -495,15 +509,19 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
             }}
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer min-h-[44px]"
           >
-            عرض جميع الأساطير
+            {t('library.resetFilters')}
           </button>
         </Card>
       ) : viewMode === 'grid' ? (
         /* ================= GRID VIEW ================= */
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           {pagedMyths.map((entry) => {
+            if (!entry) return null;
+            const rawEntry = rawById.get(entry.id) ?? entry;
             const status = getReadingStatus(entry.id, progressMap);
-            const progressVal = progressMap[entry.id] ?? (progressMap[`al-${entry.id}`] ?? 0);
+            const rawProgress = progressMap?.[entry.id] ?? progressMap?.[`al-${entry.id}`] ?? 0;
+            const progressVal = Number.isFinite(rawProgress) ? rawProgress : 0;
+            const isLocked = Boolean(entry.isPremium) && !effectivePremium;
 
             return (
               <Card
@@ -512,7 +530,7 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
                 elevation="subtle"
                 interactive
                 className="p-3.5 flex flex-col justify-between group overflow-hidden transition-all cursor-pointer"
-                onClick={() => onSelectEntry(entry)}
+                onClick={() => onSelectEntry(rawEntry)}
               >
                 <div>
                   <div
@@ -522,19 +540,20 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
                     }}
                     className="relative h-36 w-full rounded-xl overflow-hidden mb-2.5 border"
                   >
-                    <img
+                    <LockedHeroImage
                       src={entry.heroImage}
-                      alt={entry.name}
+                      alt={entry.name ?? ''}
+                      isLocked={isLocked}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      loading="lazy"
-                      decoding="async"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src =
-                          'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=800&q=80';
+                        const img = e.target as HTMLImageElement;
+                        if (img.dataset.fallbackApplied === '1') return;
+                        img.dataset.fallbackApplied = '1';
+                        img.src = '/icons/icon.svg';
                       }}
                     />
 
-                    {/* Bottom Right: Type Label */}
+                    {/* Bottom Start: Type Label */}
                     {entry.typeLabel && (
                       <span
                         style={{
@@ -542,38 +561,29 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
                           color: tokens.deepAccent,
                           borderColor: tokens.border,
                         }}
-                        className="absolute bottom-2 right-2 px-2 py-0.5 rounded-md backdrop-blur-xs text-[10px] font-bold border shadow-xs"
+                        className="absolute bottom-2 start-2 px-2 py-0.5 rounded-md backdrop-blur-xs text-[10px] font-bold border shadow-xs"
                       >
                         {entry.typeLabel}
                       </span>
                     )}
 
-                    {/* Top Right: طويلة / Premium / حكاية كاملة badges */}
-                    {entry.isLongForm ? (
-                      <div className="absolute top-2 right-2 flex items-center gap-1">
-                        <span
-                          style={{
-                            backgroundColor: tokens.primaryMint,
-                            color: '#0E5C4D',
-                            borderColor: 'rgba(14, 92, 77, 0.25)',
-                          }}
-                          className="px-2 py-0.5 rounded-full backdrop-blur-xs text-[10px] font-bold border shadow-xs flex items-center gap-1"
-                        >
-                          <BookOpen size={10} style={{ color: '#0E5C4D' }} />
-                          <span>طويلة</span>
-                        </span>
-                        {entry.isPremium && (
+                    {/* Top Start: long / Premium / full story badges */}
+                    {entry.isLongForm || entry.isPremium ? (
+                      <div className="absolute top-2 start-2 flex items-center gap-1">
+                        {entry.isLongForm && (
                           <span
                             style={{
-                              backgroundColor: isDark ? 'rgba(74, 144, 217, 0.92)' : tokens.coolBlueTint,
-                              color: isDark ? '#FFFFFF' : tokens.coolBlueAccent,
-                              borderColor: tokens.border,
+                              backgroundColor: tokens.primaryMint,
+                              color: '#0E5C4D',
+                              borderColor: 'rgba(14, 92, 77, 0.25)',
                             }}
-                            className="px-2 py-0.5 rounded-full backdrop-blur-xs text-[10px] font-bold border shadow-xs"
+                            className="px-2 py-0.5 rounded-full backdrop-blur-xs text-[10px] font-bold border shadow-xs flex items-center gap-1"
                           >
-                            Premium
+                            <BookOpen size={10} style={{ color: '#0E5C4D' }} />
+                            <span>{t('library.longBadge')}</span>
                           </span>
                         )}
+                        {entry.isPremium && <PremiumPill />}
                       </div>
                     ) : (
                       hasDeepStory(entry.id) && (
@@ -583,25 +593,25 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
                             color: '#0E5C4D',
                             borderColor: 'rgba(14, 92, 77, 0.25)',
                           }}
-                          className="absolute top-2 right-2 px-2.5 py-0.5 rounded-full backdrop-blur-xs text-[10px] font-bold border shadow-xs flex items-center gap-1"
+                          className="absolute top-2 start-2 px-2.5 py-0.5 rounded-full backdrop-blur-xs text-[10px] font-bold border shadow-xs flex items-center gap-1"
                         >
                           <Sparkles size={10} style={{ color: '#0E5C4D' }} />
-                          <span>حكاية كاملة</span>
+                          <span>{t('library.fullStory')}</span>
                         </span>
                       )
                     )}
 
-                    {/* Top Left: Reading status pill */}
+                    {/* Top End: Reading status pill */}
                     {status === 'completed' && (
                       <span
                         style={{
                           backgroundColor: isDark ? 'rgba(127, 209, 174, 0.9)' : 'rgba(14, 92, 77, 0.9)',
                           color: isDark ? '#0B2420' : '#FFFFFF',
                         }}
-                        className="absolute top-2 left-2 px-2 py-0.5 rounded-full backdrop-blur-xs text-[10px] font-bold shadow-xs flex items-center gap-1"
+                        className="absolute top-2 end-2 px-2 py-0.5 rounded-full backdrop-blur-xs text-[10px] font-bold shadow-xs flex items-center gap-1"
                       >
                         <CheckCircle2 size={10} />
-                        <span>انتهيت</span>
+                        <span>{t('library.completedBadge')}</span>
                       </span>
                     )}
                     {status === 'reading' && (
@@ -610,7 +620,7 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
                           backgroundColor: isDark ? 'rgba(127, 178, 232, 0.9)' : 'rgba(79, 142, 219, 0.9)',
                           color: '#FFFFFF',
                         }}
-                        className="absolute top-2 left-2 px-2 py-0.5 rounded-full backdrop-blur-xs text-[10px] font-bold shadow-xs flex items-center gap-1"
+                        className="absolute top-2 end-2 px-2 py-0.5 rounded-full backdrop-blur-xs text-[10px] font-bold shadow-xs flex items-center gap-1"
                       >
                         <Clock size={10} />
                         <span>{progressVal}%</span>
@@ -623,7 +633,7 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
                       style={{ color: tokens.textPrimary }}
                       className="font-['Aref_Ruqaa',serif] text-lg font-bold group-hover:opacity-90 transition-colors truncate"
                     >
-                      {entry.name}
+                      {entry.name ?? ''}
                     </h3>
                     {entry.latinName && (
                       <span
@@ -639,7 +649,7 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
                     style={{ color: tokens.textSecondary }}
                     className="text-xs line-clamp-2 leading-relaxed"
                   >
-                    {entry.summary}
+                    {entry.summary ?? ''}
                   </p>
                 </div>
 
@@ -652,21 +662,23 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
                       style={{ color: tokens.textSecondary }}
                       className="text-[10px] truncate max-w-[100px]"
                     >
-                      {entry.region}
+                      {entry.region ?? ''}
                     </span>
                     <span
                       style={{ color: tokens.deepAccent }}
                       className="text-[10px] font-mono shrink-0"
                     >
-                      {formatReadingTime(getEstimatedReadingTime(entry))}
+                      {formatReadingTime(getEstimatedReadingTime(rawEntry), lang)}
                     </span>
                   </div>
                   <div
                     style={{ color: tokens.coolBlueAccent }}
-                    className="flex items-center gap-1 group-hover:translate-x-[-2px] transition-transform font-bold shrink-0"
+                    className={`flex items-center gap-1 transition-transform font-bold shrink-0 ${
+                      dir === 'ltr' ? 'group-hover:translate-x-[2px]' : 'group-hover:translate-x-[-2px]'
+                    }`}
                   >
                     <span>{t('article.readStory')}</span>
-                    <ChevronLeft size={14} />
+                    <ChevronLeft size={14} className={dir === 'ltr' ? 'rotate-180' : ''} />
                   </div>
                 </div>
               </Card>
@@ -677,8 +689,12 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
         /* ================= LIST VIEW ================= */
         <div className="space-y-3">
           {pagedMyths.map((entry) => {
+            if (!entry) return null;
+            const rawEntry = rawById.get(entry.id) ?? entry;
             const status = getReadingStatus(entry.id, progressMap);
-            const progressVal = progressMap[entry.id] ?? (progressMap[`al-${entry.id}`] ?? 0);
+            const rawProgress = progressMap?.[entry.id] ?? progressMap?.[`al-${entry.id}`] ?? 0;
+            const progressVal = Number.isFinite(rawProgress) ? rawProgress : 0;
+            const isLocked = Boolean(entry.isPremium) && !effectivePremium;
 
             return (
               <Card
@@ -687,7 +703,7 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
                 elevation="subtle"
                 interactive
                 className="p-3 group transition-all cursor-pointer flex items-center gap-3.5"
-                onClick={() => onSelectEntry(entry)}
+                onClick={() => onSelectEntry(rawEntry)}
               >
                 {/* Thumbnail Image */}
                 <div
@@ -697,15 +713,18 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
                   }}
                   className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden shrink-0 border"
                 >
-                  <img
+                  <LockedHeroImage
                     src={entry.heroImage}
-                    alt={entry.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    alt={entry.name ?? ''}
+                    isLocked={isLocked}
+                    compact
                     loading="lazy"
-                    decoding="async"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src =
-                        'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=800&q=80';
+                      const img = e.target as HTMLImageElement;
+                      if (img.dataset.fallbackApplied === '1') return;
+                      img.dataset.fallbackApplied = '1';
+                      img.src = '/icons/icon.svg';
                     }}
                   />
                   {/* Status indicator overlay on thumbnail */}
@@ -715,7 +734,7 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
                         backgroundColor: tokens.primaryMint,
                         color: '#0E5C4D',
                       }}
-                      className="absolute bottom-1 right-1 p-0.5 rounded-full"
+                      className="absolute bottom-1 start-1 p-0.5 rounded-full"
                     >
                       <CheckCircle2 size={12} />
                     </span>
@@ -726,7 +745,7 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
                         backgroundColor: tokens.coolBlueAccent,
                         color: '#FFFFFF',
                       }}
-                      className="absolute bottom-1 right-1 px-1 rounded-sm text-[9px] font-bold"
+                      className="absolute bottom-1 start-1 px-1 rounded-sm text-[9px] font-bold"
                     >
                       {progressVal}%
                     </span>
@@ -740,32 +759,23 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
                       style={{ color: tokens.textPrimary }}
                       className="font-['Aref_Ruqaa',serif] text-base sm:text-lg font-bold group-hover:opacity-90 transition-colors"
                     >
-                      {entry.name}
+                      {entry.name ?? ''}
                     </h3>
-                    {entry.isLongForm && (
+                    {(entry.isLongForm || entry.isPremium) && (
                       <>
-                        <span
-                          style={{
-                            backgroundColor: tokens.primaryMint,
-                            color: '#0E5C4D',
-                          }}
-                          className="px-2 py-0.5 rounded-full text-[10px] font-bold flex items-center gap-0.5"
-                        >
-                          <BookOpen size={9} />
-                          <span>طويلة</span>
-                        </span>
-                        {entry.isPremium && (
+                        {entry.isLongForm && (
                           <span
                             style={{
-                              backgroundColor: tokens.coolBlueTint,
-                              color: tokens.coolBlueAccent,
-                              borderColor: tokens.border,
+                              backgroundColor: tokens.primaryMint,
+                              color: '#0E5C4D',
                             }}
-                            className="px-2 py-0.5 rounded-full text-[10px] font-bold border"
+                            className="px-2 py-0.5 rounded-full text-[10px] font-bold flex items-center gap-0.5"
                           >
-                            Premium
+                            <BookOpen size={9} />
+                            <span>{t('library.longBadge') || 'طويلة'}</span>
                           </span>
                         )}
+                        {entry.isPremium && <PremiumPill />}
                       </>
                     )}
                     {!entry.isLongForm && hasDeepStory(entry.id) && (
@@ -777,7 +787,7 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
                         className="px-2 py-0.2 rounded-full text-[10px] font-bold flex items-center gap-0.5"
                       >
                         <Sparkles size={9} />
-                        <span>حكاية كاملة</span>
+                        <span>{t('library.fullStory')}</span>
                       </span>
                     )}
                     {entry.typeLabel && (
@@ -794,7 +804,7 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
                     style={{ color: tokens.textSecondary }}
                     className="text-xs line-clamp-2 leading-relaxed"
                   >
-                    {entry.summary}
+                    {entry.summary ?? ''}
                   </p>
 
                   <div className="flex items-center justify-between text-[11px] pt-1">
@@ -803,19 +813,23 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
                         style={{ color: tokens.deepAccent }}
                         className="text-[10px] font-mono"
                       >
-                        {formatReadingTime(getEstimatedReadingTime(entry))}
+                        {formatReadingTime(getEstimatedReadingTime(rawEntry), lang)}
                       </span>
-                      <span style={{ color: tokens.textSecondary }} className="text-[10px]">
-                        • {entry.region}
-                      </span>
+                      {entry.region && (
+                        <span style={{ color: tokens.textSecondary }} className="text-[10px]">
+                          • {entry.region}
+                        </span>
+                      )}
                     </div>
 
                     <div
                       style={{ color: tokens.coolBlueAccent }}
-                      className="flex items-center gap-0.5 text-xs font-bold group-hover:translate-x-[-2px] transition-transform"
+                      className={`flex items-center gap-0.5 text-xs font-bold transition-transform ${
+                        dir === 'ltr' ? 'group-hover:translate-x-[2px]' : 'group-hover:translate-x-[-2px]'
+                      }`}
                     >
-                      <span>قراءة</span>
-                      <ChevronLeft size={13} />
+                      <span>{t('library.readAction')}</span>
+                      <ChevronLeft size={13} className={dir === 'ltr' ? 'rotate-180' : ''} />
                     </div>
                   </div>
                 </div>
@@ -829,7 +843,10 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
       {finalSortedMyths.length > 0 && (
         <div className="pt-4 pb-2 flex flex-col items-center justify-center gap-2">
           <p style={{ color: tokens.textSecondary }} className="text-xs">
-            عرض {Math.min(visibleCount, finalSortedMyths.length)} من أصل {finalSortedMyths.length} أسطورة
+            {t('library.resultsShown', {
+              shown: Math.min(visibleCount, finalSortedMyths.length),
+              total: finalSortedMyths.length,
+            })}
           </p>
           {visibleCount < finalSortedMyths.length ? (
             <button
@@ -846,14 +863,19 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
               }}
               className="px-6 py-2.5 rounded-full border text-xs font-bold hover:border-[#7FD1AE] transition-all cursor-pointer shadow-xs min-h-[44px] min-w-[44px]"
             >
-              عرض المزيد ({finalSortedMyths.length - visibleCount} متبقية)
+              {t('library.loadMore', { remaining: finalSortedMyths.length - visibleCount }) || 'عرض المزيد'}
             </button>
           ) : (
             <span
               style={{ color: tokens.textSecondary }}
-              className="text-[11px] font-medium"
+              className="text-[11px] font-medium inline-flex items-center gap-1"
             >
-              تم استعراض جميع الأساطير ({finalSortedMyths.length}) ✨
+              <span>{t('library.allMythsLoaded', { total: finalSortedMyths.length })}</span>
+              <Sparkles
+                size={14}
+                strokeWidth={1.9}
+                style={{ color: isDark ? '#9FE8CC' : '#0E5C4D' }}
+              />
             </span>
           )}
         </div>

@@ -1,0 +1,4455 @@
+{
+  "myths": {
+    "al-ghul": {
+      "name": "Al-Ghul (Ghul)",
+      "typeLabel": "Makhluk Mitologi Pemangsa",
+      "region": "Gurun Najd, Tihamah, dan Pedalaman Jazirah Arab",
+      "summary": "Makhluk gurun pemangsa yang berubah wujud untuk menyesatkan pengembara di padang pasir.",
+      "body": [
+        "Dalam leksikon bahasa Arab klasik dan cerita rakyat gurun, Ghul termasuk golongan jin dan setan pengubah wujud yang dipercaya masyarakat Arab Jahiliyah menampakkan diri kepada musafir di padang tandus.",
+        "Al-Jahiz dalam Kitab al-Hayawan mencatat bahwa Ghul digambarkan berwajah buruk dan berkaki kuku keledai; satu tebasan pedang langsung membunuhnya, sedangkan tebasan kedua justru menghidupkannya kembali—melahirkan peribahasa Arab: 'Pukulan Ghul hanya sekali.'",
+        "Dalam sastra pra-Islam, Ghul erat dikaitkan dengan penyair petualang (Sha'alik) seperti Ta'abbata Syarran yang dikisahkan bergulat melawan Ghul pada malam gelap gulita di Tihamah.",
+        "Kisahnya bertahan dalam Seribu Satu Malam hingga kata 'Ghoul' masuk ke berbagai bahasa dunia."
+      ],
+      "sources": [
+        {
+          "title": "Kitab al-Hayawan",
+          "author": "Al-Jahiz",
+          "year": "255 H / 868 M"
+        },
+        {
+          "title": "Lisan al-Arab",
+          "author": "Ibnu Mandzur",
+          "year": "711 H / 1311 M"
+        },
+        {
+          "title": "Kitab al-Aghani",
+          "author": "Abu al-Faraj al-Isfahani",
+          "year": "356 H / 967 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Menjadi simbol ketakutan utama bagi kafilah di padang pasir."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Riwayat hadis mengarahkan musafir mengumandangkan azan dan menolak takhayul."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Al-Jahiz membukukan kisahnya dengan tinjauan rasional."
+        }
+      ],
+      "mythTradition": "Dalam kisah rakyat, Ghul nyata: mampu menyamar, menyesatkan kafilah, dan hanya mati oleh satu pukulan.",
+      "mythAnalysis": "Secara analitis, Ghul melambangkan bahaya gurun seperti fatamorgana, tersesat malam hari, dan binatang buas seperti hyena."
+    },
+    "al-anqa": {
+      "name": "Al-Anqa (Burung Feniks Arab)",
+      "typeLabel": "Burung Mitologi Abadi",
+      "region": "Gunung Qaf dan Kepulauan Samudra Hindia",
+      "summary": "Burung raksasa berleher panjang yang menjadi peribahasa kemustahilan dan konon menghilang ke ujung cakrawala.",
+      "body": [
+        "Al-Anqa atau Anqa Mughrib adalah salah satu burung legenda teragung dalam imajinasi Arab, dinamai karena lehernya yang panjang dan kalung putihnya.",
+        "Dalam tradisi Arab, ia termasuk tiga kemustahilan klasik: 'Ghul, Anqa, dan sahabat sejati yang sempurna.'",
+        "Al-Mas'udi dan Ibnu al-Kalbi menyebutnya berdiam di Gunung Qaf atau pulau jauh di timur dengan sayap yang mampu menaungi matahari.",
+        "Pada masa Abbasiyah akhir, penyair sufi seperti As-Suhrawardi dan Ibnu Arabi menjadikannya simbol Akal Semesta dan pendakian ruhani."
+      ],
+      "sources": [
+        {
+          "title": "Kitab al-Hayawan",
+          "author": "Al-Jahiz",
+          "year": "255 H / 868 M"
+        },
+        {
+          "title": "Muruj adz-Dzahab",
+          "author": "Al-Mas'udi",
+          "year": "346 H / 957 M"
+        },
+        {
+          "title": "Tsamar al-Qulub",
+          "author": "Ats-Tsa'alibi",
+          "year": "429 H / 1038 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Peribahasa hal mustahil yang tak terjangkau."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Hadir dalam kiasan sastra tanpa pemujaan."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Diangkat menjadi simbol tasawuf dan filsafat."
+        }
+      ],
+      "mythTradition": "Kisah rakyat menggambarkan burung raksasa yang terlihat sekali dalam satu generasi di puncak Gunung Qaf.",
+      "mythAnalysis": "Al-Anqa terutama berfungsi sebagai simbol bahasa tentang kelangkaan, serumpun dengan Feniks dan Simurgh."
+    },
+    "iram-dhat-al-imad": {
+      "name": "Kota Iram yang Bertiang Tinggi",
+      "typeLabel": "Kota Mitologi yang Hilang",
+      "region": "Gurun Al-Ahqaf antara Hadhramaut, Dhofar, dan Rub' al-Khali",
+      "summary": "Ibu kota legendaris kaum 'Ad dengan tiang-tiang megah dan istana emas yang terkubur di bawah pasir Al-Ahqaf.",
+      "body": [
+        "Iram Dhat al-'Imad adalah kota hilang yang diabadikan Al-Quran sebagai kota 'yang belum pernah dibangun kota sepertinya di negeri-negeri itu', ibu kota kaum 'Ad.",
+        "Kitab tarikh karya Ath-Thabari dan Al-Mas'udi mengisahkan Syaddad bin 'Ad mendirikan Iram dengan istana emas dan pilar zamrud demi menandingi surga.",
+        "Saat Syaddad berangkat memasuki kota itu dengan iring-iringan kerajaan, angin topan dingin berhembus tujuh malam delapan hari hingga menguburnya di bawah bukit pasir.",
+        "Sering dijuluki 'Atlantis Padang Pasir', penemuannya kembali memicu riset citra satelit dan ekskavasi di situs Ubar/Syisr, Oman."
+      ],
+      "sources": [
+        {
+          "title": "Al-Quran al-Karim (Surah Al-Fajr)",
+          "author": "Teks Primer",
+          "year": "Abad ke-7 M"
+        },
+        {
+          "title": "Tarikh ar-Rusul wa al-Muluk",
+          "author": "Ath-Thabari",
+          "year": "310 H / 923 M"
+        },
+        {
+          "title": "Mu'jam al-Buldan",
+          "author": "Yaqut al-Hamawi",
+          "year": "626 H / 1229 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Gema keagungan arsitektur 'Ad tersimpan dalam syair Yaman."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Diabadikan dalam Surah Al-Fajr sebagai pelajaran sejarah."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Muncul kisah Abdullah bin Qilabah menemukan jejaknya."
+        }
+      ],
+      "mythTradition": "Kota emas yang dibangun dengan kesombongan lalu tenggelam di balik bukit pasir.",
+      "mythAnalysis": "Nama Al-Quran yang dikaji sejajar dengan simpul kafilah kuno seperti Ubar/Syisr."
+    },
+    "al-lat": {
+      "name": "Al-Lat",
+      "typeLabel": "Dewi Kesuburan & Kedaulatan",
+      "region": "Thaif, Hijaz, dan Gurun Syam",
+      "summary": "Salah satu berhala utama bangsa Arab di Thaif berupa batu putih persegi yang dijaga Bani Tsaqif.",
+      "body": [
+        "Al-Lat termasuk dewi utama yang disembah di Hijaz dan Arabia utara pada masa Jahiliyah, menjadi sesembahan pokok Bani Tsaqif di Thaif bersama Al-Uzza dan Manat.",
+        "Kuilnya menaungi batu putih persegi berhiaskan tirai dan tanah haram suci. Prasasti Nabatea dan Safaitik menyebutnya pelindung kafilah.",
+        "Penyembahannya berakhir pada tahun 9 H (630 M) ketika penduduk Thaif memeluk Islam dan tempat pemujaannya diruntuhkan."
+      ],
+      "sources": [
+        {
+          "title": "Kitab al-Ashnam",
+          "author": "Hisyam bin al-Kalbi",
+          "year": "204 H / 819 M"
+        },
+        {
+          "title": "As-Sirah an-Nabawiyyah",
+          "author": "Ibnu Hisyam",
+          "year": "218 H / 833 M"
+        },
+        {
+          "title": "Al-Mufasshal fi Tarikh al-Arab",
+          "author": "Dr. Jawad Ali",
+          "year": "1971 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Memiliki kuil dan tanah haram megah di Thaif."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Diruntuhkan pada 9 H setelah Thaif memeluk Islam."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Dicatat detailnya oleh Ibnu al-Kalbi."
+        }
+      ]
+    },
+    "al-jinn": {
+      "name": "Jin",
+      "typeLabel": "Makhluk Halus dari Api",
+      "region": "Lembah Abqar dan Belantara Jazirah Arab",
+      "summary": "Alam tersembunyi makhluk dari nyala api yang menghuni lembah, gurun, dan reruntuhan bersama manusia.",
+      "body": [
+        "Dalam keyakinan Arab kuno, jin adalah makhluk tak kasatmata dari api panas yang mendiami bumi sebelum manusia, memiliki suku dan kerajaan.",
+        "Masyarakat pra-Islam meyakini penyair ulung mendapat ilham dari pendamping jin di Lembah Abqar. Al-Jahiz mengklasifikasikan tingkatannya: Jinni, 'Amir, Syaitan, Marid, dan 'Ifrit.",
+        "Al-Quran menegaskan jin sebagai makhluk mukalaf yang dibebani syariat, sementara sastra rakyat menghidupkannya dalam Seribu Satu Malam."
+      ],
+      "sources": [
+        {
+          "title": "Al-Quran al-Karim (Surah Al-Jinn & Ar-Rahman)",
+          "author": "Teks Primer",
+          "year": "Abad ke-7 M"
+        },
+        {
+          "title": "Kitab al-Hayawan",
+          "author": "Al-Jahiz",
+          "year": "255 H / 868 M"
+        },
+        {
+          "title": "Akam al-Marjan",
+          "author": "Asy-Syibli ad-Dimasyqi",
+          "year": "769 H / 1367 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Musafir meminta perlindungan penguasa lembah jin."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Ditegaskan sebagai makhluk mukalaf; dilarang menyembahnya."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Disusun kitab ensiklopedis tentang alam jin."
+        }
+      ],
+      "mythTradition": "Cerita rakyat menggambarkan masyarakat jin sejajar dengan raja, pasar, dan etika ruang.",
+      "mythAnalysis": "Penjelasan pra-Islam terhadap penyakit dan gema malam sebelum diluruskan dalam teologi Islam."
+    },
+    "al-uzza": {
+      "name": "Al-Uzza",
+      "typeLabel": "Dewi Kekuatan & Kemuliaan",
+      "region": "Lembah Nakhlah dekat Makkah",
+      "summary": "Berhala tertinggi Quraisy di Lembah Nakhlah yang dipuja sebagai lambang kekuatan dan kemenangan.",
+      "body": [
+        "Al-Uzza dimuliakan Quraisy dan Bani Kinanah di sekitar tiga pohon samur suci di Lembah Nakhlah."
+      ],
+      "sources": [
+        {
+          "title": "Kitab al-Ashnam",
+          "author": "Hisyam bin al-Kalbi",
+          "year": "204 H / 819 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Dipuja Quraisy untuk memohon kemenangan."
+        }
+      ]
+    },
+    "manat": {
+      "name": "Manat",
+      "typeLabel": "Dewi Takdir & Kematian",
+      "region": "Al-Musyallal / Pantai Laut Merah",
+      "summary": "Dewi takdir yang dipuja di batu pantai Al-Musyallal antara Makkah dan Yatsrib.",
+      "body": [
+        "Berhala batu kuno di Qudayd yang sangat dimuliakan suku Aus dan Khazraj sebelum dihancurkan Ali bin Abi Thalib pada 8 H (630 M)."
+      ],
+      "sources": [
+        {
+          "title": "Kitab al-Ashnam",
+          "author": "Hisyam bin al-Kalbi",
+          "year": "Abad ke-2 H"
+        },
+        {
+          "title": "Thabaqat Ibnu Sa'd",
+          "author": "Ibnu Sa'd",
+          "year": "Abad ke-3 H"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Dewi takdir suku Aus dan Khazraj."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Diruntuhkan pada 8 H."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Tercatat dalam kitab nasab."
+        }
+      ]
+    },
+    "hubal": {
+      "name": "Hubal",
+      "typeLabel": "Berhala Utama Makkah",
+      "region": "Makkah / Ka'bah",
+      "summary": "Patung akik merah bertangan emas yang berdiri di dalam Ka'bah pada masa Jahiliyah.",
+      "body": [
+        "Anak panah undian (azlam) dilempar di hadapan Hubal untuk menentukan perang dan pernikahan sebelum dihancurkan saat Fathu Makkah tahun 8 H (630 M)."
+      ],
+      "sources": [
+        {
+          "title": "Kitab al-Ashnam",
+          "author": "Hisyam bin al-Kalbi",
+          "year": "Abad ke-2 H"
+        },
+        {
+          "title": "At-Tarikh al-Kabir",
+          "author": "Al-Bukhari",
+          "year": "Abad ke-3 H"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Berhala utama di dalam Ka'bah."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Dihancurkan saat Fathu Makkah (630 M)."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Simbol Jahiliyah dalam syair."
+        }
+      ]
+    },
+    "wadd": {
+      "name": "Wadd",
+      "typeLabel": "Dewa Kasih Sayang",
+      "region": "Dumat al-Jandal / Utara Jazirah",
+      "summary": "Berhala kabilah Kalb dan Kerajaan Ma'in di Dumat al-Jandal, pertama disebut dalam Surah Nuh.",
+      "body": [
+        "Digambarkan sebagai sosok lelaki bersenjata pedang dan busur sebelum kultusnya berakhir dengan tersebarnya Islam."
+      ],
+      "sources": [
+        {
+          "title": "Tarikh ath-Thabari",
+          "author": "Ath-Thabari",
+          "year": "Abad ke-4 H"
+        },
+        {
+          "title": "Kitab al-Ashnam",
+          "author": "Hisyam bin al-Kalbi",
+          "year": "Abad ke-2 H"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Sesembahan di Dumat al-Jandal."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Berakhirnya pemujaan."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Dibahas dalam kitab tafsir."
+        }
+      ]
+    },
+    "suwa": {
+      "name": "Suwa'",
+      "typeLabel": "Sesembahan Bani Hudzail",
+      "region": "Ruhat / Nakhlah di Hijaz",
+      "summary": "Berhala Bani Hudzail di Ruhat yang berbentuk sosok perempuan.",
+      "body": [
+        "Dikunjungi dengan persembahan dan kurban hingga diruntuhkan menjelang Fathu Makkah."
+      ],
+      "sources": [
+        {
+          "title": "Kitab al-Ashnam",
+          "author": "Hisyam bin al-Kalbi",
+          "year": "Abad ke-2 H"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Sesembahan suku Hudzail."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Diruntuhkan tahun 8 H."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Tercatat dalam literatur sejarah."
+        }
+      ]
+    },
+    "yaghuth": {
+      "name": "Yaghuts",
+      "typeLabel": "Dewa Pertolongan",
+      "region": "Yaman / Jurasy",
+      "summary": "Berhala singa batu yang bermula dari penghormatan tokoh saleh hingga menjadi sesembahan.",
+      "body": [
+        "Berbentuk singa dan dipuja suku Hamdan serta Madzhij di Yaman sampai Islam melenyapkannya."
+      ],
+      "sources": [
+        {
+          "title": "Al-Quran al-Karim (Surah Nuh)",
+          "author": "Teks Primer",
+          "year": "Abad ke-7 M"
+        },
+        {
+          "title": "Kitab al-Ashnam",
+          "author": "Hisyam bin al-Kalbi",
+          "year": "Abad ke-2 H"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Sesembahan Hamdan dan Madzhij."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Lenyap bersama Islamisasi Yaman."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Pelajaran tentang asal-usul berhala."
+        }
+      ]
+    },
+    "yauq": {
+      "name": "Ya'uq",
+      "typeLabel": "Sesembahan Khaiwan",
+      "region": "Yaman / Khaiwan",
+      "summary": "Patung kuda batu suci yang dipuja suku Khaiwan sebagai penjaga kuda dan peperangan.",
+      "body": [
+        "Salah satu berhala kaum Nuh yang dipuja di pegunungan Yaman hingga masa Islam."
+      ],
+      "sources": [
+        {
+          "title": "Tarikh ath-Thabari",
+          "author": "Ath-Thabari",
+          "year": "Abad ke-4 H"
+        },
+        {
+          "title": "Kitab al-Ashnam",
+          "author": "Hisyam bin al-Kalbi",
+          "year": "Abad ke-2 H"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Dewa pelindung kuda Khaiwan."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Pemujaan ditinggalkan."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Dicatat ahli tafsir."
+        }
+      ]
+    },
+    "nasr": {
+      "name": "Nasr",
+      "typeLabel": "Sesembahan Agung Himyar",
+      "region": "Yaman / Balkha",
+      "summary": "Berhala burung elang gunung yang dipuja Bani Himyar di selatan Jazirah Arab.",
+      "body": [
+        "Berwujud elang penjaga langit sebelum pemujaannya padam oleh dakwah Islam."
+      ],
+      "sources": [
+        {
+          "title": "Al-Quran al-Karim (Surah Nuh)",
+          "author": "Teks Primer",
+          "year": "Abad ke-7 M"
+        },
+        {
+          "title": "Kitab al-Ashnam",
+          "author": "Hisyam bin al-Kalbi",
+          "year": "Abad ke-2 H"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Dewa suku Himyar."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Berakhirnya pemujaan."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Tercatat dalam kitab sejarah."
+        }
+      ]
+    },
+    "dhu-al-khalasa": {
+      "name": "Dzu al-Khalashah",
+      "typeLabel": "Ka'bah Yamaniyah",
+      "region": "Tabalah di Asir dan Hijaz Selatan",
+      "summary": "Kuil batu kuarsa putih bermahkota emas yang menjadi tujuan ziarah kabilah selatan.",
+      "body": [
+        "Dibangun suku Khats'am dan Bajilah sebagai kuil saingan yang dijuluki Ka'bah Yamaniyah."
+      ],
+      "sources": [
+        {
+          "title": "Lisan al-Arab",
+          "author": "Ibnu Mandzur",
+          "year": "711 H / 1311 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Dikunjungi kabilah dengan persembahan emas."
+        }
+      ]
+    },
+    "al-si-la": {
+      "name": "As-Si'lah",
+      "typeLabel": "Penyihir Belantara",
+      "region": "Belukar Tihamah dan Lembah Najd",
+      "summary": "Jin betina liar yang menyamar menjadi wanita cantik dan meniru suara keluarga untuk menjerat musafir.",
+      "body": [
+        "Dianggap lebih licik daripada Ghul, menari di bawah cahaya bulan untuk memikat korbannya."
+      ],
+      "sources": [
+        {
+          "title": "Kitab al-Hayawan",
+          "author": "Al-Jahiz",
+          "year": "255 H / 868 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Penyair padang pasir memperingatkan bahayanya."
+        }
+      ]
+    },
+    "al-rukh": {
+      "name": "Burung Rukh (Roc)",
+      "typeLabel": "Burung Raksasa Kosmik",
+      "region": "Lautan Timur Jauh dan Samudra Hindia",
+      "summary": "Burung legenda raksasa yang sanggup mengangkat gajah dengan telurnya sebesar kubah masjid.",
+      "body": [
+        "Terkenal dalam kisah pelayaran Sindbad dan Seribu Satu Malam di pulau-pulau Samudra Hindia."
+      ],
+      "sources": [
+        {
+          "title": "Seribu Satu Malam",
+          "author": "Tradisi Rakyat Arab",
+          "year": "Era Abbasiyah"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Abbasiyah",
+          "note": "Dituturkan pelaut Basrah dan Oman."
+        }
+      ]
+    },
+    "al-shiqq": {
+      "name": "Asy-Syiqq",
+      "typeLabel": "Makhluk Separuh Tubuh",
+      "region": "Gurun Najd dan Perbatasan Syam",
+      "summary": "Makhluk separuh kepala, satu tangan, dan satu kaki yang melompat secepat angin.",
+      "body": [
+        "Konon mencegat musafir seorang diri di padang tandus."
+      ],
+      "sources": [
+        {
+          "title": "Aja'ib al-Makhluqat",
+          "author": "Al-Qazwini",
+          "year": "682 H / 1283 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Hadir dalam kisah kengerian padang pasir."
+        }
+      ]
+    },
+    "al-marid": {
+      "name": "Al-Marid",
+      "typeLabel": "Raksasa Jin Pemberontak",
+      "region": "Dasar Laut dan Reruntuhan Kuno",
+      "summary": "Golongan jin terkuat dan paling membangkang yang konon disegel dalam guci tembaga oleh Nabi Sulaiman.",
+      "body": [
+        "Melambangkan kekuatan besar jin dalam legenda Baghdad dan Kairo."
+      ],
+      "sources": [
+        {
+          "title": "Akam al-Marjan",
+          "author": "Asy-Syibli",
+          "year": "769 H / 1367 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Abbasiyah",
+          "note": "Tokoh utama dongeng klasik."
+        }
+      ]
+    },
+    "al-ifrit": {
+      "name": "Al-'Ifrit",
+      "typeLabel": "Jin Cerdik Perkasa",
+      "region": "Gua dan Istana Terbengkalai Yaman",
+      "summary": "Jin paling licik dan cepat, terkenal sebagai penjaga harta karun dan pengangkut singgasana.",
+      "body": [
+        "Menggabungkan kecepatan luar biasa dengan kelicikan tajam dalam kisah klasik."
+      ],
+      "sources": [
+        {
+          "title": "Muruj adz-Dzahab",
+          "author": "Al-Mas'udi",
+          "year": "346 H / 957 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Awal Islam",
+          "note": "Disebut dalam Al-Quran menawarkan pemindahan singgasana Bilqis."
+        }
+      ]
+    },
+    "qutrub": {
+      "name": "Al-Qutrub",
+      "typeLabel": "Makhluk Mitologi",
+      "region": "Pemakaman dan Jalan Malam",
+      "summary": "Hantu pemakaman bermata menyala dalam kegelapan malam.",
+      "body": [
+        "Makhluk kurus berkeliaran di makam tua yang ditakuti musafir malam hingga fajar menyingsing."
+      ],
+      "sources": [
+        {
+          "title": "Ishlah al-Ghalat",
+          "author": "Ibnu Qutaibah",
+          "year": "Abad ke-3 H"
+        },
+        {
+          "title": "Lisan al-Arab",
+          "author": "Ibnu Mandzur",
+          "year": "Abad ke-8 H"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Momok malam pemakaman."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Digolongkan khayalan malam."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Tercatat dalam kitab keajaiban."
+        }
+      ]
+    },
+    "al-hama": {
+      "name": "Al-Hamah",
+      "typeLabel": "Burung Penuntut Bela",
+      "region": "Najd dan Hijaz",
+      "summary": "Burung arwah korban pembunuhan yang konon berseru di atas makam hingga dendamnya terbalas.",
+      "body": [
+        "Kepercayaan Jahiliyah yang dibatalkan hadis Nabi untuk memutus rantai dendam kesumat."
+      ],
+      "sources": [
+        {
+          "title": "Bulugh al-Arab",
+          "author": "Al-Alusi",
+          "year": "1342 H / 1924 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Memicu perang balas dendam antar-suku."
+        }
+      ]
+    },
+    "al-sada": {
+      "name": "Ash-Shada",
+      "typeLabel": "Roh Burung Kuburan",
+      "region": "Gurun Jazirah Arab",
+      "summary": "Roh pendamping jenazah dalam kepercayaan Jahiliyah yang terbang di malam gelap.",
+      "body": [
+        "Keyakinan lama ini ditolak tegas oleh hadis Nabi."
+      ],
+      "sources": [
+        {
+          "title": "Kitab al-Hayawan",
+          "author": "Al-Jahiz",
+          "year": "255 H / 868 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Dibatalkan dalam ajaran Islam."
+        }
+      ]
+    },
+    "dabbat-al-ard": {
+      "name": "Dabbat al-Ardh",
+      "typeLabel": "Makhluk Akhir Zaman",
+      "region": "Ajyad Makkah dan Tihamah",
+      "summary": "Makhluk agung akhir zaman yang membawa tongkat Musa dan cincin Sulaiman.",
+      "body": [
+        "Dikisahkan berbicara kepada manusia sebagai salah satu tanda besar menjelang Kiamat."
+      ],
+      "sources": [
+        {
+          "title": "Muruj adz-Dzahab",
+          "author": "Al-Mas'udi",
+          "year": "346 H / 957 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Awal Islam",
+          "note": "Tercatat dalam tanda besar akhir zaman."
+        }
+      ]
+    },
+    "faluk-snake": {
+      "name": "Ular Faluk",
+      "typeLabel": "Ular Kosmik Legendaris",
+      "region": "Dasar Samudra Bawah Bumi",
+      "summary": "Ular kosmik raksasa di lautan terdalam dalam kosmografi dongeng kuno.",
+      "body": [
+        "Simbol keluasan kedalaman alam semesta dalam kisah keajaiban klasik."
+      ],
+      "sources": [
+        {
+          "title": "Bada'i az-Zuhur",
+          "author": "Ibnu Iyas",
+          "year": "930 H / 1524 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Abbasiyah",
+          "note": "Populer dalam kitab keajaiban geografi."
+        }
+      ]
+    },
+    "waq-waq": {
+      "name": "Kepulauan Waq Waq",
+      "typeLabel": "Kepulauan Ajaib di Timur",
+      "region": "Ujung Laut Cina dan Samudra Hindia",
+      "summary": "Kepulauan misterius berpohon buah mirip manusia yang berseru 'Waq Waq!' saat jatuh.",
+      "body": [
+        "Ikon mitologi bahari Arab di batas timur dunia dalam peta Al-Idrisi dan kisah pelaut."
+      ],
+      "sources": [
+        {
+          "title": "Aja'ib al-Hind",
+          "author": "Buzurg bin Syahriyar",
+          "year": "342 H / 953 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Abbasiyah",
+          "note": "Dituturkan pelaut Siraf dan Basrah."
+        }
+      ]
+    },
+    "jabal-qaf": {
+      "name": "Gunung Qaf",
+      "typeLabel": "Pegunungan Zamrud Pengeliling Bumi",
+      "region": "Tepian Bumi Mengelilingi Tujuh Laut",
+      "summary": "Barisan gunung zamrud hijau yang melingkari bumi dan menopang kubah langit.",
+      "body": [
+        "Ahli kosmografi kuno menganggap biru langit adalah pantulan zamrud Gunung Qaf."
+      ],
+      "sources": [
+        {
+          "title": "Mu'jam al-Buldan",
+          "author": "Yaqut al-Hamawi",
+          "year": "626 H / 1229 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Abbasiyah",
+          "note": "Simbol batas semesta dalam sastra hikmah."
+        }
+      ]
+    },
+    "well-of-barhout": {
+      "name": "Sumur Barhut",
+      "typeLabel": "Lubang Angker Hadhramaut",
+      "region": "Al-Mahrah dan Hadhramaut, Yaman",
+      "summary": "Sumur jurang dalam di Hadhramaut yang diselimuti legenda bau belerang dan suara misterius.",
+      "body": [
+        "Ditakuti pelancong lama sebagai sumur gelap dengan gema bawah tanah."
+      ],
+      "sources": [
+        {
+          "title": "Mu'jam al-Buldan",
+          "author": "Yaqut al-Hamawi",
+          "year": "626 H / 1229 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Dikenal dalam cerita rakyat Yaman selatan."
+        }
+      ]
+    },
+    "wadi-abqar": {
+      "name": "Lembah Abqar",
+      "typeLabel": "Tanah Ilham Puitis",
+      "region": "Najd dan Hijaz",
+      "summary": "Lembah legendaris tempat tinggal jin penyair yang melahirkan istilah Arab 'Abqari' (jenius).",
+      "body": [
+        "Penyair konon bermalam di sana mencari ilham hingga kata 'Abqari' menjadi sinonim kecerdasan."
+      ],
+      "sources": [
+        {
+          "title": "Lisan al-Arab",
+          "author": "Ibnu Mandzur",
+          "year": "711 H / 1311 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Akar kata kecemerlangan bahasa Arab."
+        }
+      ]
+    },
+    "marib-dam": {
+      "name": "Bendungan Agung Ma'rib",
+      "typeLabel": "Keajaiban Teknik Saba'",
+      "region": "Ma'rib, Yaman",
+      "summary": "Mahakarya irigasi Kerajaan Saba' yang jebol dalam Banjir Besar Al-'Arim.",
+      "body": [
+        "Nadi ekonomi Kerajaan Saba' yang keruntuhannya memicu perpindahan besar kabilah Yaman."
+      ],
+      "sources": [
+        {
+          "title": "Tarikh ath-Thabari",
+          "author": "Ath-Thabari",
+          "year": "310 H / 923 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Lahirnya peribahasa 'Tercerai-berai seperti kaum Saba'."
+        }
+      ]
+    },
+    "city-of-brass": {
+      "name": "Kota Tembaga",
+      "typeLabel": "Kota Terkunci Nabi Sulaiman",
+      "region": "Gurun Maghreb dan Andalusia",
+      "summary": "Kota bercahaya dari tembaga kuning di tengah gurun yang dijaga pintu tertutup penuh hikmah.",
+      "body": [
+        "Diceritakan dalam Seribu Satu Malam melalui ekspedisi Musa bin Nushair di masa Dinasti Umayyah."
+      ],
+      "sources": [
+        {
+          "title": "Seribu Satu Malam",
+          "author": "Tradisi Rakyat Arab",
+          "year": "Era Abbasiyah"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Abbasiyah",
+          "note": "Mengilhami renungan tentang kefanaan."
+        }
+      ]
+    },
+    "ghumdan-palace": {
+      "name": "Istana Ghumdan",
+      "typeLabel": "Pencakar Langit Kuno Yaman",
+      "region": "Sana'a Lama, Yaman",
+      "summary": "Istana legendaris dua puluh tingkat beratap pualam bening dan empat patung singa perunggu.",
+      "body": [
+        "Dipuji Al-Hamdani sebagai puncak keajaiban arsitektur Yaman kuno."
+      ],
+      "sources": [
+        {
+          "title": "Al-Iklil",
+          "author": "Al-Hamdani",
+          "year": "334 H / 945 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Kebanggaan raja-raja Yaman."
+        }
+      ]
+    },
+    "jabal-al-dukhan": {
+      "name": "Gunung Asap",
+      "typeLabel": "Puncak Vulkanik Legendaris",
+      "region": "Medan Lava Hijaz",
+      "summary": "Gunung berasap yang memunculkan kisah penjaga harta karun dan api bawah tanah.",
+      "body": [
+        "Pelancong mengaitkan asap vulkaniknya dengan tempat tinggal jin."
+      ],
+      "sources": [
+        {
+          "title": "Shifat Jazirat al-Arab",
+          "author": "Al-Hamdani",
+          "year": "334 H / 945 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Dihindari kafilah pada malam hari."
+        }
+      ]
+    },
+    "rub-al-khali": {
+      "name": "Gurun Rub' al-Khali",
+      "typeLabel": "Lautan Pasir Legendaris",
+      "region": "Selatan Jazirah Arab",
+      "summary": "Hamparan pasir luas yang menyelimuti jalur dagang kuno dan legenda kaum 'Ad.",
+      "body": [
+        "Tempat lahirnya kisah kota emas hilang dan pengembara gurun."
+      ],
+      "sources": [
+        {
+          "title": "Mu'jam al-Buldan",
+          "author": "Yaqut al-Hamawi",
+          "year": "626 H / 1229 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Dijuluki wilayah jin karena sukar ditembus."
+        }
+      ]
+    },
+    "zarqa-al-yamama": {
+      "name": "Zarqa al-Yamamah",
+      "typeLabel": "Peramal Bermata Tajam",
+      "region": "Al-Yamamah, Najd",
+      "summary": "Perempuan Bani Jadis yang mampu melihat pasukan berkamuflase ranting dari jarak tiga hari perjalanan.",
+      "body": [
+        "Peringatannya ditertawakan kaumnya hingga pasukan Hassan al-Himyari menghancurkan negeri mereka."
+      ],
+      "sources": [
+        {
+          "title": "Kitab al-Aghani",
+          "author": "Al-Isfahani",
+          "year": "356 H / 967 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Peribahasa ketajaman penglihatan dalam budaya Arab."
+        }
+      ],
+      "mythTradition": "Melihat pasukan musuh dari jarak tiga hari namun tak dipercaya hingga terlambat.",
+      "mythAnalysis": "Tokoh memori budaya yang merangkum kejatuhan Thasm dan Jadis."
+    },
+    "antarah": {
+      "name": "Antarah bin Syaddad",
+      "typeLabel": "Pahlawan & Penyair Legendaris",
+      "region": "Najd / Bani Abs",
+      "summary": "Kesatria-penyair gagah berani Bani Abs, lambang kehormatan dan cinta abadinya pada Ablah.",
+      "body": [
+        "Terlahir dari ibu Habasyah dan ayah Arab, ia merebut kemuliaan lewat pedang dan syair Mu'allaqah-nya yang abadi."
+      ],
+      "sources": [
+        {
+          "title": "Diwan Antarah",
+          "author": "Antarah (Dinazhamkan)",
+          "year": "Pra-Islam"
+        },
+        {
+          "title": "Sirat Antarah bin Syaddad",
+          "author": "Epik Rakyat Arab",
+          "year": "Abad Pertengahan"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Kesatria dan penyair Mu'allaqat."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Teladan keberanian."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Lahirnya epos rakyat Sirat Antarah."
+        }
+      ]
+    },
+    "luqman-eagles": {
+      "name": "Luqman dan Tujuh Elang",
+      "typeLabel": "Bijak Bestari Berumur Panjang",
+      "region": "Al-Ahqaf dan Hijaz",
+      "summary": "Bijak bestari kaum 'Ad yang diberi umur tujuh ekor elang hingga elang terakhir bernama Lubad.",
+      "body": [
+        "Ketika elang ketujuh mati, lahirlah peribahasa Arab tentang panjangnya masa."
+      ],
+      "sources": [
+        {
+          "title": "Muruj adz-Dzahab",
+          "author": "Al-Mas'udi",
+          "year": "346 H / 957 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Diabadikan dalam syair klasik."
+        }
+      ]
+    },
+    "sayf-dhi-yazan": {
+      "name": "Saif bin Dzi Yazan",
+      "typeLabel": "Raja Himyar & Pahlawan Epos",
+      "region": "Yaman / Himyar",
+      "summary": "Raja pembebas Yaman yang perjuangan historisnya berkembang menjadi kisah kepahlawanan besar.",
+      "body": [
+        "Menggabungkan sejarah pembebasan Yaman dengan kisah fantasi melawan penyihir dalam hikayat rakyat."
+      ],
+      "sources": [
+        {
+          "title": "As-Sirah an-Nabawiyyah",
+          "author": "Ibnu Hisyam",
+          "year": "213 H / 828 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Menerima delegasi Arab termasuk Abdul Muththalib."
+        }
+      ]
+    },
+    "al-zeer-salem": {
+      "name": "Az-Zir Salim (Abu Laila al-Muhalhil)",
+      "typeLabel": "Kesatria Perang Basus",
+      "region": "Najd dan Jazirah",
+      "summary": "Penyair-ksatria Bani Taghlib yang memimpin perang empat puluh tahun menuntut bela saudaranya Kulaib.",
+      "body": [
+        "Perintis kehalusan qashidah Arab yang tragedinya dituturkan turun-temurun."
+      ],
+      "sources": [
+        {
+          "title": "Kitab al-Aghani",
+          "author": "Al-Isfahani",
+          "year": "356 H / 967 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Memimpin pertempuran panjang Bani Taghlib."
+        }
+      ]
+    },
+    "kulayb": {
+      "name": "Kulaib bin Rabi'ah",
+      "typeLabel": "Pemimpin Bani Rabi'ah",
+      "region": "Najd dan Wadi al-Khazaz",
+      "summary": "Pemimpin agung Rabi'ah yang pembunuhannya menyulut Perang Basus selama 40 tahun.",
+      "body": [
+        "Pemimpin terhormat yang menjaga ketat tanah larangannya di Najd."
+      ],
+      "sources": [
+        {
+          "title": "Kitab al-Aghani",
+          "author": "Al-Isfahani",
+          "year": "356 H / 967 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Sengketa unta al-Basus memicu perang 40 tahun."
+        }
+      ],
+      "mythTradition": "Raja kabilah terkuat yang kematiannya menyulut perang saudara terpanjang.",
+      "mythAnalysis": "Mencerminkan persaingan konfederasi kabilah atas padang rumput Najd."
+    },
+    "taabbata-sharran": {
+      "name": "Ta'abbata Syarran",
+      "typeLabel": "Penyair Sha'luk Ulung",
+      "region": "Tihamah dan Pegunungan Fahm",
+      "summary": "Tsabit bin Jabir al-Fahmi, pelari gurun tercepat yang dikisahkan menaklukkan Ghul.",
+      "body": [
+        "Menyuarakan keberanian pribadi menghadapi kerasnya belantara Tihamah dalam syairnya."
+      ],
+      "sources": [
+        {
+          "title": "Kitab al-Aghani",
+          "author": "Al-Isfahani",
+          "year": "356 H / 967 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Pelopor penyair pemberontak Sha'alik."
+        }
+      ],
+      "mythTradition": "Pelari gesit yang bersahabat dengan serigala dan menaklukkan Ghul.",
+      "mythAnalysis": "Protes sosial penyair Sha'alik terhadap ketimpangan kabilah."
+    },
+    "al-shanfara": {
+      "name": "Asy-Syanfara al-Azdi",
+      "typeLabel": "Penyair Gurun Pengembara",
+      "region": "Tihamah dan Pegunungan Sarat",
+      "summary": "Penggubah Lamiyyat al-Arab yang berlari lebih cepat daripada kuda pacu.",
+      "body": [
+        "Syairnya menjadi deklarasi kebebasan eksistensial dan keteguhan di alam liar."
+      ],
+      "sources": [
+        {
+          "title": "Syarh Lamiyyat al-Arab",
+          "author": "Al-Ukbari",
+          "year": "616 H / 1219 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Memilih persaudaraan alam bebas dalam syairnya."
+        }
+      ],
+      "mythTradition": "Sumpahnya membalas seratus orang Bani Salaman tergenapi dalam legenda.",
+      "mythAnalysis": "Dokumen sastra klasik terbaik tentang kehidupan padang pasir."
+    },
+    "urwa-ibn-al-ward": {
+      "name": "Urwah bin al-Ward",
+      "typeLabel": "Pemimpin Kaum Sha'alik",
+      "region": "Najd / Ghathafan",
+      "summary": "Kesatria dermawan Bani Abs yang merawat kaum fakir dan sakit dari hasil perjuangannya.",
+      "body": [
+        "Menolak kemalasan dan mendirikan perkemahan solidaritas bagi kaum papa."
+      ],
+      "sources": [
+        {
+          "title": "Kitab al-Aghani",
+          "author": "Al-Isfahani",
+          "year": "356 H / 967 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Dipuji Mu'awiyah karena kedermawanannya."
+        }
+      ],
+      "mythTradition": "Pemimpin dermawan yang berbagi seluruh rampasan kepada orang miskin.",
+      "mythAnalysis": "Model solidaritas sosial di kalangan pengembara padang pasir."
+    },
+    "al-sulayk": {
+      "name": "As-Sulaik bin as-Sulakah",
+      "typeLabel": "Penunjuk Jalan Tercepat",
+      "region": "Najd dan Gurun Dahna",
+      "summary": "Pelari Bani Sa'd yang dijuluki lebih cepat dari kuda dan menguasai rahasia sumur gurun.",
+      "body": [
+        "Mengarungi gurun tanpa tersesat dengan kecakapan navigasi bintang dan mata air."
+      ],
+      "sources": [
+        {
+          "title": "Majma' al-Amtsal",
+          "author": "Al-Maidani",
+          "year": "518 H / 1124 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Dikenal karena kelihaian meloloskan diri."
+        }
+      ],
+      "mythTradition": "Penunjuk jalan tak tertandingi yang melampaui kecepatan kuda.",
+      "mythAnalysis": "Mencerminkan pengetahuan navigasi gurun masyarakat Badui."
+    },
+    "al-harith-zalim": {
+      "name": "Al-Harits bin Dhalim al-Murri",
+      "typeLabel": "Kesatria Pemberani Legendaris",
+      "region": "Wilayah Bani Murrah, Najd",
+      "summary": "Pendekar nekat yang berani menantang raja demi menjaga harga diri.",
+      "body": [
+        "Menjadi peribahasa keberanian luar biasa di antara suku-suku Ghathafan."
+      ],
+      "sources": [
+        {
+          "title": "Majma' al-Amtsal",
+          "author": "Al-Maidani",
+          "year": "518 H / 1124 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Berhadapan langsung dengan raja Al-Hirah."
+        }
+      ]
+    },
+    "jadhima": {
+      "name": "Jadzimah al-Abrasy",
+      "typeLabel": "Raja Al-Hirah Legendaris",
+      "region": "Al-Hirah, Al-Anbar, dan Irak",
+      "summary": "Raja awal Tanukh di Al-Hirah yang jatuh ke dalam perangkap pernikahan Ratu Az-Zabba.",
+      "body": [
+        "Raja perkasa yang kisahnya berpadu antara prasasti abad ke-3 M dan drama istana Palmyra."
+      ],
+      "sources": [
+        {
+          "title": "Muruj adz-Dzahab",
+          "author": "Al-Mas'udi",
+          "year": "346 H / 957 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Mengukuhkan kekuasaan konfederasi Tanukh."
+        }
+      ],
+      "mythTradition": "Raja Al-Hirah yang teperdaya undangan pernikahan Ratu Az-Zabba.",
+      "mythAnalysis": "Dikuatkan prasasti abad ke-3 M tentang kehadiran suku Tanukh."
+    },
+    "al-zabba": {
+      "name": "Az-Zabba (Ratu Zenobia dari Palmyra)",
+      "typeLabel": "Ratu Prajurit Palmyra",
+      "region": "Palmyra, Gurun Syam, dan Efrat",
+      "summary": "Ratu pejuang yang membalas dendam kepada Jadzimah dan menantang Romawi sebelum kejatuhannya.",
+      "body": [
+        "Membangun terowongan rahasia istananya dan mengucapkan kalimat masyhur: 'Dengan tanganku sendiri, bukan tangan Amr!'"
+      ],
+      "sources": [
+        {
+          "title": "Tarikh ath-Thabari",
+          "author": "Ath-Thabari",
+          "year": "310 H / 923 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Memperluas pengaruh Palmyra hingga tepi Efrat."
+        }
+      ],
+      "mythTradition": "Ratu bijak yang memilih akhir terhormat saat bentengnya dikepung.",
+      "mythAnalysis": "Memori sastra Arab atas tokoh sejarah Ratu Zenobia dari Palmyra."
+    },
+    "al-samawal": {
+      "name": "As-Samau'al bin Adiya",
+      "typeLabel": "Simbol Kesetiaan Arab",
+      "region": "Tayma dan Hijaz Utara",
+      "summary": "Penguasa Benteng Al-Ablaq yang rela mengorbankan putranya demi menjaga amanah baju zirah Imru' al-Qais.",
+      "body": [
+        "Menjadi standar tertinggi kesetiaan memegang janji dalam sejarah Arab."
+      ],
+      "sources": [
+        {
+          "title": "Asy-Syi'r wa asy-Syu'ara",
+          "author": "Ibnu Qutaibah",
+          "year": "276 H / 889 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Lahirnya peribahasa: 'Lebih setia daripada As-Samau'al.'"
+        }
+      ],
+      "mythTradition": "Menjaga amanah harta titipan hingga mempertaruhkan segalanya.",
+      "mythAnalysis": "Mewujudkan kesucian sumpah perlindungan (dzimmah) dalam etika Arab kuno."
+    },
+    "qasir-ibn-saad": {
+      "name": "Qashir bin Sa'd",
+      "typeLabel": "Ahli Siasat Pembalasan",
+      "region": "Al-Hirah dan Palmyra",
+      "summary": "Penasihat setia Jadzimah yang menyusun taktik karung kuda demi menembus benteng Palmyra.",
+      "body": [
+        "Menyusupkan pasukan bersenjata di dalam muatan unta hingga menguasai istana Az-Zabba."
+      ],
+      "sources": [
+        {
+          "title": "Majma' al-Amtsal",
+          "author": "Al-Maidani",
+          "year": "518 H / 1124 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Melahirkan peribahasa terkenal tentang pengorbanan siasat."
+        }
+      ],
+      "mythTradition": "Menyamar masuk ke istana musuh lalu menaklukkan kota dari dalam.",
+      "mythAnalysis": "Sejajar dengan motif strategi kuda kayu dalam epik klasik."
+    },
+    "amr-ibn-muzayqiya": {
+      "name": "Amr bin Amir (Muzaiqiya)",
+      "typeLabel": "Raja Saba' Pemimpin Migrasi",
+      "region": "Ma'rib, Yaman, dan Hijaz",
+      "summary": "Pemimpin bijak yang meramalkan jebolnya Bendungan Ma'rib dan memimpin migrasi besar kaum Azd.",
+      "body": [
+        "Menjual seluruh hartanya sebelum banjir besar dan menuntun perpindahan suku ke Yatsrib, Oman, dan Syam."
+      ],
+      "sources": [
+        {
+          "title": "Al-Ansab",
+          "author": "Ash-Shuhari",
+          "year": "511 H / 1117 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Memimpin migrasi cikal-bakal Aus, Khazraj, dan Ghassanid."
+        }
+      ],
+      "mythTradition": "Menangkap tanda tikus perusak bendungan dan menyelamatkan kaumnya.",
+      "mythAnalysis": "Merekam sejarah migrasi suku Arab Selatan pasca-surutnya Bendungan Ma'rib."
+    },
+    "shiqq-satih": {
+      "name": "Syiqq dan Sathih",
+      "typeLabel": "Peramal Legendaris Pra-Islam",
+      "region": "Perbatasan Syam dan Yaman",
+      "summary": "Dua peramal berprosa sajak yang menafsirkan mimpi Raja Rabi'ah bin Nashr tentang kelahiran Nabi akhir zaman.",
+      "body": [
+        "Meramalkan berakhirnya kekuasaan Himyar dan datangnya cahaya kenabian di Jazirah Arab."
+      ],
+      "sources": [
+        {
+          "title": "As-Sirah an-Nabawiyyah",
+          "author": "Ibnu Hisyam",
+          "year": "213 H / 828 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Dimintai nasihat oleh raja-raja Yaman dan Quraisy."
+        }
+      ],
+      "mythTradition": "Menafsirkan mimpi besar kerajaan dan meramalkan terbitnya Islam.",
+      "mythAnalysis": "Sajak kahanah berfungsi sebagai lembaga interpretasi lisan pra-Islam."
+    },
+    "nar-sal": {
+      "name": "Api Pemanggil Hujan Sila'",
+      "typeLabel": "Ritual Memohon Hujan Kuno",
+      "region": "Pegunungan Hijaz dan Najd",
+      "summary": "Ritual musim kemarau pra-Islam dengan menyalakan ranting kering di bukit demi menyerupai kilat pembawa hujan.",
+      "body": [
+        "Suku pedalaman menggiring ternak membawa obor ke lereng gunung guna memohon turunnya hujan di musim paceklik."
+      ],
+      "sources": [
+        {
+          "title": "Kitab al-Hayawan",
+          "author": "Al-Jahiz",
+          "year": "255 H / 868 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Dilakukan suku Hijaz dan Najd saat kemarau panjang."
+        }
+      ]
+    },
+    "atirah-rajab": {
+      "name": "Atirah Bulan Rajab",
+      "typeLabel": "Ritual Kurban Nazar",
+      "region": "Hijaz dan Al-Yamamah",
+      "summary": "Sembelihan tahunan pada hari-hari pertama bulan Rajab yang dipersembahkan keluarga pra-Islam.",
+      "body": [
+        "Berjalan hingga dihapuskan dalam ajaran Islam melalui ketetapan penghapusan atirah dan fara'."
+      ],
+      "sources": [
+        {
+          "title": "Kitab al-Ashnam",
+          "author": "Hisyam bin al-Kalbi",
+          "year": "204 H / 819 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Berlangsung hingga dihapus pada masa awal Islam."
+        }
+      ]
+    },
+    "baheera-saaiba": {
+      "name": "Bahirah, Sa'ibah, dan Washilah",
+      "typeLabel": "Pantangan Ternak Sesembahan",
+      "region": "Makkah dan Wilayah Khuza'ah",
+      "summary": "Adat melarang menunggangi atau memerah ternak bertanda khusus karena dinazarkan kepada berhala.",
+      "body": [
+        "Dikaitkan dalam sejarah dengan Amr bin Luhay sebelum diluruskan oleh Al-Quran."
+      ],
+      "sources": [
+        {
+          "title": "Tafsir ath-Thabari",
+          "author": "Ath-Thabari",
+          "year": "310 H / 923 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Menunjukkan pengaruh juru kuil dalam ekonomi ternak."
+        }
+      ]
+    },
+    "al-iyafa-wa-al-zajar": {
+      "name": "Iyafah dan Ramalan Burung",
+      "typeLabel": "Ramalan Gerak Burung",
+      "region": "Seluruh Jazirah Arab",
+      "summary": "Meramal nasib perjalanan dengan menerbangkan burung ke kanan (pertanda baik) atau ke kiri (buruk).",
+      "body": [
+        "Para musafir menafsirkan arah terbang gagak dan elang sebelum kafilah berangkat."
+      ],
+      "sources": [
+        {
+          "title": "Bulugh al-Arab",
+          "author": "Al-Alusi",
+          "year": "1342 H / 1924 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Memengaruhi jadwal kafilah dan ekspedisi."
+        }
+      ]
+    },
+    "kahana-arrafa": {
+      "name": "Kahanah dan Sajak Peramal",
+      "typeLabel": "Peramalan Klasik",
+      "region": "Najran, Makkah, dan Syam",
+      "summary": "Tuturan bersajak rahasia oleh peramal kuno dalam sengketa barang hilang dan pertikaian suku.",
+      "body": [
+        "Para kahin memakai prosa berirama untuk menyampaikan ramalan sebelum tradisi ini ditinggalkan."
+      ],
+      "sources": [
+        {
+          "title": "Muruj adz-Dzahab",
+          "author": "Al-Mas'udi",
+          "year": "346 H / 957 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Otoritas spiritual masyarakat kabilah."
+        }
+      ]
+    },
+    "istisam-al-azlam": {
+      "name": "Undian Anak Panah (Azlam)",
+      "typeLabel": "Undian di Hadapan Hubal",
+      "region": "Ka'bah, Makkah",
+      "summary": "Mengundi anak panah bertuliskan 'Diperintahkan', 'Dilarang', atau kosong sebelum keputusan besar.",
+      "body": [
+        "Digunakan Quraisy di hadapan Hubal, termasuk saat nazar Abdul Muththalib atas putranya Abdullah."
+      ],
+      "sources": [
+        {
+          "title": "Sirat Ibnu Ishaq",
+          "author": "Muhammad bin Ishaq",
+          "year": "151 H / 768 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Menentukan tebusan seratus ekor unta."
+        }
+      ]
+    },
+    "qasam-al-khalf": {
+      "name": "Hilf al-Fudhul & Sumpah Kabilah",
+      "typeLabel": "Sumpah Pembelaan & Kesucian",
+      "region": "Rumah Ibnu Jud'an, Makkah",
+      "summary": "Pakta kehormatan membela siapa pun yang terzalimi di Makkah dengan mencelupkan tangan dalam air Zamzam dan kesturi.",
+      "body": [
+        "Para pemuka Quraisy bersumpah menegakkan keadilan di kota suci, pakta mulia yang dipuji Nabi Muhammad SAW."
+      ],
+      "sources": [
+        {
+          "title": "Ar-Raudh al-Unuf",
+          "author": "As-Suhaili",
+          "year": "581 H / 1185 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Persekutuan paling mulia di Makkah pra-Islam."
+        }
+      ]
+    },
+    "dhul-qarnayn": {
+      "name": "Zulkarnain",
+      "typeLabel": "Tokoh Al-Quran",
+      "entryType": "Tokoh Al-Quran",
+      "region": "Timur, Barat, dan Antara Dua Gunung",
+      "summary": "Raja adil yang diberi kekuasaan luas dari ufuk terbenam hingga terbitnya matahari dan membangun benteng besi-tembaga.",
+      "body": [
+        "Sosok Zulkarnain berdiri di ruang unik antara kisah tegas Al-Quran dan catatan sejarah klasik sebagai teladan pemimpin adil.",
+        "Kajian delapan bab ini menelusuri tiga perjalanannya dalam Surah Al-Kahfi sekaligus membandingkan tafsir ulama dan kisah klasik."
+      ],
+      "sources": [
+        {
+          "title": "Al-Quran al-Karim — Surah Al-Kahfi (18:83–98)",
+          "author": "Sumber Primer",
+          "year": "Teks Dasar"
+        },
+        {
+          "title": "Tarikh ar-Rusul wa al-Muluk",
+          "author": "Ath-Thabari",
+          "year": "Abad ke-4 H / 10 M"
+        },
+        {
+          "title": "Muruj adz-Dzahab",
+          "author": "Al-Mas'udi",
+          "year": "Abad ke-4 H / 10 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Kisah raja penakluk beredar secara lisan di Syam dan Yaman."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Turunnya kisah Zulkarnain dalam Surah Al-Kahfi sebagai pelajaran keadilan."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Mufasir dan sejarawan mengkaji perbandingannya dengan tokoh sejarah."
+        }
+      ],
+      "evidenceLabels": [
+        "Teks Al-Quran",
+        "Tafsir Klasik",
+        "Rekonstruksi Sastra"
+      ],
+      "chapters": [
+        {
+          "id": "dq-ch-1",
+          "title": "Peneguhan Kekuasaan di Bumi dan Sarana Timur–Barat",
+          "evidenceLabel": "Teks Al-Quran + Tafsir Klasik",
+          "paragraphs": [
+            "“Mereka bertanya kepadamu tentang Zulkarnain. Katakanlah: Aku akan membacakan kepadamu kisahnya. Sesungguhnya Kami telah memberi kekuasaan kepadanya di muka bumi dan memberikan kepadanya jalan (sabab) untuk mencapai segala sesuatu.” (QS. Al-Kahfi: 83–84).",
+            "Kisah ini dibuka tanpa silsilah istana atau nama pribadi—melainkan langsung dengan amanah kekuasaan (tamkin) dan sarana ilmu-jalan (sabab). Al-Tabari, Mujahid, dan Ibn Abbas menafsirkan sabab sebagai tali atau sarana ilmu, jalur, dan teknologi untuk menuntaskan tujuan dengan adil. Dalam Al-Quran, Zulkarnain adalah raja saleh yang diberi amanah kekuatan, bukan seorang nabi pembawa syariat baru.",
+            "[Rekonstruksi Sastra]\nDalam balairung para tetua, tak ada yang menanyakan asal keturunannya; mereka melihat bagaimana ia menimbang arah angin sebelum berucap dan menolak emas yang disodorkan karena rasa takut—membawa peta, juru ukur, dan kesabaran mendengar."
+          ]
+        },
+        {
+          "id": "dq-ch-2",
+          "title": "Tempat Terbenam Matahari dan Hukum Keadilan",
+          "evidenceLabel": "Teks Al-Quran + Tafsir Klasik",
+          "paragraphs": [
+            "“Hingga apabila ia sampai ke tempat terbenam matahari, ia mendapatinya terbenam di dalam mata air berlumpur hitam, dan di situ ia mendapati segolongan kaum.” (QS. Al-Kahfi: 85–86).",
+            "Para mufasir seperti Al-Qurtubi, Ibn Katsir, dan Al-Razi menegaskan kata wajadaha (“ia mendapatinya”): penggambaran sudut pandang mata pengelana di tepi samudra barat, bukan klaim astronomis bahwa matahari tenggelam ke dalam lumpur bumi. Di tepian paling barat itu, ia menetapkan hukum keadilan: pelaku kezaliman ditindak di dunia sebelum hisab akhirat, sedangkan rakyat beriman diperlakukan dengan lembut dan adil tanpa pajak yang menindas.",
+            "[Rekonstruksi Sastra]\nDi tanjung berbatu teluk gelap, panglimanya terkesiap melihat cakram surya menyentuh air. Zulkarnain tersenyum menjelaskan batas pandangan mata, lalu menancapkan pedang bersarungnya ke pasir agar penduduk pesisir tahu kedamaian telah tiba bagi rakyat tak bersalah."
+          ]
+        },
+        {
+          "id": "dq-ch-3",
+          "title": "Tempat Terbit Matahari dan Kaum Tanpa Pelindung",
+          "evidenceLabel": "Teks Al-Quran + Tafsir Klasik",
+          "paragraphs": [
+            "“Hingga apabila ia sampai ke tempat terbit matahari, ia mendapatinya menyinari segolongan kaum yang Kami tidak buatkan bagi mereka suatu pelindung pun dari cahayanya.” (QS. Al-Kahfi: 89–90).",
+            "Di ufuk timur paling jauh, ia menemui masyarakat tanpa naungan bangunan, pepohonan, maupun pakaian, yang berlindung di celah gua dan air saat terik memuncak. Berbeda dengan wilayah barat, di sini Zulkarnain tidak diberi mandat menghukum—perjalanan kedua ini adalah kesaksian ilmu dan pengendalian diri, ditutup dengan pengingat ilahi bahwa menguasai jalan menuju timur dan barat tidak menjadikan manusia pemilik matahari.",
+            "[Rekonstruksi Sastra]\nKetika para ahli bangunan mengaku tembok tak mampu menggeser matahari, Zulkarnain memerintahkan penggalian gua-gua sejuk menghadap utara lengkap dengan sumur teduh—meninggalkan naungan bagi penduduk yang bahkan tak sempat mengenal namanya."
+          ]
+        },
+        {
+          "id": "dq-ch-4",
+          "title": "Di Antara Dua Bukit dan Ya’juj Ma’juj",
+          "evidenceLabel": "Teks Al-Quran + Tafsir Klasik",
+          "paragraphs": [
+            "“Hingga apabila ia sampai di antara dua buah gunung, ia mendapati di hadapan keduanya suatu kaum yang hampir tidak mengerti pembicaraan.” (QS. Al-Kahfi: 92–93).",
+            "Lokasi dua gunung ini diperdebatkan para sejarawan—dari Kaukasus hingga Asia Tengah—karena wahyu sengaja membiarkannya terbuka tanpa koordinat mutlak. Walau terhalang bahasa, kaum tersebut terorganisasi dan menawarkan upeti (kharj) agar Zulkarnain membentengi mereka dari kerusakan Ya’juj dan Ma’juj. Ia menolak upeti emas mereka dan justru mengajak mereka bekerja bersama (“bantulah aku dengan kekuatan”) demi kehormatan bersama.",
+            "[Rekonstruksi Sastra]\nLewat penerjemah yang kelelahan, tetua kaum menyodorkan kantung emas. Zulkarnain mengembalikannya utuh dan menepuk batu tebing: bawalah tangan yang kuat, besi, dan ubub—bukan koin emas."
+          ]
+        },
+        {
+          "id": "dq-ch-5",
+          "title": "Membangun Tembok Besi dan Tembaga Cair",
+          "evidenceLabel": "Teks Al-Quran + Tafsir Klasik",
+          "paragraphs": [
+            "“Berilah aku potongan-potongan besi” — lalu dipanaskan dengan tiupan ubub hingga membara — “Berilah aku tembaga yang mendidih agar kutuangkan ke atasnya.” (QS. Al-Kahfi: 96).",
+            "Tiga tahap rekayasa cermat: menumpuk balok besi raksasa (zubar) mengisi seluruh celah antara dua tebing; memanaskannya hingga merah menyala tanpa melelehkan struktur inti; dan menuangkan tembaga cair (qitr) untuk mengisi seluruh celah mikron sehingga menjadi benteng paduan tunggal (radm) anti-karat. Inilah prinsip Pencegahan Ganda (18:97): mustahil dipanjat dari atas (yazharuhu) dan mustahil dilubangi dari bawah (naqban).",
+            "[Rekonstruksi Sastra]\nPada malam ketiga puluh sembilan, lima ratus pekerja memompa ubub kulit hingga lembah bercahaya bagai sungai bara. Dua belas kuali tembaga cair dituangkan bersama hingga fajar menampakkan tebing perunggu-hitam yang menyatu rapat dengan kedua gunung."
+          ]
+        },
+        {
+          "id": "dq-ch-6",
+          "title": "Siapakah Zulkarnain? Pendapat Sejarawan",
+          "evidenceLabel": "Tafsir Klasik + Analisis Sejarah",
+          "paragraphs": [
+            "Karena Al-Quran tidak menyebut nama pribadi, bangsa, maupun masanya, para ulama dan sejarawan membahas tiga dugaan utama: (1) Koresh Agung pendiri Persia yang memiliki simbol domba bertanduk dua; (2) Iskandar Agung dari Makedonia yang populer di koin bertanduk, meski jauh berbeda dari profil raja bertauhid; dan (3) Raja Himyar Yaman kuno seperti Al-Sa’b Dhu Maratsid dalam riwayat nasab klasik.",
+            "Mustakshif menyajikan ketiga kajian secara transparan tanpa memaksakan kepastian yang tidak ditetapkan teks utama.",
+            "[Rekonstruksi Sastra]\nTiga sejarawan berdebat di ruang arsip membawa koin, silinder tanah liat, dan manuskrip Yaman—hingga mereka sadar diamnya naskah justru menjaga pelajaran moralnya tetap abadi."
+          ]
+        },
+        {
+          "id": "dq-ch-7",
+          "title": "Zulkarnain dalam Syair dan Cerita Rakyat",
+          "evidenceLabel": "Warisan Rakyat",
+          "paragraphs": [
+            "Saat naskah wahyu berhenti pada teladan moral, penyair dan pendongeng menenun dunia kisah tandingan: dari pujian istana Arab atas luasnya kekuasaan hingga perpaduan dengan Roman Iskandar dalam kisah rakyat tentang Negeri Kegelapan, Air Keabadian bersama Nabi Khidir, kapal selam kaca, dan ekspedisi Salam sang Penerjemah ke Gerbang Besi.",
+            "Lencana transparansi Mustakshif memisahkan keindahan sastra rakyat tersebut dari fondasi teks Al-Quran.",
+            "[Rekonstruksi Sastra]\nDi majelis malam Baghdad, hadirin terpesona oleh kapal kaca dan pohon berbicara—sementara sejarawan tua mengingatkan bahwa rasa ingin tahu manusia selalu mengisi ruang sunyi yang sengaja dibiarkan kitab suci."
+          ]
+        },
+        {
+          "id": "dq-ch-8",
+          "title": "Ya’juj Ma’juj dan Akhir Zaman dalam Teks",
+          "evidenceLabel": "Teks Al-Quran + Hadis + Tafsir Klasik",
+          "paragraphs": [
+            "Zulkarnain tidak mengklaim bentengnya abadi. Segera setelah rampung, ia berkata: “Ini adalah rahmat dari Tuhanku, maka apabila sudah datang janji Tuhanku, Dia akan menjadikannya hancur luluh.” (QS. Al-Kahfi: 98). Dalam QS. Al-Anbiya (21:96) dan hadis sahih riwayat Al-Bukhari serta Muslim ditegaskan bahwa setiap benteng buatan manusia memiliki batas waktu hingga tiba tanda hari akhir.",
+            "[Rekonstruksi Sastra]\nKetika penduduk bersorak di kaki lembah, Zulkarnain menyentuh logam yang mulai dingin sambil mengenang bahwa nilai perisai sejati terletak pada rahmat yang dijaganya selama waktunya masih berlaku."
+          ]
+        },
+        {
+          "id": "dq-app-a",
+          "title": "Keajaiban dan Naskah Primer",
+          "evidenceLabel": "Teks & Kutipan Primer",
+          "paragraphs": [
+            "Lampiran rujukan ini menghimpun rangkaian ayat QS. Al-Kahfi 83–98 dan QS. Al-Anbiya 96 beserta catatan para ahli tafsir klasik: penjelasan sudut pandang optik oleh Al-Qurtubi, definisi sabab/zubar/qitr menurut Al-Tabari, serta ketelitian bahasa antara memanjat dan melubangi menurut Al-Zamakhsyari dan Ibn Katsir."
+          ]
+        },
+        {
+          "id": "dq-app-b",
+          "title": "Kit Kreator",
+          "evidenceLabel": "Perangkat Kreatif",
+          "paragraphs": [
+            "Panduan interaktif bagi kreator game dan penulis cerita:\n1) Ekonomi Partisipasi bukan Upeti: tolak koin emas, bangun pertahanan sebanding kontribusi tenaga kaum.\n2) Keseimbangan Pencegahan Ganda: jaga tinggi dinding (anti-panjat) dan ketebalan logam (anti-terowongan).\n3) Hitung Mundur Musim 40 Hari: atur kayu, balok besi, ubub, dan tembaga cair.\n4) Mekanika Penerjemah Lintas Bahasa.\n5) Peta Cakrawala Pengamat dengan tanda tanya jujur.\n6) Akhir Permainan Penuh Kerendahan Hati."
+          ]
+        }
+      ]
+    },
+    "sinbad": {
+      "name": "Sindbad sang Pelaut",
+      "typeLabel": "Pahlawan Fiksi Sastra",
+      "entryType": "Pahlawan Fiksi Sastra",
+      "region": "Basrah, Samudra Hindia, dan Sarandib (Sri Lanka)",
+      "summary": "Pelaut masyhur dari Seribu Satu Malam yang menempuh tujuh pelayaran penuh keajaiban melintasi Samudra Hindia.",
+      "body": [
+        "Kisah Pelayaran Sindbad memadukan jaringan niaga bahari nyata dari pelabuhan Basrah dan Siraf dengan keajaiban samudra Timur.",
+        "Kajian tujuh bagian ini mengupas tujuh pelayarannya mulai dari pulau hijau yang ternyata punggung ikan paus raksasa."
+      ],
+      "sources": [
+        {
+          "title": "Seribu Satu Malam — Malam 536–566",
+          "author": "Tradisi Naratif Arab",
+          "year": "Era Abbasiyah–Mamluk"
+        },
+        {
+          "title": "Akhbar ash-Shin wa al-Hind",
+          "author": "Sulaiman at-Tajir & Abu Zaid as-Sirafi",
+          "year": "Abad ke-3–4 H"
+        },
+        {
+          "title": "Aja'ib al-Hind",
+          "author": "Buzurg bin Syahriyar",
+          "year": "Abad ke-4 H"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Abbasiyah",
+          "note": "Pembukuan kisah pelaut Samudra Hindia menjadi siklus tujuh pelayaran."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Masuk ke Seribu Satu Malam sebagai epos petualang saudagar."
+        }
+      ],
+      "evidenceLabels": [
+        "Fiksi Sastra"
+      ],
+      "chapters": [
+        {
+          "id": "sinbad-v1",
+          "title": "Pelayaran Pertama: Pulau Paus yang Bergerak dan Kerajaan Mihrajan",
+          "evidenceLabel": "Fiksi Sastra",
+          "paragraphs": [
+            "Sindbad sang Pelaut membuka ceritanya bukan dengan memamerkan emas, melainkan kekeliruan pertamanya di tengah samudra: kapal berlabuh di pulau hijau tenang yang mendadak bergetar dan menyelam saat para awak menyalakan api unggun—rupanya pulau itu adalah punggung paus raksasa yang telah ditumbuhi pasir dan pepohonan.",
+            "Bertahan seorang diri di atas bak kayu, Sindbad terdampar ke Kerajaan al-Mihrajan tempat jalur rempah nyata Nusantara dan India bersanding dengan keajaiban kisah Seribu Satu Malam.",
+            "Bab pembuka gratis ini menyingkap pola tujuh pelayaran: ketenangan palsu, terpisah dari rombongan, selamat lewat kecerdikan, lalu kembali pulang sebelum panggilan laut datang lagi."
+          ]
+        },
+        {
+          "id": "sinbad-v2",
+          "title": "Pelayaran Kedua: Lembah Berlian dan Cakar Burung Rukh",
+          "evidenceLabel": "Fiksi Sastra",
+          "paragraphs": []
+        },
+        {
+          "id": "sinbad-v3",
+          "title": "Pelayaran Ketiga: Pulau Kera dan Benteng Raksasa Hitam",
+          "evidenceLabel": "Fiksi Sastra",
+          "paragraphs": []
+        },
+        {
+          "id": "sinbad-v4",
+          "title": "Pelayaran Keempat: Jamuan Aneh dan Lubang Hidup-Mati",
+          "evidenceLabel": "Fiksi Sastra",
+          "paragraphs": []
+        },
+        {
+          "id": "sinbad-v5",
+          "title": "Pelayaran Kelima: Orang Tua Laut dan Pulau Kelapa",
+          "evidenceLabel": "Fiksi Sastra",
+          "paragraphs": []
+        },
+        {
+          "id": "sinbad-v6",
+          "title": "Pelayaran Keenam: Sungai Bawah Tanah dan Surat Raja Sarandib",
+          "evidenceLabel": "Fiksi Sastra",
+          "paragraphs": []
+        },
+        {
+          "id": "sinbad-v7",
+          "title": "Pelayaran Ketujuh: Kuburan Gajah dan Akhir Tujuh Pengembaraan",
+          "evidenceLabel": "Fiksi Sastra",
+          "paragraphs": []
+        }
+      ]
+    },
+    "ibn-battuta": {
+      "name": "Ibnu Battutah",
+      "typeLabel": "Penjelajah Sejarah",
+      "entryType": "Penjelajah Sejarah",
+      "region": "Tangier hingga Cina, Mali, dan Andalusia",
+      "summary": "Raja para penjelajah yang menempuh hampir tiga puluh tahun pengembaraan melintasi Afrika, Asia, dan Eropa Timur, lalu mendiktekan Rihlah.",
+      "body": [
+        "Pada 2 Rajab 725 H (1325 M), Muhammad bin Abdullah al-Lawati—Ibnu Battutah—meninggalkan Tangier di usia dua puluh dua tahun menuju tanah suci, mengawali perjalanan 29 tahun.",
+        "Kajian empat belas bagian ini memetakan rute sejarah dalam 12 bab dan 2 lampiran dengan pembedaan teliti antara fakta sejarah dan keajaiban tuturan."
+      ],
+      "sources": [
+        {
+          "title": "Tuhfat an-Nuzzhar fi Ghara'ib al-Amshar (Ar-Rihlah)",
+          "author": "Ibnu Battutah (ditulis Ibnu Juzayy)",
+          "year": "756 H / 1355 M"
+        },
+        {
+          "title": "Ad-Durar al-Kaminah",
+          "author": "Ibnu Hajar al-Asqalani",
+          "year": "Abad ke-9 H / 15 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Abad ke-14 M (1325)",
+          "note": "Bertolak dari Tangier melintasi Afrika Utara menuju Mesir, Syam, dan Hijaz."
+        },
+        {
+          "era": "Abad ke-14 M (1333–1347)",
+          "note": "Menjabat Qadi di Delhi lalu berlayar ke Maladewa, Sri Lanka, Samudra Pasai, dan Cina."
+        },
+        {
+          "era": "Abad ke-14 M (1355)",
+          "note": "Menetap di Fez dan mendiktekan kisah perjalanannya kepada Ibnu Juzayy."
+        }
+      ],
+      "evidenceLabels": [
+        "Terdokumentasi Secara Sejarah",
+        "Keajaiban Kisahnya",
+        "Rekonstruksi Sastra"
+      ],
+      "chapters": [
+        {
+          "id": "ib-ch-1",
+          "title": "Bab 1: Tangier 1325 M — Perpisahan dan Awal Haji Seorang Diri",
+          "evidenceLabel": "Terdokumentasi Secara Sejarah",
+          "paragraphs": [
+            "'Aku keluar dari Tangier, tempat kelahiranku, pada hari Kamis tanggal dua bulan Rajab tahun 725 H untuk menunaikan haji ke Baitullah al-Haram.' Dengan kalimat tenang inilah Ibnu Battutah membuka catatan perjalanan terbesar dunia Arab abad pertengahan.",
+            "Tanpa kafilah pengawal di langkah awalnya, ia melukiskan rasa rindu kepada kedua orang tua dan serangan demam saat melintasi Tlemcen, Bejaia, dan Tunis—menampakkan keteguhan penuntut ilmu muda menuju Timur.",
+            "Bab pembuka gratis ini mengurai awal sejarah perjalanan lebih dari 120.000 kilometer menuju Aleksandria, Damaskus, Konstantinopel, Delhi, Maladewa, Samudra Nusantara, Cina, dan Mali."
+          ]
+        },
+        {
+          "id": "ib-ch-2",
+          "title": "Bab 2: Aleksandria dan Kairo — Ramalan Sang Wali dan Gerbang Laut Merah",
+          "evidenceLabel": "Terdokumentasi Secara Sejarah",
+          "paragraphs": []
+        },
+        {
+          "id": "ib-ch-3",
+          "title": "Bab 3: Damaskus dan Makkah — Kafilah Mahmal dan Kisah Kubah Suci",
+          "evidenceLabel": "Terdokumentasi Secara Sejarah",
+          "paragraphs": []
+        },
+        {
+          "id": "ib-ch-4",
+          "title": "Bab 4: Persia dan Irak — Syiraz, Basrah, dan Majelis Para Atabeg",
+          "evidenceLabel": "Terdokumentasi Secara Sejarah",
+          "paragraphs": []
+        },
+        {
+          "id": "ib-ch-5",
+          "title": "Bab 5: Pesisir Afrika Timur dan Dhofar — Kapal Muson dan Pelabuhan Kemenyan",
+          "evidenceLabel": "Keajaiban Kisahnya",
+          "paragraphs": []
+        },
+        {
+          "id": "ib-ch-6",
+          "title": "Bab 6: Anatolia dan Stepa Kipchak — Kereta Berjalan dan Dingin Utara",
+          "evidenceLabel": "Terdokumentasi Secara Sejarah",
+          "paragraphs": []
+        },
+        {
+          "id": "ib-ch-7",
+          "title": "Bab 7: Konstantinopel — Di Istana Kaisar dan Gema Lonceng",
+          "evidenceLabel": "Terdokumentasi Secara Sejarah",
+          "paragraphs": []
+        },
+        {
+          "id": "ib-ch-8",
+          "title": "Bab 8: Khawarizm dan Khurasan — Jalur Sutra dan Rintangan Stepa",
+          "evidenceLabel": "Terdokumentasi Secara Sejarah",
+          "paragraphs": []
+        },
+        {
+          "id": "ib-ch-9",
+          "title": "Bab 9: Delhi di Istana Muhammad bin Tughluq — Jabatan Qadi dan Wibawa",
+          "evidenceLabel": "Terdokumentasi Secara Sejarah",
+          "paragraphs": []
+        },
+        {
+          "id": "ib-ch-10",
+          "title": "Bab 10: Kepulauan Maladewa — Qadi Nusantara dan Papan Kerang",
+          "evidenceLabel": "Keajaiban Kisahnya",
+          "paragraphs": []
+        },
+        {
+          "id": "ib-ch-11",
+          "title": "Bab 11: Sarandib dan Cina — Puncak Adam dan Pelabuhan Zaitun",
+          "evidenceLabel": "Keajaiban Kisahnya",
+          "paragraphs": []
+        },
+        {
+          "id": "ib-ch-12",
+          "title": "Bab 12: Andalusia dan Mali — Penutup Pengembaraan dan Penulisan Rihlah di Fez",
+          "evidenceLabel": "Terdokumentasi Secara Sejarah",
+          "paragraphs": []
+        },
+        {
+          "id": "ib-app-1",
+          "title": "Lampiran 1: Peta Rute, Verifikasi Kronologi, dan Jeda Waktu",
+          "evidenceLabel": "Terdokumentasi Secara Sejarah",
+          "paragraphs": []
+        },
+        {
+          "id": "ib-app-2",
+          "title": "Lampiran 2: Tokoh Pinggiran dan Pilihan Rekonstruksi Sastra",
+          "evidenceLabel": "Rekonstruksi Sastra",
+          "paragraphs": []
+        }
+      ]
+    },
+    "ghul": {
+      "name": "Al-Ghul (Ghul)",
+      "typeLabel": "Makhluk Mitologi",
+      "region": "Jazirah Arab dan Gurun Besar",
+      "summary": "Makhluk gurun menakutkan yang meniru rupa manusia untuk menyesatkan musafir.",
+      "body": [
+        "Makhluk legenda padang pasir yang hidup di reruntuhan dan jalan sunyi serta konon hanya mati dengan satu pukulan."
+      ],
+      "sources": [
+        {
+          "title": "Kitab al-Ashnam",
+          "author": "Hisyam bin al-Kalbi",
+          "year": "Abad ke-2 H"
+        },
+        {
+          "title": "Kitab al-Hayawan",
+          "author": "Al-Jahiz",
+          "year": "Abad ke-3 H"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Makhluk malam yang ditakuti di padang pasir."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Metafora kebohongan dan penyesatan."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Masuk dalam kisah Seribu Satu Malam."
+        }
+      ],
+      "mythTradition": "Berubah wujud untuk menyesatkan kafilah dan tewas oleh satu hantaman.",
+      "mythAnalysis": "Personifikasi bahaya gurun seperti fatamorgana dan tersesat."
+    },
+    "anqa": {
+      "name": "Al-Anqa",
+      "typeLabel": "Makhluk Mitologi",
+      "region": "Pegunungan Jauh dan Belantara",
+      "summary": "Burung raksasa misterius, simbol abadi bagi sesuatu yang mustahil dijangkau.",
+      "body": [
+        "Terkenal dalam syair Arab kuno sebagai lambang hal langka yang hanya terdengar beritanya."
+      ],
+      "sources": [
+        {
+          "title": "Kitab al-Hayawan",
+          "author": "Al-Jahiz",
+          "year": "Abad ke-3 H"
+        },
+        {
+          "title": "Muruj adz-Dzahab",
+          "author": "Al-Mas'udi",
+          "year": "Abad ke-4 H"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Peribahasa kemustahilan."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Hadir dalam perumpamaan sastra."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Berpadu dengan filsafat dan kisah Rukh."
+        }
+      ],
+      "mythTradition": "Burung agung di Gunung Qaf yang tampak sekali seumur generasi.",
+      "mythAnalysis": "Simbol bahasa bagi kelangkaan mutlak."
+    },
+    "irm": {
+      "name": "Kota Iram yang Bertiang Tinggi",
+      "typeLabel": "Tempat Mitologi",
+      "region": "Al-Ahqaf / Hadhramaut",
+      "summary": "Kota megah kaum 'Ad yang tiada bandingannya sebelum ditelan pasir Al-Ahqaf.",
+      "body": [
+        "Sering disebut Atlantis Padang Pasir dan dikaitkan oleh peneliti modern dengan situs Ubar."
+      ],
+      "sources": [
+        {
+          "title": "Al-Quran al-Karim (Surah Al-Fajr)",
+          "author": "Teks Primer",
+          "year": "Abad ke-7 M"
+        },
+        {
+          "title": "Mu'jam al-Buldan",
+          "author": "Yaqut al-Hamawi",
+          "year": "Abad ke-7 H"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Ibu kota awal kaum 'Ad."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Ibrah dalam Al-Quran."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Legenda perburuan harta karun gurun."
+        }
+      ],
+      "mythTradition": "Kota emas Syaddad yang timbul tenggelam di balik bukit pasir.",
+      "mythAnalysis": "Pertemuan memori teks suci dan arkeologi jalur kafilah Ubar."
+    },
+    "allat": {
+      "name": "Al-Lat",
+      "typeLabel": "Sesembahan Kuno",
+      "region": "Thaif / Hijaz",
+      "summary": "Dewi besar Thaif dan salah satu dari tiga berhala utama Hijaz pra-Islam.",
+      "body": [
+        "Berhala batu putih yang diruntuhkan setelah Thaif masuk Islam tahun 9 H."
+      ],
+      "sources": [
+        {
+          "title": "Kitab al-Ashnam",
+          "author": "Hisyam bin al-Kalbi",
+          "year": "Abad ke-2 H"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Kuil utama Thaif."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Diruntuhkan tahun 9 H."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Dicatat dalam literatur sejarah."
+        }
+      ]
+    },
+    "jinn": {
+      "name": "Jin",
+      "typeLabel": "Makhluk Mitologi",
+      "region": "Semua Negeri, Khususnya Reruntuhan",
+      "summary": "Makhluk gaib dari api yang hidup berdampingan secara tak kasatmata dengan manusia.",
+      "body": [
+        "Dalam tradisi Arab memiliki suku, pasar, serta golongan beriman maupun ingkar."
+      ],
+      "sources": [
+        {
+          "title": "Kitab al-Hayawan",
+          "author": "Al-Jahiz",
+          "year": "Abad ke-3 H"
+        },
+        {
+          "title": "Al-Haba'ik",
+          "author": "As-Suyuthi",
+          "year": "Abad ke-9 H"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Ditakuti di lembah sepi."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Ditegaskan sebagai makhluk mukalaf."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Pembukuan ensiklopedis."
+        }
+      ],
+      "mythTradition": "Dunia paralel dengan raja, pasar, dan adab bertetangga.",
+      "mythAnalysis": "Penjelasan pra-Islam terhadap peristiwa malam misterius."
+    },
+    "aluzza": {
+      "name": "Al-Uzza",
+      "typeLabel": "Sesembahan Kuno",
+      "region": "Lembah Nakhlah",
+      "summary": "Dewi kemuliaan dan berhala paling dihormati Quraisy sebelum Islam.",
+      "body": [
+        "Diruntuhkan Khalid bin Walid pada tahun 8 H (630 M)."
+      ],
+      "sources": [
+        {
+          "title": "Kitab al-Ashnam",
+          "author": "Hisyam bin al-Kalbi",
+          "year": "Abad ke-2 H"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Berhala utama Quraisy."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Diruntuhkan tahun 8 H."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Dicatat sejarawan."
+        }
+      ]
+    },
+    "saqlaba": {
+      "name": "As-Si'lah",
+      "typeLabel": "Makhluk Mitologi",
+      "region": "Gurun dan Reruntuhan",
+      "summary": "Ghul betina yang meniru suara lembut orang terdekat demi memikat korban.",
+      "body": [
+        "Bersembunyi di reruntuhan senja dan hanya terbongkar wujud aslinya lewat pantulan air."
+      ],
+      "sources": [
+        {
+          "title": "Kitab al-Hayawan",
+          "author": "Al-Jahiz",
+          "year": "Abad ke-3 H"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Hantu malam padang pasir."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Kiasan tipu daya."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Tokoh kisah keajaiban."
+        }
+      ]
+    },
+    "umm_duwais": {
+      "name": "Ummu ad-Duwais",
+      "typeLabel": "Makhluk Mitologi",
+      "region": "Teluk Arab dan Rub' al-Khali",
+      "summary": "Penampakan cahaya biru memikat di gurun yang menyesatkan pengembara kesepian.",
+      "body": [
+        "Cerita rakyat Teluk tentang cahaya malam yang memperingatkan anak-anak agar pulang sebelum petang."
+      ],
+      "sources": [
+        {
+          "title": "Cerita Rakyat Teluk",
+          "author": "Kompilasi Warisan",
+          "year": "Modern"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Api gurun pengelabu."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Kisah pengembara."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Mengakar dalam folklor."
+        }
+      ]
+    },
+    "nasanis": {
+      "name": "An-Nasnas",
+      "typeLabel": "Makhluk Mitologi",
+      "region": "Pulau Terpencil dan Hutan Lebat",
+      "summary": "Makhluk bertubuh separuh yang melompat cepat dengan satu kaki di hutan belantara.",
+      "body": [
+        "Dicatat penjelajah kuno seperti Al-Mas'udi dalam bab keajaiban pulau timur."
+      ],
+      "sources": [
+        {
+          "title": "Kitab al-Hayawan",
+          "author": "Al-Jahiz",
+          "year": "Abad ke-3 H"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Kisah bangsa jauh."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Tercatat dalam kitab geografi."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Diperkaya berita pelayaran India."
+        }
+      ]
+    },
+    "hama": {
+      "name": "Al-Hamah",
+      "typeLabel": "Makhluk Mitologi",
+      "region": "Pemakaman dan Padang Belantara",
+      "summary": "Burung bayangan arwah korban pembunuhan yang menuntut bela di atas kubur.",
+      "body": [
+        "Takhayul lama yang dihapus oleh ajaran Islam."
+      ],
+      "sources": [
+        {
+          "title": "Lisan al-Arab",
+          "author": "Ibnu Mandzur",
+          "year": "Abad ke-8 H"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Burung roh pembalasan."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Dibatalkan dalam hadis."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Bertahan sebagai metafora puisi."
+        }
+      ]
+    },
+    "ifrit": {
+      "name": "Al-'Ifrit",
+      "typeLabel": "Makhluk Mitologi",
+      "region": "Alam Gaib Jin",
+      "summary": "Golongan jin perkasa lagi licik, penjaga harta terpendam dan penghuni guci bersegel.",
+      "body": [
+        "Disebut dalam Surah An-Naml dan kisah Nelayan dengan Jin dalam Seribu Satu Malam."
+      ],
+      "sources": [
+        {
+          "title": "Al-Quran al-Karim (Surah An-Naml)",
+          "author": "Teks Primer",
+          "year": "Abad ke-7 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Kekuatan jin gurun."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Termaktub dalam kisah Nabi Sulaiman."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Tokoh klasik Seribu Satu Malam."
+        }
+      ]
+    },
+    "marid": {
+      "name": "Al-Marid",
+      "typeLabel": "Makhluk Mitologi",
+      "region": "Lautan, Gunung, dan Reruntuhan",
+      "summary": "Raksasa jin pemberontak berkuasa besar atas badai.",
+      "body": [
+        "Menggambarkan kekuatan raksasa pembangun maupun pembangkang dalam kisah klasik."
+      ],
+      "sources": [
+        {
+          "title": "Ishlah al-Ghalat",
+          "author": "Ibnu Qutaibah",
+          "year": "Abad ke-3 H"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Jin raksasa pembangun."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Ditundukkan dengan izin Allah."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Lambang kekuatan dahsyat."
+        }
+      ]
+    },
+    "wad_abqar": {
+      "name": "Lembah Abqar",
+      "typeLabel": "Tempat Mitologi",
+      "region": "Najd / Tihamah",
+      "summary": "Lembah rahasia para jin sumber ilham puitis yang melahirkan kata 'Abqari' (jenius).",
+      "body": [
+        "Akar kata kejeniusan bahasa Arab dalam tradisi kesusastraan."
+      ],
+      "sources": [
+        {
+          "title": "Kitab al-Hayawan",
+          "author": "Al-Jahiz",
+          "year": "Abad ke-3 H"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Sumber ilham penyair."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Asal istilah Abqari."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Lambang kreativitas sastra."
+        }
+      ]
+    },
+    "qaf": {
+      "name": "Gunung Qaf",
+      "typeLabel": "Tempat Mitologi",
+      "region": "Tepi Dunia",
+      "summary": "Gunung zamrud hijau yang melingkari bumi dan menjadi sarang Al-Anqa.",
+      "body": [
+        "Batas kosmografi klasik antara alam nyata dan wilayah gaib."
+      ],
+      "sources": [
+        {
+          "title": "Muruj adz-Dzahab",
+          "author": "Al-Mas'udi",
+          "year": "Abad ke-4 H"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Batas dunia dikenal."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Cakrawala kosmografi."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Simbol ujung semesta."
+        }
+      ]
+    },
+    "city_copper": {
+      "name": "Kota Tembaga",
+      "typeLabel": "Tempat Mitologi",
+      "region": "Rub' al-Khali / Gurun Sahara",
+      "summary": "Kota tembaga berkilau nan sepi yang hanya mengizinkan pengembara mengambil hikmah, bukan emas.",
+      "body": [
+        "Hikmah kefanaan yang diukir di atas gerbang tembaga sunyi."
+      ],
+      "sources": [
+        {
+          "title": "Seribu Satu Malam",
+          "author": "Tradisi Rakyat",
+          "year": "Abad ke-9 H"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Kota jin yang hilang."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Kisah pengembara gurun."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Ikon Seribu Satu Malam."
+        }
+      ]
+    },
+    "bahr_rih": {
+      "name": "Laut Angin",
+      "typeLabel": "Tempat Mitologi",
+      "region": "Samudra Hindia / Atlantik",
+      "summary": "Samudra gelap berbadai di batas peta lama tempat kompas berputar tak menentu.",
+      "body": [
+        "Mewujudkan gentarnya pelaut kuno menghadapi samudra tak berujung."
+      ],
+      "sources": [
+        {
+          "title": "Muruj adz-Dzahab",
+          "author": "Al-Mas'udi",
+          "year": "Abad ke-4 H"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Lautan batas dunia."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Catatan pelaut."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Geografi keajaiban bahari."
+        }
+      ]
+    },
+    "val_waqwaq": {
+      "name": "Pulau Waqwaq",
+      "typeLabel": "Tempat Mitologi",
+      "region": "Samudra Hindia / Laut Cina",
+      "summary": "Pulau terpencil dengan pepohonan berbuah menyerupai wajah yang berseru 'Waqwaq!' tertiup angin.",
+      "body": [
+        "Batas terjauh keajaiban timur dalam catatan geografi Arab abad pertengahan."
+      ],
+      "sources": [
+        {
+          "title": "Muruj adz-Dzahab",
+          "author": "Al-Mas'udi",
+          "year": "Abad ke-4 H"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Pulau terjauh dalam legenda."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Laporan pelayaran samudra."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Peta keajaiban timur."
+        }
+      ]
+    },
+    "balqis": {
+      "name": "Bilqis (Ratu Saba')",
+      "typeLabel": "Ratu Legendaris",
+      "region": "Saba' / Ma'rib, Yaman",
+      "summary": "Ratu bijak Kerajaan Saba' yang memimpin dengan musyawarah dan beriman setelah bertemu Nabi Sulaiman.",
+      "body": [
+        "Lambang kebijaksanaan pemimpin perempuan dalam Al-Quran dan sastra Arab."
+      ],
+      "sources": [
+        {
+          "title": "Al-Quran al-Karim (Surah An-Naml)",
+          "author": "Teks Primer",
+          "year": "Abad ke-7 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Ratu masyhur Yaman kuno."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Kisahnya abadi dalam Al-Quran."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Simbol kebijaksanaan agung."
+        }
+      ]
+    },
+    "suleiman": {
+      "name": "Nabi Sulaiman AS",
+      "typeLabel": "Raja dan Nabi Bijaksana",
+      "region": "Yerusalem dan Khazanah Klasik",
+      "summary": "Nabi sekaligus raja yang dianugerahi kekuasaan atas angin, bahasa burung, dan bangsa jin.",
+      "body": [
+        "Sosok keadilan dan kebijaksanaan agung dalam Al-Quran serta tradisi sastra Arab."
+      ],
+      "sources": [
+        {
+          "title": "Al-Quran al-Karim (Surah An-Naml / Saba')",
+          "author": "Teks Primer",
+          "year": "Abad ke-7 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Raja hikmah dalam tradisi."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Nabi penguasa angin dan jin."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Penguasa cincin segel dalam sastra rakyat."
+        }
+      ]
+    },
+    "sayf": {
+      "name": "Saif bin Dzi Yazan",
+      "typeLabel": "Pahlawan Epos",
+      "region": "Yaman / Himyar",
+      "summary": "Raja pembebas Yaman yang epos rakyatnya memadukan sejarah dengan petualangan magis.",
+      "body": [
+        "Simbol kemerdekaan bangsa Arab dalam hikayat tutur rakyat."
+      ],
+      "sources": [
+        {
+          "title": "Sirat Saif bin Dzi Yazan",
+          "author": "Anonim",
+          "year": "Sekitar Abad ke-10 H"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Raja pembebas Yaman."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Berubah menjadi tokoh legenda."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Epos rakyat panjang."
+        }
+      ]
+    },
+    "zir_salem": {
+      "name": "Az-Zir Salim",
+      "typeLabel": "Pahlawan Epos",
+      "region": "Najd / Taghlib",
+      "summary": "Ksatria Bani Taghlib dalam epos tragis Perang Basus selama empat puluh tahun.",
+      "body": [
+        "Mengabadikan nilai kehormatan, kesetiaan, dan syair ratapan."
+      ],
+      "sources": [
+        {
+          "title": "Sirat Az-Zir Salim",
+          "author": "Anonim",
+          "year": "Abad Pertengahan"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Pemicu sejarah Perang Basus."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Peribahasa penuntutan bela."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Epos lisan panggung rakyat."
+        }
+      ]
+    },
+    "juha": {
+      "name": "Juha (Abu Nawas / Nasruddin)",
+      "typeLabel": "Tokoh Folklor",
+      "region": "Seluruh Dunia Islam",
+      "summary": "Sosok rakyat jelata jenaka yang menyembunyikan kritik sosial tajam di balik keluguannya.",
+      "body": [
+        "Cerita humoris penuh filsafat rakyat yang dicintai dari Arab hingga Nusantara."
+      ],
+      "sources": [
+        {
+          "title": "Hikayat Juha Rakyat",
+          "author": "Warisan Lisan",
+          "year": "Tradisi Lisan"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Akar humor jenaka desa."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Menyebar ke kota-kota Islam."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Pembukuan kisah Juha."
+        }
+      ]
+    },
+    "abuzayd": {
+      "name": "Abu Zaid al-Hilali",
+      "typeLabel": "Pahlawan Epos",
+      "region": "Najd / Mesir / Maghreb",
+      "summary": "Panglima cerdas Bani Hilal dalam epos besar migrasi ke Afrika Utara.",
+      "body": [
+        "Epos rakyat yang dilantunkan para penyair keliling sepanjang sejarah."
+      ],
+      "sources": [
+        {
+          "title": "Sirat Bani Hilal",
+          "author": "Tradisi Epos",
+          "year": "Abad Pertengahan"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Asal-usul kabilah Hilal."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Migrasi bersejarah menjadi epos."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Pengukuhan hikayat Hilaliyah."
+        }
+      ]
+    },
+    "harut_marut": {
+      "name": "Harut dan Marut",
+      "typeLabel": "Tokoh Kisah",
+      "region": "Babilonia / Irak",
+      "summary": "Dua malaikat yang turun di Babilonia sebagai ujian keimanan terhadap sihir.",
+      "body": [
+        "Termaktub dalam Surah Al-Baqarah mengingatkan manusia agar menjauhi sihir dan kekufuran."
+      ],
+      "sources": [
+        {
+          "title": "Al-Quran al-Karim (Surah Al-Baqarah)",
+          "author": "Teks Primer",
+          "year": "Abad ke-7 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Gema kisah Babilonia."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Penegasan kisah dalam Al-Quran."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Perluasan riwayat dalam kitab kisah."
+        }
+      ]
+    },
+    "khidr": {
+      "name": "Nabi Khidir",
+      "typeLabel": "Tokoh Bijaksana",
+      "region": "Pertemuan Dua Lautan",
+      "summary": "Hamba Allah saleh guru Nabi Musa dalam Surah Al-Kahfi yang melambangkan hikmah tersembunyi.",
+      "body": [
+        "Dihormati sebagai lambang ilmu laduni dan pelindung musafir lautan dalam folklor."
+      ],
+      "sources": [
+        {
+          "title": "Al-Quran al-Karim (Surah Al-Kahfi)",
+          "author": "Teks Primer",
+          "year": "Abad ke-7 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Motif mata air kehidupan Timur."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Kisah bersama Nabi Musa AS."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Simbol hikmah dalam sastra sufi."
+        }
+      ]
+    },
+    "malik": {
+      "name": "Malaikat Malik",
+      "typeLabel": "Tokoh Eskatologi",
+      "region": "Khazanah Islam",
+      "summary": "Malaikat penjaga pintu neraka yang disebut dalam Surah Az-Zukhruf.",
+      "body": [
+        "Lambang keagungan dan ketegasan keadilan ilahi dalam tradisi nasihat Islam."
+      ],
+      "sources": [
+        {
+          "title": "Al-Quran al-Karim (Surah Az-Zukhruf)",
+          "author": "Teks Primer",
+          "year": "Abad ke-7 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Awal Islam",
+          "note": "Termaktub dalam Al-Quran."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Diangkat dalam sastra nasihat."
+        }
+      ]
+    },
+    "tatayyur": {
+      "name": "Tathayyur (Firasat Burung)",
+      "typeLabel": "Kepercayaan Kuno",
+      "region": "Jazirah Arab",
+      "summary": "Takhayul menentukan sial atau mujur melalui arah terbang burung.",
+      "body": [
+        "Dihapus oleh Islam dan digantikan dengan optimisme (fa'l) serta tawakal."
+      ],
+      "sources": [
+        {
+          "title": "Lisan al-Arab",
+          "author": "Ibnu Mandzur",
+          "year": "Abad ke-8 H"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Memengaruhi keputusan bepergian."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Dihapuskan sebagai takhayul."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Tersisa dalam peribahasa."
+        }
+      ]
+    },
+    "iyafa": {
+      "name": "Iyafah (Ilmu Terbang Burung)",
+      "typeLabel": "Ritual Kuno",
+      "region": "Jazirah Arab",
+      "summary": "Membaca arah terbang dan suara burung untuk memutus urusan perang atau safar.",
+      "body": [
+        "Ditinggalkan seiring penyebaran ilmu dan tauhid."
+      ],
+      "sources": [
+        {
+          "title": "Lisan al-Arab",
+          "author": "Ibnu Mandzur",
+          "year": "Abad ke-8 H"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Profesi peramal suku."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Dilarang dalam syariat."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Dikenang dalam syair."
+        }
+      ]
+    },
+    "kahana": {
+      "name": "Kahanah (Peramalan)",
+      "typeLabel": "Ritual Kuno",
+      "region": "Jazirah Arab / Irak",
+      "summary": "Praktik peramalan kuno memakai prosa berima oleh para kahin.",
+      "body": [
+        "Dilarang tegas dalam Islam yang membawa wahyu terang."
+      ],
+      "sources": [
+        {
+          "title": "Lisan al-Arab",
+          "author": "Ibnu Mandzur",
+          "year": "Abad ke-8 H"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Otoritas peramal kabilah."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Larangan keras mendatangi peramal."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Tersingkir dari ilmu resmi."
+        }
+      ]
+    },
+    "istisqa": {
+      "name": "Ritual Memohon Hujan Kuno",
+      "typeLabel": "Ritual Kuno",
+      "region": "Jazirah Arab",
+      "summary": "Ritual kuno mengelilingi batu suci pada musim kemarau sebelum diganti Shalat Istisqa.",
+      "body": [
+        "Islam mengganti kurban batu dengan doa tulus langsung kepada Tuhan."
+      ],
+      "sources": [
+        {
+          "title": "Kitab al-Ashnam",
+          "author": "Hisyam bin al-Kalbi",
+          "year": "Abad ke-2 H"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Ritual mengelilingi batu berhala."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Diganti Shalat Istisqa."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Jejaknya bertahan dalam nama bintang."
+        }
+      ]
+    },
+    "anwaa": {
+      "name": "Al-Anwa' (Ilmu Bintang Musim)",
+      "typeLabel": "Tradisi Astronomi",
+      "region": "Jazirah Arab",
+      "summary": "Penanggalan bintang pengembara Badui untuk membaca perubahan musim hujan dan angin.",
+      "body": [
+        "Berkembang dari perbintangan musim rakyat menjadi ilmu astronomi Islam yang presisi."
+      ],
+      "sources": [
+        {
+          "title": "Kitab al-Anwa'",
+          "author": "Ibnu Qutaibah",
+          "year": "Abad ke-3 H"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Penanda musim hujan & angin."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Diluruskan dari keyakinan bintang menurunkan hujan."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Berkembang menjadi astronomi ilmiah."
+        }
+      ]
+    },
+    "zuhal": {
+      "name": "Zuhal (Planet Saturnus)",
+      "typeLabel": "Mitos Astronomi",
+      "region": "Khazanah Langit Arab",
+      "summary": "Planet dingin yang diyakini peramal kuno sebagai lambang masa tua dan waktu keras.",
+      "body": [
+        "Bertahan dalam puisi sebagai kiasan waktu yang menguji ketabahan."
+      ],
+      "sources": [
+        {
+          "title": "Kitab al-Anwa'",
+          "author": "Ibnu Qutaibah",
+          "year": "Abad ke-3 H"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Bintang pertanda dingin dalam astrologi."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Dalam cerita rakyat."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Dikaji sebagai planet astronomi."
+        }
+      ]
+    },
+    "suhayl": {
+      "name": "Bintang Suhail (Canopus)",
+      "typeLabel": "Mitos Astronomi",
+      "region": "Yaman / Arabia Selatan",
+      "summary": "Bintang terang selatan penanda meredanya terik musim panas dan rindu kampung halaman.",
+      "body": [
+        "Kemunculannya membawa angin sejuk dan musim perjalanan dalam syair Arab."
+      ],
+      "sources": [
+        {
+          "title": "Kitab al-Anwa'",
+          "author": "Ibnu Qutaibah",
+          "year": "Abad ke-3 H"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Bintang Yaman dan musim hujan."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Penanda waktu musim."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Simbol kerinduan dalam puisi."
+        }
+      ]
+    },
+    "thurayya": {
+      "name": "Ats-Tsurayya (Pleiades)",
+      "typeLabel": "Mitos Astronomi",
+      "region": "Jazirah Arab",
+      "summary": "Gugus bintang berkilau bagai untaian mutiara penuntun musim tanam petani.",
+      "body": [
+        "Keindahannya menjadikan Tsurayya salah satu nama perempuan paling dicintai."
+      ],
+      "sources": [
+        {
+          "title": "Kitab al-Anwa'",
+          "author": "Ibnu Qutaibah",
+          "year": "Abad ke-3 H"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Penanda tanam dan hujan."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Diposisikan sebagai penunjuk musim."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Simbol kecantikan puitis."
+        }
+      ]
+    },
+    "qamar_saba": {
+      "name": "Bulan Sabit Saba'",
+      "typeLabel": "Mitos Astronomi",
+      "region": "Yaman / Ma'rib",
+      "summary": "Lambang bulan suci pada koin dan kuil Kerajaan Saba' kuno di Yaman.",
+      "body": [
+        "Tetap abadi sebagai kenangan kejayaan peradaban Yaman kuno."
+      ],
+      "sources": [
+        {
+          "title": "Prasasti Musnad Yaman",
+          "author": "Warisan Yaman Kuno",
+          "year": "Pra-Islam"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Pemujaan dewa bulan Almaqah."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Simbol artistik bertahan."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Lambang nostalgia Yaman."
+        }
+      ]
+    },
+    "ain_zumurrud": {
+      "name": "Mata Air Zamrud",
+      "typeLabel": "Tempat Mitologi",
+      "region": "Rub' al-Khali / Gurun Besar",
+      "summary": "Mata air hijau zamrud legendaris di tengah gurun penguji keserakahan musafir.",
+      "body": [
+        "Peringatan bahwa harta sejati padang pasir adalah air dan kehidupan, bukan fatamorgana."
+      ],
+      "sources": [
+        {
+          "title": "Kisah Lisan Badui",
+          "author": "Kompilasi Warisan",
+          "year": "Tradisi Rakyat"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Legenda mata air ajaib."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Kisah kafilah gurun."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Simbol harta hilang."
+        }
+      ]
+    },
+    "samud": {
+      "name": "Kaum Tsamud",
+      "typeLabel": "Bangsa Kuno",
+      "region": "Al-Hijr (Mada'in Shalih) / Al-Ula",
+      "summary": "Bangsa pemahat batu cadas di utara Hijaz yang didakwahi Nabi Shalih dengan mukjizat unta betina.",
+      "body": [
+        "Setelah membunuh unta mukjizat, suara menggelegar membinasakan mereka dengan meninggalkan rumah batu Al-Hijr sebagai saksi."
+      ],
+      "sources": [
+        {
+          "title": "Al-Quran al-Karim (Surah Al-A'raf / Asy-Syams)",
+          "author": "Teks Primer",
+          "year": "Abad ke-7 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Bangsa pemahat tebing Al-Hijr."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Pelajaran abadi dalam Al-Quran."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Reruntuhan digambarkan para musafir."
+        }
+      ]
+    },
+    "sad": {
+      "name": "Kaum 'Ad",
+      "typeLabel": "Bangsa Kuno",
+      "region": "Al-Ahqaf / Hadhramaut",
+      "summary": "Pembangun perkasa kota Iram yang binasa diterjang angin topan tujuh malam delapan hari.",
+      "body": [
+        "Diseru Nabi Hud AS, namun kesombongan mereka berujung kehancuran oleh angin kencang."
+      ],
+      "sources": [
+        {
+          "title": "Al-Quran al-Karim (Surah Hud / Al-Fajr)",
+          "author": "Teks Primer",
+          "year": "Abad ke-7 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Bangsa raksasa Al-Ahqaf."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Ibrah atas kesombongan."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Pencarian harta karun Iram."
+        }
+      ]
+    },
+    "tuba": {
+      "name": "Tubba'",
+      "typeLabel": "Raja Legendaris",
+      "region": "Himyar / Yaman",
+      "summary": "Gelar agung raja-raja Himyar yang melawat luas hingga memakaikan kiswah kain Yaman pertama pada Ka'bah.",
+      "body": [
+        "Disebut dalam Al-Quran sebagai kaum pengingat sejarah raja penakluk Arabia Selatan."
+      ],
+      "sources": [
+        {
+          "title": "Al-Quran al-Karim (Surah Ad-Dukhan / Qaf)",
+          "author": "Teks Primer",
+          "year": "Abad ke-7 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Para raja agung Himyar."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Pengingat dalam Al-Quran."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Legenda raja penjelajah."
+        }
+      ]
+    },
+    "sihr": {
+      "name": "Sihir (Al-Sihr)",
+      "typeLabel": "Seni Terlarang",
+      "region": "Babilonia dan Jazirah Arab",
+      "summary": "Praktik simpul benang, mantra, dan tipu daya kuno dari Babilonia hingga kisah Seribu Satu Malam.",
+      "body": [
+        "Dilarang keras dalam Islam namun sering mewarnai kisah fantasi klasik."
+      ],
+      "sources": [
+        {
+          "title": "Al-Quran al-Karim (Surah Al-Baqarah)",
+          "author": "Teks Primer",
+          "year": "Abad ke-7 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Berkaitan dengan peramal dan Babilonia."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Diharamkan secara tegas."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Unsur fantasi cerita rakyat."
+        }
+      ],
+      "mythTradition": "Dongeng klasik menceritakan ikatan mantra, jin pelayan, dan guci bersegel.",
+      "mythAnalysis": "Teknik pengaruh psikologis dan warisan cerita Mesopotamia serta Mesir."
+    },
+    "bahr_zulumat": {
+      "name": "Lautan Kegelapan",
+      "typeLabel": "Tempat Mitologi",
+      "region": "Samudra Atlantik / Maghreb",
+      "summary": "Samudra Atlantik kelam pada peta Arab klasik tempat berakhirnya pelayaran terjauh ke barat.",
+      "body": [
+        "Al-Idrisi mengisahkan pelayaran delapan petualang (al-Mugharrirun) menembus batas samudra barat."
+      ],
+      "sources": [
+        {
+          "title": "Nuzhat al-Musytaq",
+          "author": "Al-Idrisi",
+          "year": "Abad ke-6 H / 12 M"
+        }
+      ],
+      "timeline": [
+        {
+          "era": "Era Pra-Islam",
+          "note": "Batas barat bumi dikenal."
+        },
+        {
+          "era": "Awal Islam",
+          "note": "Ekspedisi para petualang."
+        },
+        {
+          "era": "Era Abbasiyah",
+          "note": "Geografi batas samudra."
+        }
+      ]
+    }
+  },
+  "civilizations": {
+    "civ-madyan": {
+      "name": "Kaum Madyan",
+      "era": "Milenium ke-2 – ke-1 SM",
+      "region": "Barat Laut Jazirah Arab (Tabuk / Oasis Al-Bad')",
+      "cities": [
+        "Madyan (Al-Bad')",
+        "Aynuna (Pelabuhan Laut)"
+      ],
+      "economy": "Niaga kafilah antara Yaman, Mesir, dan Syam; tembaga, kemenyan, dan bea sumur.",
+      "society": "Kabilah saudagar pengelola oasis dan timbangan perdagangan.",
+      "religion": "Pemujaan Al-Aikah (Hutan Suci) di tengah penyimpangan niaga.",
+      "prophet": "Nabi Syu'aib AS (Khatib Para Nabi)",
+      "quranRefs": [
+        "Al-A'raf 7:85–93",
+        "Hud 11:84–95",
+        "Asy-Syu'ara 26:176–190",
+        "Al-Ankabut 29:36–37"
+      ],
+      "archaeology": [
+        "Situs arkeologi Al-Bad' (Tabuk): lapisan pemukiman dan sumur kuno",
+        "Prasasti batu dan lukisan kafilah unta di barat laut Jazirah",
+        "Tembikar lukis khas Madyan (Qurayyah Ware) di barat laut Jazirah dan Yordania selatan"
+      ],
+      "historianNote": "Arkeologi modern menghubungkan situs barat laut Jazirah dengan budaya dagang milenium ke-1 SM; Al-Quran tetap sumber utama risalah Nabi Syu'aib.",
+      "traditionView": "Madyan adalah kaum Nabi Syu'aib yang mencurangi timbangan hingga diazab pada hari naungan awan panas, serta tempat sumur saat Nabi Musa AS mencari suaka.",
+      "archaeologyView": "Tembikar lukis Madyan (abad ke-14–12 SM) ditemukan di situs tambang dan dagang barat laut Arabia.",
+      "legacy": "Madyan abadi sebagai lambang kejujuran timbangan serta sumur persaudaraan.",
+      "chapters": [
+        {
+          "title": "Tanah Kafilah dan Sumur",
+          "text": "Di pertemuan pegunungan Madyan dan Laut Merah, pemukiman batu bata mengelilingi sumur abadi jalur dagang kemenyan."
+        },
+        {
+          "title": "Timbangan yang Dicurangi",
+          "text": "Kemakmuran berubah menjadi kecurangan niaga dan perampasan di balik pemujaan Al-Aikah."
+        },
+        {
+          "title": "Syu'aib, Khatib Para Nabi",
+          "text": "Nabi Syu'aib menyeru dengan hujah jernih agar berlaku adil dalam takaran; di tempat yang sama Musa AS memberi minum ternak dua putri Syu'aib."
+        },
+        {
+          "title": "Azab Hari Naungan",
+          "text": "Awan yang mereka sangka peneduh mendatangkan bara api dan gempa, menyisakan pelajaran abadi tentang keadilan ekonomi."
+        }
+      ]
+    },
+    "civ-aad": {
+      "name": "Kaum 'Ad",
+      "era": "Zaman Perunggu (Abad-Abad SM)",
+      "region": "Al-Ahqaf (Bukit Pasir Dhofar dan Hadhramaut)",
+      "cities": [
+        "Iram Dhat al-'Imad",
+        "Ubar / Syisr (Situs Usulan)"
+      ],
+      "economy": "Panen kemenyan, waduk gurun, dan jalur kafilah darat.",
+      "society": "Bangsa pembangun monumen megah yang membanggakan kekuatan fisik.",
+      "religion": "Berhala leluhur yang menolak dakwah tauhid Nabi Hud AS.",
+      "prophet": "Nabi Hud AS",
+      "quranRefs": [
+        "Al-A'raf 7:65–72",
+        "Hud 11:50–60",
+        "Asy-Syu'ara 26:123–140",
+        "Fushshilat 41:15–16",
+        "Al-Haqqah 69:6–8",
+        "Al-Fajr 89:6–8"
+      ],
+      "archaeology": [
+        "Situs Ubar / Syisr di Dhofar (Oman) pada jalur kuno kemenyan",
+        "Makam Zaman Perunggu dan kuil gurun di Dhofar serta Hadhramaut",
+        "Belum ditemukan prasasti arkeologis mandiri bertuliskan nama resmi 'Ad"
+      ],
+      "historianNote": "Penemuan jalur kemenyan di Ubar/Syisr membuka wawasan peradaban gurun selatan, meski kaitan langsungnya dengan Iram masih berupa hipotesis.",
+      "traditionView": "Kaum pembangun menara megah di Al-Ahqaf yang mendustakan Nabi Hud lalu dibinasakan angin topan tujuh malam delapan hari.",
+      "archaeologyView": "Peneliti menghubungkan memori budaya 'Ad dengan oasis perdagangan kemenyan Zaman Perunggu di Dhofar.",
+      "legacy": "'Kaum 'Ad' menjadi lambang abadi keagungan yang lenyap ditelan pasir.",
+      "chapters": [
+        {
+          "title": "Pewaris Negeri Pertama",
+          "text": "Di lautan pasir Al-Ahqaf tumbuh peradaban perkasa berbenteng dan bertiang batu tinggi."
+        },
+        {
+          "title": "Pembangun Pilar Agung",
+          "text": "Mendirikan istana megah di setiap puncak seakan kekal abadi dari kematian."
+        },
+        {
+          "title": "Hud Seorang Diri",
+          "text": "Menyeru tauhid di tengah kesombongan kaum yang merasa tak terkalahkan."
+        },
+        {
+          "title": "Angin Topan dan Kesudahan",
+          "text": "Badai dahsyat tujuh malam delapan hari menyapu kota, meninggalkan pelajaran sejarah."
+        }
+      ]
+    },
+    "civ-thamud": {
+      "name": "Kaum Tsamud",
+      "era": "Milenium ke-1 SM",
+      "region": "Al-Hijr dan Wadi al-Qura (Kini Al-Ula)",
+      "cities": [
+        "Al-Hijr (Mada'in Shalih)",
+        "Wadi al-Qura"
+      ],
+      "economy": "Pos utama Jalur Kemenyan: bea cukai, segel dagang, dan perbekalan kafilah.",
+      "society": "Ahli teknik air dan pemahat tebing batu yang ulung.",
+      "religion": "Berhala bintang dan batu penjaga jalur dagang serta makam.",
+      "prophet": "Nabi Shalih AS",
+      "quranRefs": [
+        "Al-A'raf 7:73–79",
+        "Hud 11:61–68",
+        "Asy-Syu'ara 26:141–159",
+        "Al-Fajr 89:9",
+        "Qaf 50:12–13"
+      ],
+      "archaeology": [
+        "Al-Hijr (Hegra / Mada'in Shalih): situs warisan dunia UNESCO",
+        "Penyebutan 'Tamudi' dalam catatan Asyur Raja Sargon II (sekitar 715 SM)",
+        "Prasasti dan lukisan batu di Wadi al-Qura dan Al-Ula"
+      ],
+      "historianNote": "Fasad batu yang tampak di Al-Hijr secara arkeologis dipahat oleh bangsa Nabatea (abad 1 SM–1 M), sementara nama Tsamud sudah tercatat dalam arsip Asyur abad ke-8 SM.",
+      "traditionView": "Pemahat bukit yang menyembelih unta mukjizat Nabi Shalih hingga diazab suara menggelegar.",
+      "archaeologyView": "Fasad Hegra adalah karya Nabatea, sedangkan konfederasi Tsamud tercatat jauh lebih tua pada abad ke-8 SM.",
+      "legacy": "Al-Hijr berdiri sebagai museum terbuka tempat tebing pahatan menyimpan pelajaran moral.",
+      "chapters": [
+        {
+          "title": "Para Pemahat Batu",
+          "text": "Memahat rumah dan saluran air langsung pada tebing batu pasir."
+        },
+        {
+          "title": "Kota Al-Hijr",
+          "text": "Gerbang penting Jalur Kemenyan dari selatan ke Syam."
+        },
+        {
+          "title": "Mukjizat Unta Betina",
+          "text": "Unta pembagi giliran air disembelih sembilan komplotan pengacau."
+        },
+        {
+          "title": "Suara Keras dan Warisan",
+          "text": "Tiga hari berselang suara dahsyat meruntuhkan kesombongan mereka."
+        }
+      ]
+    },
+    "civ-saba": {
+      "name": "Kerajaan Saba' dan Ma'in",
+      "era": "Sekitar 1200 SM – 275 M",
+      "region": "Ma'rib, Al-Jawf, dan Dataran Tinggi Yaman",
+      "cities": [
+        "Ma'rib",
+        "Shirwah",
+        "Qarnaw (Ma'in)"
+      ],
+      "economy": "Penguasaan jalur kemenyan dan mur; irigasi terasering megah.",
+      "society": "Raja bergelar Mukarrib bersama serikat saudagar Ma'in hingga Al-Ula dan Delos.",
+      "religion": "Almaqah (dewa bulan), Athtar, dan Syams.",
+      "prophet": "Nabi Sulaiman AS dan Ratu Bilqis",
+      "quranRefs": [
+        "Saba' 34:15–19",
+        "An-Naml 27:22–44"
+      ],
+      "archaeology": [
+        "Bendungan Agung Ma'rib dan pintu air batunya",
+        "Kuil Awwam (Mahram Bilqis) di Ma'rib",
+        "Ribuan prasasti aksara Musnad di Ma'rib dan Al-Jawf"
+      ],
+      "historianNote": "Prasasti Saba' mendokumentasikan kejayaan bendungan dan raja-raja sejak abad ke-8 SM.",
+      "traditionView": "Negeri makmur Ratu Bilqis berdua taman subur hingga kelalaian meruntuhkan bendungan.",
+      "archaeologyView": "Bukti arkeologis membuktikan perawatan panjang Bendungan Ma'rib hingga abad ke-6 M.",
+      "legacy": "Peribahasa 'Tercerai-berai seperti tangan Saba'' tetap hidup hingga kini.",
+      "chapters": [
+        {
+          "title": "Penakluk Banjir Musim",
+          "text": "Bendungan Ma'rib menyuburkan dua taman raksasa timur dan barat."
+        },
+        {
+          "title": "Kafilah Kemenyan",
+          "text": "Menghadirkan julukan 'Arabia Felix' karena kekayaan jalur rempah dan kemenyan."
+        },
+        {
+          "title": "Sang Ratu dan Surat Sulaiman",
+          "text": "Diplomasi bijak Ratu Bilqis berujung pengakuan iman di istana kaca."
+        },
+        {
+          "title": "Banjir Al-Arim",
+          "text": "Keruntuhan bendungan memicu perpindahan kabilah ke seluruh Jazirah."
+        }
+      ]
+    },
+    "civ-himyar": {
+      "name": "Kerajaan Himyar dan Para Tubba'",
+      "era": "Sekitar 110 SM – 525 M",
+      "region": "Zafar, Sana'a, dan Aden",
+      "cities": [
+        "Zafar",
+        "Sana'a (Ghumdan)",
+        "Aden"
+      ],
+      "economy": "Niaga Laut Merah–Samudra Hindia dan pertanian dataran tinggi.",
+      "society": "Raja-raja pejuang bergelar Penguasa Saba', Dzu Raydan, dan Hadhramaut.",
+      "religion": "Beralih dari Almaqah ke tauhid lokal: 'Ar-Rahman Tuhan Langit dan Bumi.'",
+      "prophet": "",
+      "quranRefs": [
+        "Qaf 50:14",
+        "Ad-Dukhan 44:37",
+        "Al-Buruj 85:4–9"
+      ],
+      "archaeology": [
+        "Reruntuhan Zafar dan museum situsnya di Yaman",
+        "Situs Al-Ukhdud di Najran",
+        "Prasasti Himyar di Zafar dan Ma'rib"
+      ],
+      "historianNote": "Prasasti abad ke-5–6 M memakai sebutan 'Rahmanan Tuhan Langit dan Bumi', mencerminkan pengaruh tauhid di Arabia Selatan.",
+      "legacy": "Gelar Tubba' abadi dalam syair sebagai lambang raja selatan.",
+      "chapters": [
+        {
+          "title": "Penguasa Selatan Setelah Saba'",
+          "text": "Dari benteng Zafar hingga pelabuhan Aden, Himyar menguasai darat dan laut."
+        },
+        {
+          "title": "Ghumdan dan Zafar",
+          "text": "Istana dua puluh lantai Ghumdan dikenang sebagai keajaiban arsitektur."
+        },
+        {
+          "title": "Dari Almaqah ke Ar-Rahman",
+          "text": "Pergeseran keagamaan di tengah rivalitas Bizantium dan Persia."
+        },
+        {
+          "title": "Ukhdud dan Tahun Gajah",
+          "text": "Peristiwa Najran dan ekspedisi gajah Abrahah menutup era Himyar merdeka."
+        }
+      ]
+    },
+    "civ-nabataean": {
+      "name": "Kerajaan Nabatea dan Al-Hijr",
+      "era": "Sekitar 400 SM – 106 M",
+      "region": "Petra hingga Al-Hijr dan Hauran",
+      "cities": [
+        "Petra (Raqmu)",
+        "Al-Hijr (Hegra)",
+        "Bosra"
+      ],
+      "economy": "Bea kafilah kemenyan, rekayasa air gurun, dan aspal Laut Mati.",
+      "society": "Mantan pengembara gurun yang menjadi ahli hidrolika dan pemahat batu.",
+      "religion": "Dushara dan Al-Lat dalam batu betyl sebelum memeluk Kristen.",
+      "prophet": "",
+      "quranRefs": [],
+      "archaeology": [
+        "Petra: Situs Warisan Dunia UNESCO sejak 1985",
+        "Hegra (Al-Hijr): lebih dari 100 makam berpahat fasad megah (UNESCO 2008)",
+        "Prasasti Nabatea hingga Namara (328 M) dan Zebed (512 M)"
+      ],
+      "historianNote": "Arkeologi membuktikan bangsa Nabatea adalah pemahat asli fasad Hegra sekaligus cikal bakal aksara Arab.",
+      "traditionView": "Kisah rakyat mengaitkan makam tebing Al-Hijr dengan kaum Tsamud.",
+      "archaeologyView": "Aksara Nabatea berkembang langsung menjadi tulisan Arab.",
+      "legacy": "Hadiah terbesar Nabatea bukan batu, melainkan huruf Arab yang kita baca hari ini.",
+      "chapters": [
+        {
+          "title": "Penguasa Air di Negeri Dahaga",
+          "text": "Menangkap banjir musiman melalui waduk batu tersembunyi."
+        },
+        {
+          "title": "Petra dan Hegra",
+          "text": "Kota mawar batu pasir dengan prasasti cikal bakal khat Arab."
+        },
+        {
+          "title": "Kafilah dan Cukai",
+          "text": "Mengamankan jalur dagang dari Gaza hingga Laut Merah."
+        },
+        {
+          "title": "Dari Kerajaan Menjadi Huruf",
+          "text": "Dicaplok Romawi tahun 106 M namun aksaranya abadi dalam bahasa Arab."
+        }
+      ]
+    },
+    "civ-tasm-jadis": {
+      "name": "Thasm dan Jadis",
+      "era": "Era Mitologi Kuno (Tak Bertanggal Pasti)",
+      "region": "Al-Yamamah (Sekitar Riyadh Modern)",
+      "cities": [
+        "Jaww (Al-Yamamah)",
+        "Hajar"
+      ],
+      "economy": "Kebun kurma, gandum, dan pasar awal Najd.",
+      "society": "Dua suku bersaudara yang saling membinasakan akibat kezaliman.",
+      "religion": "Kepercayaan kuno kabilah Najd.",
+      "prophet": "",
+      "quranRefs": [],
+      "archaeology": [
+        "Lapisan pemukiman kuno di Al-Yamamah",
+        "Nama tempat Najd kuno dalam syair klasik",
+        "Tidak ada bukti prasasti langsung; disajikan sebagai memori mitologi"
+      ],
+      "historianNote": "Tergolong Arab Ba'idah dalam catatan silsilah; ditampilkan secara jujur sebagai warisan mitologi.",
+      "traditionView": "Kisah pesta pedang tersembunyi dan ketajaman mata Zarqa al-Yamamah.",
+      "archaeologyView": "Diklasifikasikan sebagai kisah pendiri dalam memori rakyat Najd.",
+      "legacy": "Menghadirkan peribahasa kehancuran timbal balik dan penglihatan Zarqa.",
+      "chapters": [
+        {
+          "title": "Dua Saudara Al-Yamamah",
+          "text": "Thasm dan Jadis hidup berdampingan hingga kesewenang-wenangan menyulut dendam."
+        },
+        {
+          "title": "Perjamuan Pedang Tersembunyi",
+          "text": "Jadis menyembunyikan pedang di bawah nampan jamuan untuk menumbangkan penguasa Thasm."
+        },
+        {
+          "title": "Penyintas dan Raja Yaman",
+          "text": "Pasukan Raja Hassan menyamar membawa dahan pohon berjalan."
+        },
+        {
+          "title": "Zarqa dan Hutan Berjalan",
+          "text": "Peringatan Zarqa al-Yamamah tak dipercaya hingga negerinya jatuh."
+        }
+      ]
+    },
+    "civ-lakhm": {
+      "name": "Kerajaan Lakhmiyah (Al-Hirah)",
+      "era": "Sekitar 266 – 602 M",
+      "region": "Al-Hirah dan Al-Anbar di Sungai Efrat",
+      "cities": [
+        "Al-Hirah",
+        "Al-Anbar"
+      ],
+      "economy": "Pertanian tepi Efrat, bea kafilah, dan tunjangan perbatasan Persia.",
+      "society": "Istana Arab pengayom penyair, penulis, tabib, dan pasukan kabilah.",
+      "religion": "Kristen Nestorian bersama tradisi lama; terkenal dengan biaranya.",
+      "prophet": "",
+      "quranRefs": [],
+      "archaeology": [
+        "Prasasti Namara (328 M): salah satu teks Arab paling awal",
+        "Sisa biara dan gereja di sekitar Najaf dan Al-Hirah",
+        "Diwan syair istana Lakhmiyah"
+      ],
+      "historianNote": "Prasasti Namara tahun 328 M mengukuhkan sejarah Lakhmiyah dalam aksara Arab awal.",
+      "legacy": "Kota yang mengajarkan seni syair dan tulis-menulis kepada bangsa Arab utara.",
+      "chapters": [
+        {
+          "title": "Perbatasan Persia",
+          "text": "Menjaga sisi barat Kekaisaran Sasaniyah sejak abad ke-3 M."
+        },
+        {
+          "title": "Kota Biara dan Penyair",
+          "text": "Al-Nabighah dan Al-A'sya berlomba syair di istana An-Nu'man."
+        },
+        {
+          "title": "An-Nu'man dan Hari Dzi Qar",
+          "text": "Kemenangan Bani Bakr atas pasukan Kisra mengawali kebanggaan baru."
+        },
+        {
+          "title": "Kejatuhan dan Kenangan",
+          "text": "Terbuka damai tahun 633 M namun tetap abadi sebagai sekolah khat dan syair."
+        }
+      ]
+    },
+    "civ-ghassan": {
+      "name": "Kerajaan Ghassaniyah (Syam)",
+      "era": "Sekitar 220 – 636 M",
+      "region": "Syam, Balqa, dan Dataran Tinggi Golan",
+      "cities": [
+        "Al-Jabiyah",
+        "Bosra",
+        "Biara Golan & Lajat"
+      ],
+      "economy": "Subsidi perbatasan Bizantium, pengawalan kafilah, dan pertanian Hauran.",
+      "society": "Federasi kabilah Azd bergelar filarkh Romawi namun berbahasa Arab.",
+      "religion": "Kristen Miafisit yang kerap bersitegang doktrin dengan Konstantinopel.",
+      "prophet": "",
+      "quranRefs": [],
+      "archaeology": [
+        "Gereja dan biara era Bizantium di Golan dan Hauran",
+        "Kota basalt Umm al-Jimal",
+        "Prasasti Yunani dan Suryani menyebut para pemimpin Ghassaniyah"
+      ],
+      "historianNote": "Sumber Yunani dan Suryani mendokumentasikan aliansi Ghassaniyah-Bizantium pada abad ke-6 M.",
+      "legacy": "Diabadikan dalam kasidah pujian Hassan bin Tsabit.",
+      "chapters": [
+        {
+          "title": "Dari Ma'rib ke Syam",
+          "text": "Cabang kabilah Azd bermigrasi ke utara pasca-keruntuhan Ma'rib."
+        },
+        {
+          "title": "Sekutu Kaisar",
+          "text": "Al-Harits bin Jabalah melindungi jalur ziarah dan gereja Syam."
+        },
+        {
+          "title": "Penyair Dua Istana",
+          "text": "Pertarungan syair halus antara istana Al-Hirah dan istana Ghassaniyah."
+        },
+        {
+          "title": "Yarmuk dan Penutup",
+          "text": "Pertempuran Yarmuk tahun 636 M menutup era negara perbatasan ini."
+        }
+      ]
+    },
+    "civ-mecca": {
+      "name": "Makkah Pra-Islam dan Quraisy",
+      "era": "Sekitar 400 – 610 M (Masa Sebelum Wahyu)",
+      "region": "Hijaz (Lembah Makkah)",
+      "cities": [
+        "Makkah (Bakkah)",
+        "Pasar Musiman Ukaz"
+      ],
+      "economy": "Kafilah dagang musim dingin dan panas (Ilaf), layanan haji (Siqayah dan Rifadah), dan pasar tahunan.",
+      "society": "Republik dagang tanpa raja yang berhimpun di Dar an-Nadwah.",
+      "religion": "Tanah suci Ka'bah dikelilingi ratusan berhala musiman serta bulan-bulan suci gencatan senjata.",
+      "prophet": "",
+      "quranRefs": [
+        "Quraisy 106:1–4",
+        "Ibrahim 14:37",
+        "Al-Fil 105:1–5",
+        "Al-Baqarah 2:125–127"
+      ],
+      "archaeology": [
+        "Temuan fisik pra-Islam terbatas akibat pembangunan berkelanjutan",
+        "Toponimi klasik terpelihara (Ajyad, Abu Qubais, Ukaz)",
+        "Prasasti batu Hijazi melimpah sejak abad ke-1 H"
+      ],
+      "historianNote": "Sejarah Makkah pra-Islam terutama bertumpu pada riwayat sejarawan Arab dan Al-Quran didukung epigrafi Hijaz awal.",
+      "legacy": "Mengubah kesucian menjadi keamanan, keamanan menjadi perdagangan, dan perdagangan menjadi kefasihan bahasa Arab.",
+      "chapters": [
+        {
+          "title": "Memori Pendirian",
+          "text": "Berakar pada Ibrahim, Ismail, dan Zamzam hingga Qushay bin Kilab mempersatukan pelayanan Ka'bah."
+        },
+        {
+          "title": "Lembah Tandus yang Menghidupi",
+          "text": "Kafilah Ilaf ke Yaman dan Syam menjadikan bulan haram pasar raya paling aman."
+        },
+        {
+          "title": "Republik Para Saudagar",
+          "text": "Tanpa mahkota raja, kehormatan diukur dari pengabdian memberi air dan makan jamaah."
+        },
+        {
+          "title": "Tahun Gajah dan Menjelang Senja",
+          "text": "Sekitar 570 M pasukan gajah Abrahah gagal menembus Makkah, menandai gerbang turunnya wahyu tahun 610 M."
+        }
+      ]
+    }
+  },
+  "stories": {
+    "ghul": {
+      "chapters": [
+        {
+          "title": "Malam Kafilah Terakhir",
+          "text": "Di tepi Rub' al-Khali, tetua kafilah berpesan agar tiada seorang pun berjalan sendiri selepas gelap—namun Haritsah yang muda menertawakan peringatan itu dan melaju sendiri ke tengah bukit pasir."
+        },
+        {
+          "title": "Suara yang Mengenali Namamu",
+          "text": "Tengah malam terdengar suara saudaranya memanggil dari kegelapan. Mengingat pesan tetua kafilah, ia berlindung kepada Allah hingga suara itu berpindah dari bukit lain."
+        },
+        {
+          "title": "Wajah Orang Tercinta",
+          "text": "Menjelang fajar ia melihat anak menangis tanpa bayangan dan bercakar tajam. Mengingat aturan satu tebasan untuk Ghul, ia menghunjamkan tombak sekali saja dan ilusi itu lenyap."
+        },
+        {
+          "title": "Dari Monster Gurun ke Peribahasa",
+          "text": "Sejak hari itu setiap pembohong yang bertopeng manis disebut Ghul—hidup dalam kisah api unggun agar musafir tak berjalan seorang diri."
+        }
+      ],
+      "quotes": [
+        {
+          "text": "Tidak ada penularan penyakit dengan sendirinya, tidak ada thiyarah, tidak ada hamah, tidak ada shafar, dan tidak ada ghul.",
+          "source": "Shahih Bukhari & Muslim — Hadis Nabi",
+          "type": "Teks Harfiah"
+        },
+        {
+          "text": "Mereka mengira Ghul berganti warna menyesatkan musafir, namun lari tatkala disebut nama Allah.",
+          "source": "Kitab al-Hayawan — Al-Jahiz (Adaptasi)",
+          "type": "Gaya Sumber Klasik"
+        },
+        {
+          "text": "Ghul mati dengan satu tebasan; jika dipukul dua kali ia hidup kembali.",
+          "source": "Riwayat Lisan Badui",
+          "type": "Gaya Sumber Klasik"
+        }
+      ],
+      "motifs": [
+        "Menyamar sebagai keluarga",
+        "Suara memanggil namamu",
+        "Tersesat malam di gurun",
+        "Aturan satu pukulan",
+        "Bayangan dusta"
+      ],
+      "themes": [
+        "Ketakutan terhadap yang tak dikenal",
+        "Kebersamaan adalah keselamatan",
+        "Kedustaan memakai wajah akrab"
+      ],
+      "cast": [
+        "Haritsah bin Amir",
+        "Tetua Kafilah",
+        "Ghul Pengubah Wujud",
+        "Suara Palsu"
+      ],
+      "gameHooks": [
+        "Mekanik kecurigaan: rekan seperjalanan bisa saja Ghul",
+        "Indikator ketakutan saat terpisah sendirian malam hari",
+        "Teka-teki satu pukulan: memukul dua kali menghidupkan kembali musuh",
+        "Peniruan suara untuk memancing pemain keluar dari kemah"
+      ],
+      "writingHooks": [
+        "Penyintas tak tepercaya: benarkah Haritsah selamat atau Ghul menyamar?",
+        "Metafora keluarga tentang kebohongan",
+        "Akhir tak terduga: anak yang diselamatkan adalah Ghul itu sendiri"
+      ],
+      "traits": [
+        "Berubah Wujud",
+        "Tipu Daya"
+      ],
+      "storyHooks": [
+        "Tersesat di malam hari",
+        "Hanya satu serangan penentu"
+      ],
+      "gameRoles": [
+        "Monster",
+        "Bos Mini"
+      ],
+      "scenes": [
+        {
+          "title": "Malam sang Ghul",
+          "text": "Musafir tersesat di padang tandus berhadapan dengan sosok penjelma hingga satu tebasan menentukan."
+        },
+        {
+          "title": "Lembah Sunyi",
+          "text": "Suara minta tolong membujuk musafir menjauh dari rombongan."
+        },
+        {
+          "title": "Terbongkarnya Fajar",
+          "text": "Cahaya pagi melenyapkan ilusi, menyisakan jejak kuku keledai."
+        }
+      ],
+      "decision": "Apakah Anda mempertaruhkan satu serangan penentu terhadap Ghul, atau menghindar demi menjaga kafilah?"
+    },
+    "irm": {
+      "chapters": [
+        {
+          "title": "Kota Penantang Langit",
+          "text": "Selama empat puluh tahun Syaddad bin 'Ad membangun Iram dari emas, batu karang, dan kesturi demi menandingi surga."
+        },
+        {
+          "title": "Iringan Raja yang Sombong",
+          "text": "Di gerbang emas Iram, satu hembusan angin maut mengakhiri keangkuhan sebelum satu langkah pun menjejak tahta."
+        },
+        {
+          "title": "Unta Hilang Ibnu Qilabah",
+          "text": "Berabad kemudian di masa Mu'awiyah, seorang Badui melihat menara zamrud sebentar sebelum kota itu menghilang kembali ke balik bukit pasir."
+        },
+        {
+          "title": "Antara Pasir dan Satelit",
+          "text": "Citra radar dan penggalian Ubar kembali mengingatkan manusia bahwa debu pasir mengingat apa yang dilupakan kesombongan."
+        }
+      ],
+      "quotes": [
+        {
+          "text": "Tidakkah engkau perhatikan bagaimana Tuhanmu berbuat terhadap kaum 'Ad, yaitu penduduk Iram yang mempunyai bangunan-bangunan tinggi.",
+          "source": "Al-Quran — Surah Al-Fajr 89:6–8",
+          "type": "Teks Harfiah"
+        },
+        {
+          "text": "Maka Kami tiupkan angin yang amat gemuruh kepada mereka dalam beberapa hari yang sial.",
+          "source": "Al-Quran — Surah Fushshilat 41:16",
+          "type": "Teks Harfiah"
+        },
+        {
+          "text": "Aku melihat kota berdinding emas dan perak, lalu tak pernah lagi menemukan jalannya.",
+          "source": "Riwayat Abdullah bin Qilabah",
+          "type": "Gaya Sumber Klasik"
+        }
+      ],
+      "motifs": [
+        "Utopia terbalik",
+        "Emas membutakan mata hati",
+        "Angin sebagai keadilan langit",
+        "Kota timbul tenggelam"
+      ],
+      "themes": [
+        "Kesombongan sebelum kejatuhan",
+        "Mimpi yang menelan pembangunnya",
+        "Memori melampaui kekuasaan"
+      ],
+      "cast": [
+        "Syaddad bin 'Ad",
+        "Nabi Hud AS",
+        "Abdullah bin Qilabah",
+        "Ka'b al-Ahbar",
+        "Angin Topan"
+      ],
+      "gameHooks": [
+        "Ruang bawah tanah hanya muncul saat badai pasir",
+        "Beban keserakahan mempercepat runtuhnya lorong emas",
+        "Pelarian berbatas napas dari amukan angin",
+        "Koordinat peta bergeser setiap siklus bulan"
+      ],
+      "writingHooks": [
+        "Pengembara yang menghabiskan usia mencari kota yang terlihat sekali",
+        "Dua lini masa sejajar antara Syaddad dan arkeolog modern",
+        "Hukum Iram: orang tamak keluar dengan tangan hampa"
+      ],
+      "traits": [
+        "Keangkuhan",
+        "Kemewahan"
+      ],
+      "storyHooks": [
+        "Pencarian Kota Hilang"
+      ],
+      "gameRoles": [
+        "Lokasi Eksplorasi",
+        "Harta Karun"
+      ],
+      "scenes": [
+        {
+          "title": "Fatamorgana Al-Ahqaf",
+          "text": "Pilar zamrud berkilau di antara bukit pasir yang bergerak."
+        },
+        {
+          "title": "Istana Syaddad",
+          "text": "Gerbang raksasa yang tak tersentuh selama ribuan tahun."
+        },
+        {
+          "title": "Angin Mematikan",
+          "text": "Badai pasir menelan reruntuhan dan memaksa penjelajah memilih cepat."
+        }
+      ],
+      "decision": "Menerjang ruang harta Iram sebelum ditelan badai pasir, atau menyelamatkan diri dengan cepat?"
+    },
+    "anqa": {
+      "chapters": [
+        {
+          "title": "Terdengar Namun Tak Pernah Terlihat",
+          "text": "Burung raksasa berkalung putih yang setiap orang menceritakan bayangannya namun tak seorang pun membawa sehelai bulunya."
+        },
+        {
+          "title": "Gunung Penyandang Namanya",
+          "text": "Penampakan jarak jauh berkumpul di satu puncak terjauh: Gunung Qaf di batas semesta."
+        },
+        {
+          "title": "Peribahasa Dua Kemustahilan",
+          "text": "Dipasangkan dengan sahabat sejati, Anqa menjadi ukuran impian yang tak tertangkap."
+        },
+        {
+          "title": "Dari Kepunahan Menjadi Simbol",
+          "text": "Sebagian keajaiban tidak diciptakan untuk ditangkap, melainkan untuk ditulis dan menggerakkan harapan."
+        }
+      ],
+      "quotes": [
+        {
+          "text": "Al-Anqa: burung raksasa berleher panjang, peribahasa sesuatu yang terdengar namun tak terlihat.",
+          "source": "Lisan al-Arab — Ibnu Mandzur",
+          "type": "Gaya Sumber Klasik"
+        },
+        {
+          "text": "Lebih langka daripada Al-Anqa.",
+          "source": "Peribahasa Arab Klasik",
+          "type": "Teks Harfiah"
+        },
+        {
+          "text": "Al-Anqa dan sahabat sejati adalah dua cita yang sukar dicapai.",
+          "source": "Peribahasa Kemustahilan",
+          "type": "Teks Harfiah"
+        },
+        {
+          "text": "Di antara burung yang dikenal sekadar berita ialah Anqa.",
+          "source": "Kitab al-Hayawan — Al-Jahiz",
+          "type": "Gaya Sumber Klasik"
+        }
+      ],
+      "motifs": [
+        "Terdengar tanpa terlihat",
+        "Kalung putih dan leher panjang",
+        "Gunung Qaf",
+        "Dua kemustahilan"
+      ],
+      "themes": [
+        "Kerinduan mustahil",
+        "Nilai kelangkaan",
+        "Menamai yang tak terlihat"
+      ],
+      "cast": [
+        "Pencerita Penggembar-gembor",
+        "Pemburu Bertangan Hampa",
+        "Al-Anqa",
+        "Gunung Qaf"
+      ],
+      "gameHooks": [
+        "Makhluk unik yang hanya bisa disaksikan, bukan ditangkap",
+        "Peta kabar burung yang bergeser mengikuti laporan pemain",
+        "Misi yang selesai dengan menerima ketakjuban",
+        "Jalur terbang rahasia lewat pengetahuan nama sejati"
+      ],
+      "writingHooks": [
+        "Tujuh pemburu menceritakan burung berbeda",
+        "Tokoh yang dibahas sepanjang novel dan muncul pada baris terakhir",
+        "Narator ternyata Anqa terakhir dalam rupa manusia"
+      ],
+      "traits": [
+        "Kelangkaan",
+        "Kewibawaan"
+      ],
+      "storyHooks": [
+        "Mengejar Kemustahilan"
+      ],
+      "gameRoles": [
+        "Tujuan Akhir",
+        "Penjaga Langit"
+      ],
+      "scenes": [
+        {
+          "title": "Bayangan Melintas",
+          "text": "Bayangan sayap raksasa meredupkan sinar matahari tengah hari."
+        },
+        {
+          "title": "Puncak Gunung Qaf",
+          "text": "Puncak bersalju abadi menyala oleh bara pembaruan."
+        },
+        {
+          "title": "Bulu Emas",
+          "text": "Sehelai bulu berkilau memancarkan kebijaksanaan zaman."
+        }
+      ],
+      "decision": "Mendaki puncak terlarang Gunung Qaf demi bulu keabadian, atau kembali selamat tanpa hasil?"
+    },
+    "jinn": {
+      "chapters": [
+        {
+          "title": "Bangsa dari Nyala Api",
+          "text": "Sebelum tanah liat bernapas, makhluk api telah menghuni bumi dengan kerajaan, suku, dan pasar tersembunyi."
+        },
+        {
+          "title": "Etika Ruang Bersama",
+          "text": "Sebut nama Allah saat menyiram air panas atau memasuki reruntuhan agar tetangga tak kasatmata tetap tenang."
+        },
+        {
+          "title": "Bisikan Lembah Abqar",
+          "text": "Penyair kuno menisbatkan keluhuran bait pada ilham Lembah Abqar hingga lahir kata 'Abqari'."
+        },
+        {
+          "title": "Tetangga yang Bertanggung Jawab",
+          "text": "Al-Quran memposisikan jin sebagai makhluk mukalaf sehingga rasa takut berubah menjadi ketakjuban yang beradab."
+        }
+      ],
+      "quotes": [
+        {
+          "text": "Katakanlah: Telah diwahyukan kepadaku bahwa sekumpulan jin telah mendengarkan bacaan Al-Quran yang menakjubkan.",
+          "source": "Al-Quran — Surah Al-Jinn 72:1",
+          "type": "Teks Harfiah"
+        },
+        {
+          "text": "Aku berlindung kepada penguasa lembah ini dari golongan jahil kaumnya.",
+          "source": "Doa Musafir Pra-Islam",
+          "type": "Teks Harfiah"
+        },
+        {
+          "text": "Golongan jin memiliki pasar, pertemuan, penyair, serta yang beriman dan ingkar.",
+          "source": "Kitab al-Hayawan — Al-Jahiz",
+          "type": "Gaya Sumber Klasik"
+        }
+      ],
+      "motifs": [
+        "Penciptaan dari api",
+        "Adab ruang dan basmalah",
+        "Tetangga tak terlihat",
+        "Qarin",
+        "Pasar jin"
+      ],
+      "themes": [
+        "Hidup berdampingan dengan alam gaib",
+        "Tata sosial tersembunyi",
+        "Hormat menggantikan takut"
+      ],
+      "cast": [
+        "Raja Jin",
+        "Qarin",
+        "Jin Mukmin",
+        "Tetangga Manusia"
+      ],
+      "gameHooks": [
+        "Sistem adab ruang yang memicu pertemuan gaib bila dilanggar",
+        "Lapisan dunia ganda menyingkap alam tak kasatmata",
+        "Rekan Qarin dengan agenda tersembunyi",
+        "Pasar jin tengah malam dengan mata uang bara yang berubah menjadi emas"
+      ],
+      "writingHooks": [
+        "Sudut pandang jin melihat manusia sebagai pendatang berisik",
+        "Kontrak hidup berdampingan tertulis antara keluarga dan jin rumah",
+        "Qarin mengisahkan riwayat manusia yang didampinginya"
+      ],
+      "traits": [
+        "Api Membara",
+        "Menghilang Cepat",
+        "Kekuatan Gaib",
+        "Pendengaran Tajam"
+      ],
+      "storyHooks": [
+        "Perjanjian kuno raja jin",
+        "Penjaga sumur keramat",
+        "Bintang jatuh pengusir pencuri dengar"
+      ],
+      "gameRoles": [
+        "Sekutu Magis",
+        "Penjaga Segel",
+        "Pemanggil Cepat"
+      ],
+      "scenes": [
+        {
+          "title": "Pertemuan Lembah",
+          "text": "Nyala api tanpa asap muncul di antara batu karang."
+        },
+        {
+          "title": "Perjanjian Sulaiman",
+          "text": "Cincin segel kuno menundukkan kekuatan tersembunyi."
+        },
+        {
+          "title": "Bintang Penjaga",
+          "text": "Meteor menyambar langit dan membubarkan majelis malam."
+        }
+      ],
+      "decision": "Menerima perjanjian bangsa jin demi kekuatan luar biasa, atau mengandalkan tenaga manusiawi sendiri?"
+    },
+    "saqlaba": {
+      "chapters": [
+        {
+          "title": "Penunggu Reruntuhan Senja",
+          "text": "Si'lah berburu bukan dengan kecepatan lari, melainkan dengan merayu kerinduan lewat suara yang dikenal."
+        },
+        {
+          "title": "Suara Pinjaman",
+          "text": "Memanggil dengan suara istri atau anak dari dalam ngarai—namun tak dapat melintasi garis besi dan terbongkar di cermin air."
+        },
+        {
+          "title": "Malam Dua Penggembala",
+          "text": "Sahabat yang jeli menahan temannya hingga fajar menyingkap bekas cakar panjang pada jubah yang jatuh."
+        },
+        {
+          "title": "Dari Nenek Sihir ke Hyena",
+          "text": "Ahli alam menduga hyena peniru suara menjadi cikal bakal cerita yang tetap dipakai para ibu memperingatkan anak menjelang senja."
+        }
+      ],
+      "quotes": [
+        {
+          "text": "Di antara teror malam ialah Si'lah yang memikat pengembara dengan suara pinjaman.",
+          "source": "Kitab al-Hayawan — Al-Jahiz",
+          "type": "Gaya Sumber Klasik"
+        },
+        {
+          "text": "Lebih buruk rupa daripada Si'lah.",
+          "source": "Peribahasa Arab",
+          "type": "Teks Harfiah"
+        },
+        {
+          "text": "Hyena meniru suara demi memikat gembala.",
+          "source": "Hayat al-Hayawan — Ad-Damiri",
+          "type": "Gaya Sumber Klasik"
+        }
+      ],
+      "motifs": [
+        "Suara pinjaman",
+        "Reruntuhan senja",
+        "Pantulan air",
+        "Rasionalisasi hyena"
+      ],
+      "themes": [
+        "Tipu daya berwajah keluarga",
+        "Ujian kewaspadaan malam",
+        "Merasionalkan rasa takut"
+      ],
+      "cast": [
+        "Dua Penggembala",
+        "Istri yang Ditiru Suaranya",
+        "Si'lah",
+        "Hyena Tua"
+      ],
+      "gameHooks": [
+        "Jebakan suara rekan yang memerlukan kata sandi harian",
+        "Wujud asli hanya terlihat di pantulan air atau cermin",
+        "Lingkaran besi pelindung hingga fajar",
+        "Kekuatan musuh melemah saat matahari terbit"
+      ],
+      "writingHooks": [
+        "Cerita dua sudut pandang: yang mendengar suara dan yang melihat bayangan",
+        "Metafora rumor yang melahap desa dalam semalam",
+        "Suara pinjaman kembali bersama ingatan ngarai"
+      ],
+      "traits": [
+        "Mengerikan",
+        "Buas"
+      ],
+      "storyHooks": [
+        "Pernikahan dengan jin gurun"
+      ],
+      "gameRoles": [
+        "Sekutu Aneh",
+        "Monster"
+      ],
+      "scenes": [
+        {
+          "title": "Reruntuhan Senja",
+          "text": "Bayangan di permukaan air menyingkap taring buas di balik penyamaran."
+        },
+        {
+          "title": "Suara Pinjaman",
+          "text": "Panggilan hangat menggema dari dalam gua gelap."
+        },
+        {
+          "title": "Perangkap Terbongkar",
+          "text": "Kegelapan berubah menjadi cakar tajam saat penyamaran runtuh."
+        }
+      ],
+      "decision": "Mengikuti suara orang tercinta ke dalam gua, atau menutup telinga demi selamat dari jebakan?"
+    },
+    "ifrit": {
+      "chapters": [
+        {
+          "title": "Puncak Hierarki Jin",
+          "text": "Di puncak tata tingkat jin berdiri Ifrit—perkasa, licik, penjaga harta terpendam."
+        },
+        {
+          "title": "Singgasana yang Terangkat",
+          "text": "Saat Ifrit sanggup memindahkan singgasana Bilqis sebelum Sulaiman berdiri, namun orang berilmu memindahkannya sekejap mata, hikmah menang atas otot."
+        },
+        {
+          "title": "Tahanan Guci Tembaga",
+          "text": "Berabad terkurung di dasar laut mengubah janji kekayaan menjadi sumpah amarah—penjara panjang melahirkan dendam."
+        },
+        {
+          "title": "Dari Pelayan ke Simbol",
+          "text": "Ifrit tak ditaklukkan dengan pedang, melainkan dengan akal dan hikmah."
+        }
+      ],
+      "quotes": [
+        {
+          "text": "Berkatalah Ifrit dari golongan jin: Aku akan datang membawa singgasana itu sebelum engkau berdiri dari tempat dudukmu.",
+          "source": "Al-Quran — Surah An-Naml 27:39",
+          "type": "Teks Harfiah"
+        },
+        {
+          "text": "Ifrit ialah jin perkasa nan licik yang tak terkalahkan kecuali dengan kecerdikan.",
+          "source": "Lisan al-Arab — Ibnu Mandzur",
+          "type": "Gaya Sumber Klasik"
+        },
+        {
+          "text": "Seratus tahun aku berjanji memperkaya penolongku, lalu penantian panjang mengubahnya jadi ancaman.",
+          "source": "Kisah Nelayan dan Jin",
+          "type": "Gaya Sumber Klasik"
+        }
+      ],
+      "motifs": [
+        "Kekuatan tunduk pada ilmu",
+        "Guci tembaga & segel Sulaiman",
+        "Janji berubah akibat waktu",
+        "Kecepatan kilat"
+      ],
+      "themes": [
+        "Kekuatan tanpa hikmah adalah penjara",
+        "Pengurungan lama memupuk murka",
+        "Kecerdikan mengalahkan otot"
+      ],
+      "cast": [
+        "Ifrit",
+        "Nabi Sulaiman AS",
+        "Pemilik Ilmu Kitab",
+        "Nelayan Miskin"
+      ],
+      "gameHooks": [
+        "Bos teka-teki segel yang dikalahkan dengan akal",
+        "Penghitung abad yang mengubah sikap NPC seiring waktu",
+        "Misi kurir sekejap mata melintasi peta dengan bayaran tertentu",
+        "Ilmu kitab menaklukkan kekuatan kasar"
+      ],
+      "writingHooks": [
+        "Monolog Ifrit di dalam guci tembaga abad demi abad",
+        "Kisah modern: Ifrit terperangkap dalam gugus server digital",
+        "Nelayan menyembunyikan kesepakatan rahasia"
+      ],
+      "traits": [
+        "Perkasa",
+        "Patuh pada Segel",
+        "Pemikul Singgasana",
+        "Harga Diri Terluka"
+      ],
+      "storyHooks": [
+        "Memindahkan singgasana sekejap mata",
+        "Guci tembaga bersegel",
+        "Pemberontakan dasar laut"
+      ],
+      "gameRoles": [
+        "Bos Raksasa",
+        "Penjaga Harta Karam",
+        "Pemanggil Daya Penghancur"
+      ],
+      "scenes": [
+        {
+          "title": "Membuka Segel Tembaga",
+          "text": "Asap hitam membumbung membentuk raksasa Ifrit."
+        },
+        {
+          "title": "Tawaran Kekuatan",
+          "text": "Bumi bergetar menanti kesepakatan pembebasan."
+        },
+        {
+          "title": "Siasat Terakhir",
+          "text": "Trik cerdik memancingnya kembali masuk ke dalam guci."
+        }
+      ],
+      "decision": "Memanfaatkan kekuatan Ifrit demi misi mustahil, atau menyegelnya kembali demi keselamatan?"
+    },
+    "hama": {
+      "traits": [
+        "Balas Dendam",
+        "Duka"
+      ],
+      "storyHooks": [
+        "Seruan dendam di atas makam"
+      ],
+      "gameRoles": [
+        "Penanda Misi Balas Dendam"
+      ]
+    },
+    "nasanis": {
+      "traits": [
+        "Keanehan",
+        "Kecepatan"
+      ],
+      "storyHooks": [
+        "Pengejaran berkaki satu"
+      ],
+      "gameRoles": [
+        "Monster Kecil"
+      ]
+    },
+    "wad_abqar": {
+      "traits": [
+        "Misteri",
+        "Ilham"
+      ],
+      "storyHooks": [
+        "Pendamping penyair",
+        "Malam di lembah"
+      ],
+      "gameRoles": [
+        "Zona Misteri"
+      ]
+    },
+    "sulayk": {
+      "traits": [
+        "Kecepatan",
+        "Taktik"
+      ],
+      "storyHooks": [
+        "Lomba lari melawan kuda"
+      ],
+      "gameRoles": [
+        "Pengintai",
+        "Pencuri Ulung"
+      ]
+    },
+    "jadhima": {
+      "traits": [
+        "Wibawa",
+        "Keangkuhan"
+      ],
+      "storyHooks": [
+        "Persahabatan dua bintang",
+        "Undangan maut Az-Zabba"
+      ],
+      "gameRoles": [
+        "Raja Tragis"
+      ]
+    },
+    "qasir-ibn-saad": {
+      "traits": [
+        "Pengorbanan",
+        "Kecerdikan",
+        "Kesetiaan"
+      ],
+      "storyHooks": [
+        "Pengorbanan penyamaran",
+        "Kafilah prajurit"
+      ],
+      "gameRoles": [
+        "Mata-mata",
+        "Ahli Strategi"
+      ]
+    },
+    "kulayb": {
+      "traits": [
+        "Kehormatan",
+        "Kekuasaan"
+      ],
+      "storyHooks": [
+        "Unta al-Basus",
+        "Padang larangan"
+      ],
+      "gameRoles": [
+        "Pemimpin yang Gugur"
+      ]
+    },
+    "amr-ibn-muzayqiya": {
+      "traits": [
+        "Firasat",
+        "Kepemimpinan"
+      ],
+      "storyHooks": [
+        "Tikus penggerogot bendungan",
+        "Migrasi Azd"
+      ],
+      "gameRoles": [
+        "Pemimpin Eksodus"
+      ]
+    },
+    "shiqq-satih": {
+      "traits": [
+        "Ramalan",
+        "Keunikan"
+      ],
+      "storyHooks": [
+        "Menafsirkan mimpi raja"
+      ],
+      "gameRoles": [
+        "Peramal",
+        "Pemberi Misi"
+      ]
+    },
+    "dhul-qarnayn": {
+      "chaptersCount": 10,
+      "totalWords": 6284,
+      "estimatedReadingMinutes": 35,
+      "chapters": [
+        {
+          "title": "Peneguhan Kekuasaan di Bumi dan Sarana Timur–Barat",
+          "evidenceLabel": "Teks Al-Quran + Tafsir Klasik",
+          "isAppendix": false,
+          "text": "“Mereka bertanya kepadamu tentang Zulkarnain. Katakanlah: Aku akan membacakan kepadamu kisahnya. Sesungguhnya Kami telah memberi kekuasaan kepadanya di muka bumi dan memberikan kepadanya jalan (sabab) untuk mencapai segala sesuatu.” (QS. Al-Kahfi: 83–84).\n\nKisah ini dibuka tanpa silsilah istana atau nama pribadi—melainkan langsung dengan amanah kekuasaan (tamkin) dan sarana ilmu-jalan (sabab). Al-Tabari, Mujahid, dan Ibn Abbas menafsirkan sabab sebagai tali atau sarana ilmu, jalur, dan teknologi untuk menuntaskan tujuan dengan adil. Dalam Al-Quran, Zulkarnain adalah raja saleh yang diberi amanah kekuatan, bukan seorang nabi pembawa syariat baru.\n\n[Rekonstruksi Sastra]\nDalam balairung para tetua, tak ada yang menanyakan asal keturunannya; mereka melihat bagaimana ia menimbang arah angin sebelum berucap dan menolak emas yang disodorkan karena rasa takut—membawa peta, juru ukur, dan kesabaran mendengar."
+        },
+        {
+          "title": "Tempat Terbenam Matahari dan Hukum Keadilan",
+          "evidenceLabel": "Teks Al-Quran + Tafsir Klasik",
+          "isAppendix": false,
+          "text": "“Hingga apabila ia sampai ke tempat terbenam matahari, ia mendapatinya terbenam di dalam mata air berlumpur hitam, dan di situ ia mendapati segolongan kaum.” (QS. Al-Kahfi: 85–86).\n\nPara mufasir seperti Al-Qurtubi, Ibn Katsir, dan Al-Razi menegaskan kata wajadaha (“ia mendapatinya”): penggambaran sudut pandang mata pengelana di tepi samudra barat, bukan klaim astronomis bahwa matahari tenggelam ke dalam lumpur bumi. Di tepian paling barat itu, ia menetapkan hukum keadilan: pelaku kezaliman ditindak di dunia sebelum hisab akhirat, sedangkan rakyat beriman diperlakukan dengan lembut dan adil tanpa pajak yang menindas.\n\n[Rekonstruksi Sastra]\nDi tanjung berbatu teluk gelap, panglimanya terkesiap melihat cakram surya menyentuh air. Zulkarnain tersenyum menjelaskan batas pandangan mata, lalu menancapkan pedang bersarungnya ke pasir agar penduduk pesisir tahu kedamaian telah tiba bagi rakyat tak bersalah."
+        },
+        {
+          "title": "Tempat Terbit Matahari dan Kaum Tanpa Pelindung",
+          "evidenceLabel": "Teks Al-Quran + Tafsir Klasik",
+          "isAppendix": false,
+          "text": "“Hingga apabila ia sampai ke tempat terbit matahari, ia mendapatinya menyinari segolongan kaum yang Kami tidak buatkan bagi mereka suatu pelindung pun dari cahayanya.” (QS. Al-Kahfi: 89–90).\n\nDi ufuk timur paling jauh, ia menemui masyarakat tanpa naungan bangunan, pepohonan, maupun pakaian, yang berlindung di celah gua dan air saat terik memuncak. Berbeda dengan wilayah barat, di sini Zulkarnain tidak diberi mandat menghukum—perjalanan kedua ini adalah kesaksian ilmu dan pengendalian diri, ditutup dengan pengingat ilahi bahwa menguasai jalan menuju timur dan barat tidak menjadikan manusia pemilik matahari.\n\n[Rekonstruksi Sastra]\nKetika para ahli bangunan mengaku tembok tak mampu menggeser matahari, Zulkarnain memerintahkan penggalian gua-gua sejuk menghadap utara lengkap dengan sumur teduh—meninggalkan naungan bagi penduduk yang bahkan tak sempat mengenal namanya."
+        },
+        {
+          "title": "Di Antara Dua Bukit dan Ya’juj Ma’juj",
+          "evidenceLabel": "Teks Al-Quran + Tafsir Klasik",
+          "isAppendix": false,
+          "text": "“Hingga apabila ia sampai di antara dua buah gunung, ia mendapati di hadapan keduanya suatu kaum yang hampir tidak mengerti pembicaraan.” (QS. Al-Kahfi: 92–93).\n\nLokasi dua gunung ini diperdebatkan para sejarawan—dari Kaukasus hingga Asia Tengah—karena wahyu sengaja membiarkannya terbuka tanpa koordinat mutlak. Walau terhalang bahasa, kaum tersebut terorganisasi dan menawarkan upeti (kharj) agar Zulkarnain membentengi mereka dari kerusakan Ya’juj dan Ma’juj. Ia menolak upeti emas mereka dan justru mengajak mereka bekerja bersama (“bantulah aku dengan kekuatan”) demi kehormatan bersama.\n\n[Rekonstruksi Sastra]\nLewat penerjemah yang kelelahan, tetua kaum menyodorkan kantung emas. Zulkarnain mengembalikannya utuh dan menepuk batu tebing: bawalah tangan yang kuat, besi, dan ubub—bukan koin emas."
+        },
+        {
+          "title": "Membangun Tembok Besi dan Tembaga Cair",
+          "evidenceLabel": "Teks Al-Quran + Tafsir Klasik",
+          "isAppendix": false,
+          "text": "“Berilah aku potongan-potongan besi” — lalu dipanaskan dengan tiupan ubub hingga membara — “Berilah aku tembaga yang mendidih agar kutuangkan ke atasnya.” (QS. Al-Kahfi: 96).\n\nTiga tahap rekayasa cermat: menumpuk balok besi raksasa (zubar) mengisi seluruh celah antara dua tebing; memanaskannya hingga merah menyala tanpa melelehkan struktur inti; dan menuangkan tembaga cair (qitr) untuk mengisi seluruh celah mikron sehingga menjadi benteng paduan tunggal (radm) anti-karat. Inilah prinsip Pencegahan Ganda (18:97): mustahil dipanjat dari atas (yazharuhu) dan mustahil dilubangi dari bawah (naqban).\n\n[Rekonstruksi Sastra]\nPada malam ketiga puluh sembilan, lima ratus pekerja memompa ubub kulit hingga lembah bercahaya bagai sungai bara. Dua belas kuali tembaga cair dituangkan bersama hingga fajar menampakkan tebing perunggu-hitam yang menyatu rapat dengan kedua gunung."
+        },
+        {
+          "title": "Siapakah Zulkarnain? Pendapat Sejarawan",
+          "evidenceLabel": "Tafsir Klasik + Analisis Sejarah",
+          "isAppendix": false,
+          "text": "Karena Al-Quran tidak menyebut nama pribadi, bangsa, maupun masanya, para ulama dan sejarawan membahas tiga dugaan utama: (1) Koresh Agung pendiri Persia yang memiliki simbol domba bertanduk dua; (2) Iskandar Agung dari Makedonia yang populer di koin bertanduk, meski jauh berbeda dari profil raja bertauhid; dan (3) Raja Himyar Yaman kuno seperti Al-Sa’b Dhu Maratsid dalam riwayat nasab klasik.\n\nMustakshif menyajikan ketiga kajian secara transparan tanpa memaksakan kepastian yang tidak ditetapkan teks utama.\n\n[Rekonstruksi Sastra]\nTiga sejarawan berdebat di ruang arsip membawa koin, silinder tanah liat, dan manuskrip Yaman—hingga mereka sadar diamnya naskah justru menjaga pelajaran moralnya tetap abadi."
+        },
+        {
+          "title": "Zulkarnain dalam Syair dan Cerita Rakyat",
+          "evidenceLabel": "Warisan Rakyat",
+          "isAppendix": false,
+          "text": "Saat naskah wahyu berhenti pada teladan moral, penyair dan pendongeng menenun dunia kisah tandingan: dari pujian istana Arab atas luasnya kekuasaan hingga perpaduan dengan Roman Iskandar dalam kisah rakyat tentang Negeri Kegelapan, Air Keabadian bersama Nabi Khidir, kapal selam kaca, dan ekspedisi Salam sang Penerjemah ke Gerbang Besi.\n\nLencana transparansi Mustakshif memisahkan keindahan sastra rakyat tersebut dari fondasi teks Al-Quran.\n\n[Rekonstruksi Sastra]\nDi majelis malam Baghdad, hadirin terpesona oleh kapal kaca dan pohon berbicara—sementara sejarawan tua mengingatkan bahwa rasa ingin tahu manusia selalu mengisi ruang sunyi yang sengaja dibiarkan kitab suci."
+        },
+        {
+          "title": "Ya’juj Ma’juj dan Akhir Zaman dalam Teks",
+          "evidenceLabel": "Teks Al-Quran + Hadis + Tafsir Klasik",
+          "isAppendix": false,
+          "text": "Zulkarnain tidak mengklaim bentengnya abadi. Segera setelah rampung, ia berkata: “Ini adalah rahmat dari Tuhanku, maka apabila sudah datang janji Tuhanku, Dia akan menjadikannya hancur luluh.” (QS. Al-Kahfi: 98). Dalam QS. Al-Anbiya (21:96) dan hadis sahih riwayat Al-Bukhari serta Muslim ditegaskan bahwa setiap benteng buatan manusia memiliki batas waktu hingga tiba tanda hari akhir.\n\n[Rekonstruksi Sastra]\nKetika penduduk bersorak di kaki lembah, Zulkarnain menyentuh logam yang mulai dingin sambil mengenang bahwa nilai perisai sejati terletak pada rahmat yang dijaganya selama waktunya masih berlaku."
+        },
+        {
+          "title": "Keajaiban dan Naskah Primer",
+          "evidenceLabel": "Teks & Kutipan Primer",
+          "isAppendix": true,
+          "text": "Lampiran rujukan ini menghimpun rangkaian ayat QS. Al-Kahfi 83–98 dan QS. Al-Anbiya 96 beserta catatan para ahli tafsir klasik: penjelasan sudut pandang optik oleh Al-Qurtubi, definisi sabab/zubar/qitr menurut Al-Tabari, serta ketelitian bahasa antara memanjat dan melubangi menurut Al-Zamakhsyari dan Ibn Katsir."
+        },
+        {
+          "title": "Kit Kreator",
+          "evidenceLabel": "Perangkat Kreatif",
+          "isAppendix": true,
+          "text": "Panduan interaktif bagi kreator game dan penulis cerita:\n1) Ekonomi Partisipasi bukan Upeti: tolak koin emas, bangun pertahanan sebanding kontribusi tenaga kaum.\n2) Keseimbangan Pencegahan Ganda: jaga tinggi dinding (anti-panjat) dan ketebalan logam (anti-terowongan).\n3) Hitung Mundur Musim 40 Hari: atur kayu, balok besi, ubub, dan tembaga cair.\n4) Mekanika Penerjemah Lintas Bahasa.\n5) Peta Cakrawala Pengamat dengan tanda tanya jujur.\n6) Akhir Permainan Penuh Kerendahan Hati."
+        }
+      ],
+      "quotes": [
+        {
+          "text": "“Sesungguhnya Kami telah memberi kekuasaan kepadanya di muka bumi, dan Kami telah memberikan kepadanya jalan (untuk mencapai) segala sesuatu.”",
+          "source": "Al-Quran — Surah Al-Kahfi: 84",
+          "type": "Teks Harfiah"
+        },
+        {
+          "text": "“Apa yang telah dikuasakan oleh Tuhanku kepadaku adalah lebih baik, maka bantulah aku dengan kekuatan (manusia dan alat), agar aku membuatkan dinding antara kamu dan mereka.”",
+          "source": "Al-Quran — Surah Al-Kahfi: 95",
+          "type": "Teks Harfiah"
+        },
+        {
+          "text": "“Maka mereka tidak bisa mendakinya dan mereka tidak bisa melubanginya. Zulkarnain berkata: Dinding ini adalah rahmat dari Tuhanku, maka apabila janji Tuhanku datang, Dia akan menjadikannya rata dengan tanah.”",
+          "source": "Al-Quran — Surah Al-Kahfi: 97–98",
+          "type": "Teks Harfiah"
+        },
+        {
+          "text": "Pada hari kiamat Allah berfirman kepada Adam tentang penghuni neraka, seraya menenangkan kaum mukminin mengenai besarnya nisbah yang dikeluarkan dari Ya’juj dan Ma’juj.",
+          "source": "Shahih al-Bukhari & Muslim (Gaya Sumber Klasik)",
+          "type": "Gaya Sumber Klasik"
+        },
+        {
+          "text": "Ungkapan “mendapati matahari terbenam di mata air berlumpur hitam” menunjuk batas penglihatan pengamat di tepi pantai, bukan piringan matahari masuk ke lumpur.",
+          "source": "Al-Jami li-Ahkam al-Quran — Al-Qurtubi (Gaya Sumber Klasik)",
+          "type": "Gaya Sumber Klasik"
+        },
+        {
+          "text": "Sabab pada asalnya berarti tali penyambung tujuan, mencakup ilmu dan jalan; zubar ialah bongkahan besar besi, dan qitr ialah tembaga yang dicairkan.",
+          "source": "Jami al-Bayan — Al-Tabari (Gaya Sumber Klasik)",
+          "type": "Gaya Sumber Klasik"
+        }
+      ],
+      "motifs": [
+        "Mengikuti sabab (tali jalan dan keahlian)",
+        "Batas penglihatan di ufuk barat dan timur",
+        "Kaum terbuka tanpa naungan",
+        "Kemitraan kerja melampaui upeti emas",
+        "Benteng paduan besi dan tembaga cair",
+        "Pencegahan ganda (tak terpanjat dan tak tertembus)",
+        "Benteng sementara yang runtuh saat janji Tuhan tiba"
+      ],
+      "themes": [
+        "Kekuasaan di bawah tanggung jawab moral",
+        "Batas kekuatan dan kerendahan hati penguasa",
+        "Martabat melalui partisipasi bukan ketergantungan",
+        "Memisahkan dalil naskah dari dugaan sejarah",
+        "Kefanaan benteng manusia di hadapan waktu"
+      ],
+      "cast": [
+        "Zulkarnain (raja adil yang diberi kekuasaan)",
+        "Kaum di ufuk barat",
+        "Kaum di ufuk timur tanpa pelindung",
+        "Penduduk di antara dua gunung",
+        "Sang Penerjemah lintas bahasa",
+        "Kabilah Ya’juj dan Ma’juj",
+        "Kepala Insinyur dan Pandai Besi Benteng"
+      ],
+      "gameHooks": [
+        "Ekonomi Kerja Bersama alih-alih Emas: tolak upeti dan bangun benteng sesuai tenaga warga yang ikut menyumbang batu dan besi.",
+        "Keseimbangan Pencegahan Ganda: kelola bar ketinggian dinding (anti-panjat) dan ketebalan logam (anti-galian).",
+        "Penghitung Waktu 40 Hari: kelola kayu bakar, besi, ubub udara, dan tembaga cair sebelum celah terbuka.",
+        "Mekanika Penerjemah: pecahkan isyarat bahasa penduduk melalui perantara tanpa salah tafsir perjanjian.",
+        "Peta Batas Penglihatan: buka peta dari sudut pandang penjelajah dengan tanda tanya jujur untuk lokasi benteng.",
+        "Tujuan Akhir Penuh Kerendahan Hati: hargai keteguhan moral dan kemaslahatan yang ditinggalkan, bukan tembok abadi."
+      ],
+      "writingHooks": [
+        "Catatan Sang Penerjemah: penerjemah tua di celah gunung menyadari penolakan emas jauh lebih bermakna dari pidato raja.",
+        "Malam Penuangan Tembaga Cair: kisah dari sudut pandang kepala pandai besi menyaksikan logam menyatu.",
+        "Museum Tiga Identitas: tiga sejarawan memperdebatkan Koresh, Iskandar, dan Raja Himyar di depan naskah bisu.",
+        "Dunia Setelah Kepergian: generasi penerus di timur tumbuh di gua sejuk tanpa mengenal nama raja penggalinya."
+      ],
+      "traits": [
+        "Keteguhan",
+        "Keadilan",
+        "Rekayasa",
+        "Kebijaksanaan"
+      ],
+      "storyHooks": [
+        "Kerja bersama bukan emas",
+        "Malam penuangan besi dan tembaga",
+        "Batas waktu empat puluh hari"
+      ],
+      "gameRoles": [
+        "Raja Adil",
+        "Insinyur Benteng",
+        "Mediator Antarbangsa"
+      ],
+      "scenes": [
+        {
+          "title": "Pantai Gelap di Ujung Barat",
+          "text": "Menatap surya turun di ufuk teluk gelap, sang raja menegakkan hukum keadilan sebelum melangkah menuju fajar."
+        },
+        {
+          "title": "Perundingan di Antara Dua Tebing",
+          "text": "Zulkarnain menolak kantung emas dan mengajak warga bahu-membahu membangun benteng dalam batas empat puluh hari."
+        },
+        {
+          "title": "Malam Penuangan Tembaga Cair",
+          "text": "Balok besi berpijar ditiup ubub hingga lelehan tembaga menyegel setiap pori menjadi tebing logam utuh."
+        }
+      ],
+      "decision": "Apakah Anda menerima upeti emas penduduk dan menyewa tembok sementara, atau mengajak mereka bergotong-royong menempa benteng kokoh meski kelak harus runtuh juga?"
+    },
+    "sinbad": {
+      "source": "Seribu Satu Malam — Kisah Sindbad sang Pelaut",
+      "chaptersCount": 2,
+      "totalWords": 658,
+      "estimatedReadingMinutes": 4,
+      "chapters": [
+        {
+          "title": "Kisah Bingkai: Sindbad si Kuli dan Sindbad si Saudagar",
+          "evidenceLabel": "Fiksi Sastra",
+          "isAppendix": false,
+          "text": "Di Baghdad pada masa Harun al-Rasyid, seorang kuli miskin bernama Sindbad memikul beban berat dari fajar hingga malam demi sekadar makan harian. Saat beristirahat di depan rumah megah beraroma wangi dan air sejuk, ia mengeluh kepada Tuhan mengapa nasibnya begitu jauh dari pemilik rumah itu.\n\nTuan rumah—yang juga bernama Sindbad, seorang pedagang yang telah mengarungi tujuh lautan—mendengar keluhannya, mengundangnya makan bersama, dan bercerita bahwa kekayaannya diraih lewat tujuh pelayaran penuh marabahaya. Ia mengajak kuli itu hadir setiap hari mendengarkan satu kisah perjalanan dengan imbalan seratus dinar emas setiap hari.\n\nDi sini kisah menjadi mata uang: pengalaman yang dibayar kesabaran mendengar."
+        },
+        {
+          "title": "Pelayaran Pertama: Pulau Paus, Raja, dan Lautan",
+          "evidenceLabel": "Fiksi Sastra",
+          "isAppendix": false,
+          "text": "Sindbad berkisah: Setelah menghabiskan warisan ayahku dengan foya-foya, aku menjual sisa harta, membeli dagangan, lalu berlayar dari Basrah. Kami berlabuh di sebuah pulau hijau bak taman. Saat penumpang menyalakan api untuk memasak, pulau itu mendadak bergetar dan menyelam! Ternyata itu seekor ikan paus raksasa yang telah ditumbuhi pasir dan pepohonan selama bertahun-tahun tidur di permukaan laut.\n\nTerlempar ke ombak, aku berpegangan pada sebuah bak kayu besar milik kapal hingga terdampar di sebuah pulau tinggi. Di sana aku membantu penjaga kuda sang raja menghalau kuda laut buas dari pantai, sehingga sang raja mengangkatku menjadi pengawas pelabuhan. Suatu hari kapalku yang hilang berlabuh; setelah membuktikan tanda barang daganganku, aku kembali ke Baghdad jauh lebih kaya sambil mengingat dua pelajaran abadi: jangan percaya tanah yang tidak kaukenal asalnya, dan berpeganglah pada alat penyelamat paling sederhana saat kapal besar tenggelam."
+        }
+      ],
+      "motifs": [
+        "Pulau yang bukan pulau",
+        "Bak kayu yang terapung",
+        "Kuda laut",
+        "Mengambil kembali barang dagangan"
+      ],
+      "themes": [
+        "Selamat dengan alat paling sederhana",
+        "Jangan percaya pijakan yang tak kaukenal asalnya",
+        "Kisah adalah mata uang"
+      ],
+      "cast": [
+        "Sindbad Saudagar",
+        "Sindbad si Kuli",
+        "Sang Raja",
+        "Nakhoda Kapal",
+        "Kuda Laut"
+      ]
+    }
+  }
+}

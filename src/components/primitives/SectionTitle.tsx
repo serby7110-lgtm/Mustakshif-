@@ -29,7 +29,7 @@ export const SectionTitle: React.FC<SectionTitleProps> = ({
   const { tokens } = useTheme();
 
   return (
-    <div className={`flex items-end justify-between gap-3 text-right ${className}`}>
+    <div className={`flex items-end justify-between gap-3 text-start ${className}`}>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           {icon && <span style={{ color: tokens.deepAccent }}>{icon}</span>}
@@ -52,7 +52,7 @@ export const SectionTitle: React.FC<SectionTitleProps> = ({
       </div>
 
       {action && (
-        <div className="shrink-0 text-left">
+        <div className="shrink-0 text-end">
           {action}
         </div>
       )}

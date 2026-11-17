@@ -23,9 +23,25 @@
     <string name="long_form_locked_badge">مقفل — Premium</string>
     <string name="long_form_resume">استئناف القراءة</string>
     <string name="long_form_start_chapter_1">ابدأ الفصل الأول مجاناً</string>
-    <string name="long_form_unlock_prompt">الفصل الثاني وما بعده متاح عبر اشتراك premium_monthly.</string>
-    <string name="long_form_unlock_cta">فتح الفصول عبر Premium</string>
+    <string name="long_form_unlock_prompt">الفصل الثاني وما بعده متاح لمشتركي Premium.</string>
+    <string name="long_form_unlock_cta">اشترك الآن</string>
+    <string name="long_form_restore_cta">استعادة المشتريات</string>
     <string name="long_form_batch_pending">هيكل الفصل جاهز — سيتم إضافة النص الكامل في الدفعات القادمة.</string>
     <string name="long_form_mark_progress">تحديث التقدم</string>
     <string name="long_form_chapter_completed">مكتمل 100%</string>
+
+    <!-- Subscription & Home Banner Arabic UI Strings -->
+    <string name="subscription_screen_title">الاشتراك</string>
+    <string name="home_banner_title">افتح كل القصص الطويلة وأزل الإعلانات</string>
+    <string name="home_banner_cta">اشترك</string>
+    <string name="home_banner_active_chip">Premium مفعّل ✓</string>
+    <string name="subscription_status_active">مفعّل</string>
+    <string name="subscription_status_inactive">غير مفعّل</string>
+    <string name="subscription_benefit_stories">فتح كل القصص الطويلة</string>
+    <string name="subscription_benefit_ads">إزالة كل الإعلانات</string>
+    <string name="subscription_activate_cta">شحن / تفعيل الاشتراك</string>
+    <string name="subscription_restore_cta">استعادة المشتريات</string>
+    <string name="subscription_manage_cta">إدارة الاشتراك / الإلغاء</string>
+    <string name="subscription_activated_toast">تم تفعيل Premium</string>
+    <string name="subscription_unavailable">خدمة الاشتراك غير متاحة على هذا الجهاز</string>
 </resources>

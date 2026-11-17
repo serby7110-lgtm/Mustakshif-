@@ -17,8 +17,8 @@ import { MythEntry } from '../data/types';
  * 4. Normalizes Yaa / Alef Maqsura: [ىي] -> ي
  * 5. Removes Tatweel / Kashida (ـ)
  */
-export function normalizeArabic(text: string): string {
-  if (!text) return '';
+export function normalizeArabic(text?: string | null): string {
+  if (!text || typeof text !== 'string') return '';
 
   return text
     // Remove diacritics / tashkeel
@@ -66,24 +66,28 @@ export interface PrebuiltSearchItem {
 }
 
 let _prebuiltIndex: PrebuiltSearchItem[] | null = null;
+let _prebuiltEntriesRef: MythEntry[] | null = null;
 
-export function buildSearchIndex(entries: MythEntry[]): PrebuiltSearchItem[] {
-  _prebuiltIndex = entries.map((entry) => ({
+export function buildSearchIndex(entries: MythEntry[] = []): PrebuiltSearchItem[] {
+  const safeEntries = Array.isArray(entries) ? entries.filter(Boolean) : [];
+  _prebuiltEntriesRef = safeEntries;
+  _prebuiltIndex = safeEntries.map((entry) => ({
     entry,
-    normName: normalizeArabic(entry.name),
-    bareName: stripDefiniteArticle(entry.name),
-    normSummary: normalizeArabic(entry.summary),
-    normRegion: normalizeArabic(entry.region),
-    normTags: entry.tags.map((t) => normalizeArabic(t)),
-    latinName: (entry.latinName || '').toLowerCase(),
-    normBody: entry.body.map((p) => normalizeArabic(p)),
+    normName: normalizeArabic(entry?.name ?? ''),
+    bareName: stripDefiniteArticle(entry?.name ?? ''),
+    normSummary: normalizeArabic(entry?.summary ?? ''),
+    normRegion: normalizeArabic(entry?.region ?? ''),
+    normTags: (Array.isArray(entry?.tags) ? entry.tags : []).map((t) => normalizeArabic(t)),
+    latinName: (entry?.latinName ?? '').toLowerCase(),
+    normBody: (Array.isArray(entry?.body) ? entry.body : []).map((p) => normalizeArabic(p)),
   }));
   return _prebuiltIndex;
 }
 
-export function getOrBuildSearchIndex(entries: MythEntry[]): PrebuiltSearchItem[] {
-  if (!_prebuiltIndex || _prebuiltIndex.length !== entries.length) {
-    return buildSearchIndex(entries);
+export function getOrBuildSearchIndex(entries: MythEntry[] = []): PrebuiltSearchItem[] {
+  const safeEntries = Array.isArray(entries) ? entries : [];
+  if (!_prebuiltIndex || _prebuiltEntriesRef !== safeEntries || _prebuiltIndex.length !== safeEntries.length) {
+    return buildSearchIndex(safeEntries);
   }
   return _prebuiltIndex;
 }
@@ -93,9 +97,9 @@ export function getOrBuildSearchIndex(entries: MythEntry[]): PrebuiltSearchItem[
  * Matches both with and without "ال" (e.g. "غول" matches "الغول", "عنقاء" matches "العنقاء").
  * Uses pre-built search index for maximum performance.
  */
-export function searchEntries(entries: MythEntry[], rawQuery: string): SearchMatch[] {
-  const query = rawQuery.trim();
-  if (!query) return [];
+export function searchEntries(entries: MythEntry[] = [], rawQuery: string = ''): SearchMatch[] {
+  const query = typeof rawQuery === 'string' ? rawQuery.trim() : '';
+  if (!query || !Array.isArray(entries)) return [];
 
   const normQuery = normalizeArabic(query);
   const bareQuery = stripDefiniteArticle(query);
@@ -151,7 +155,7 @@ export function searchEntries(entries: MythEntry[], rawQuery: string): SearchMat
         score += 15;
         if (!snippet) {
           matchedField = 'body';
-          const paragraph = entry.body[i] || '';
+          const paragraph = (Array.isArray(entry?.body) ? entry.body[i] : '') ?? '';
           const idx = normParagraph.indexOf(normQuery !== '' ? normQuery : bareQuery);
           const start = Math.max(0, idx - 40);
           const end = Math.min(paragraph.length, idx + 80);
@@ -200,11 +204,11 @@ export interface SearchCivilizationMatch {
  * Searches civilizations across name, latinName, region, era, cities, prophet, and chapters
  */
 export function searchCivilizations(
-  civs: import('../data/civTypes').Civilization[],
-  rawQuery: string
+  civs: import('../data/civTypes').Civilization[] = [],
+  rawQuery: string = ''
 ): SearchCivilizationMatch[] {
-  const query = rawQuery.trim();
-  if (!query) return [];
+  const query = typeof rawQuery === 'string' ? rawQuery.trim() : '';
+  if (!query || !Array.isArray(civs)) return [];
 
   const normQuery = normalizeArabic(query);
   const bareQuery = stripDefiniteArticle(query);
@@ -213,14 +217,15 @@ export function searchCivilizations(
   const results: SearchCivilizationMatch[] = [];
 
   for (const civ of civs) {
-    const normName = normalizeArabic(civ.name || '');
-    const bareName = stripDefiniteArticle(civ.name || '');
-    const normLatin = (civ.latinName || '').toLowerCase();
-    const normRegion = normalizeArabic(civ.region || '');
-    const normEra = normalizeArabic(civ.era || '');
-    const normProphet = normalizeArabic(civ.prophet || '');
-    const normCities = (civ.cities || []).map((c) => normalizeArabic(c));
-    const normLegacy = normalizeArabic(civ.legacy || '');
+    if (!civ) continue;
+    const normName = normalizeArabic(civ.name ?? '');
+    const bareName = stripDefiniteArticle(civ.name ?? '');
+    const normLatin = (civ.latinName ?? '').toLowerCase();
+    const normRegion = normalizeArabic(civ.region ?? '');
+    const normEra = normalizeArabic(civ.era ?? '');
+    const normProphet = normalizeArabic(civ.prophet ?? '');
+    const normCities = (Array.isArray(civ.cities) ? civ.cities : []).map((c) => normalizeArabic(c));
+    const normLegacy = normalizeArabic(civ.legacy ?? '');
 
     let score = 0;
     let matchedField: SearchCivilizationMatch['matchedField'] = 'name';
@@ -271,16 +276,17 @@ export function searchCivilizations(
       }
     }
 
-    for (const ch of civ.chapters || []) {
-      const normChText = normalizeArabic(ch.text || '');
+    for (const ch of Array.isArray(civ.chapters) ? civ.chapters : []) {
+      const chText = ch?.text ?? '';
+      const normChText = normalizeArabic(chText);
       if (normChText.includes(normQuery) || (bareQuery.length > 2 && normChText.includes(bareQuery))) {
         score += 20;
         if (!snippet) {
           matchedField = 'chapters';
           const idx = normChText.indexOf(normQuery !== '' ? normQuery : bareQuery);
           const start = Math.max(0, idx - 40);
-          const end = Math.min(ch.text.length, idx + 80);
-          snippet = (start > 0 ? '...' : '') + ch.text.substring(start, end).trim() + (end < ch.text.length ? '...' : '');
+          const end = Math.min(chText.length, idx + 80);
+          snippet = (start > 0 ? '...' : '') + chText.substring(start, end).trim() + (end < chText.length ? '...' : '');
         }
         break;
       }

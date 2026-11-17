@@ -5,9 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" />
     <title>مستكشف | Mustakshif - موسوعة الأساطير والكائنات والرموز الفولكلورية العربية</title>
     <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#0E5C4D">
+    <meta name="theme-color" content="#0f766e">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="مستكشف">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="apple-touch-icon" href="/icons/icon.svg">
     <link rel="icon" type="image/svg+xml" href="/icons/icon.svg">
     <meta name="description" content="موسوعة الأساطير والكائنات والرموز الفولكلورية العربية بتصميم عربي حديث وقارئ هادئ للطلاب والعائلات." />
@@ -16,84 +17,24 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
-    <!-- Google Fonts: Cairo, Tajawal, Aref Ruqaa, Amiri, Reem Kufi -->
+    <!-- Google Fonts: Cairo, Tajawal, Aref Ruqaa, Amiri, Reem Kufi, Noto Naskh Arabic, Noto Sans Thai -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=Aref+Ruqaa:wght@400;700&family=Cairo:wght@400;500;600;700;800&family=Reem+Kufi:wght@400;500;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=Aref+Ruqaa:wght@400;700&family=Cairo:wght@400;500;600;700;800&family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&family=Reem+Kufi:wght@400;500;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
   </head>
   <body class="bg-theme-surface text-theme-text-primary antialiased selection:bg-[#7FD1AE]/30">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+
     <script>
-      if ('serviceWorker' in navigator) {
+      if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator && !window.__mustakshifSwRegistered) {
+        window.__mustakshifSwRegistered = true;
         window.addEventListener('load', function () {
-          navigator.serviceWorker.register('/sw.js');
-        });
+          navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(function (err) {
+            console.warn('[PWA] Service worker registration skipped:', err);
+          });
+        }, { once: true });
       }
     </script>
-
-    <!-- Error Logging: saves last 20 errors in localStorage under "app_errors" (الرسالة، الوقت، الصفحة) -->
-    <script>
-      (function () {
-        var STORAGE_KEY = 'app_errors';
-        var MAX_ERRORS = 20;
-
-        function recordError(msg, extra) {
-          try {
-            var errors = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-            var record = {
-              message: String(msg || 'Unknown Error'),
-              time: new Date().toISOString(),
-              page: window.location.href,
-              الرسالة: String(msg || 'Unknown Error'),
-              الوقت: new Date().toISOString(),
-              الصفحة: window.location.href
-            };
-            if (extra) record.extra = extra;
-            errors.push(record);
-            if (errors.length > MAX_ERRORS) {
-              errors = errors.slice(errors.length - MAX_ERRORS);
-            }
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(errors));
-          } catch (e) {
-            // Ignore storage failures
-          }
-        }
-
-        window.onerror = function (msg, url, line, col, error) {
-          recordError(msg, { url: url, line: line, col: col, stack: error ? error.stack : undefined });
-          return false;
-        };
-
-        window.addEventListener('unhandledrejection', function (event) {
-          var reason = event.reason;
-          var msg = (reason && (reason.message || reason.stack)) || String(reason || 'Unhandled Promise Rejection');
-          recordError(msg);
-        });
-      })();
-    </script>
-
-    <!-- Diagnostic Mode: Loads and initializes eruda when ?debug=1 is in URL -->
-    <script>
-      (function () {
-        try {
-          var params = new URLSearchParams(window.location.search);
-          if (params.get('debug') === '1') {
-            var script = document.createElement('script');
-            script.src = 'https://cdn.jsdelivr.net/npm/eruda';
-            script.onload = function () {
-              if (window.eruda) {
-                window.eruda.init();
-                console.log('[Mustakshif] Eruda diagnostic tools initialized');
-              }
-            };
-            document.head.appendChild(script);
-          }
-        } catch (e) {
-          // Ignore query param error
-        }
-      })();
-    </script>
-
   </body>
 </html>

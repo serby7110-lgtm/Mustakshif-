@@ -1,23 +1,67 @@
 {
-  "name": "مستكشف — موسوعة الأساطير والحضارات العربية",
+  "id": "/",
+  "name": "مستكشف",
   "short_name": "مستكشف",
-  "description": "موسوعة تفاعلية تضم 62 أسطورة و10 حضارات عربية، برواية التراث والآثار معاً.",
+  "description": "مستكشف: موسوعة عربية تفاعلية تأخذك في رحلة مشوّقة عبر أساطير العرب وكائنات الفولكلور والحضارات القديمة، بتوثيقٍ رصين وخريطة تفاعلية وقارئ هادئ يعمل دون اتصال.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "theme_color": "#0E5C4D",
-  "background_color": "#FFFFFF",
   "lang": "ar",
   "dir": "rtl",
   "categories": ["education", "books"],
+  "background_color": "#ffffff",
+  "theme_color": "#0f766e",
   "icons": [
-    { "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
-    { "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    }
   ],
   "shortcuts": [
-    { "name": "أسطورة اليوم", "short_name": "اليوم", "url": "/?daily=1" },
-    { "name": "المكتبة", "short_name": "المكتبة", "url": "/library" },
-    { "name": "الخريطة", "short_name": "الخريطة", "url": "/map" }
+    {
+      "name": "أسطورة اليوم",
+      "short_name": "اليوم",
+      "url": "/?daily=1",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "المكتبة",
+      "short_name": "المكتبة",
+      "url": "/library",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "خريطة الأساطير",
+      "short_name": "الخريطة",
+      "url": "/map",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    }
   ]
 }

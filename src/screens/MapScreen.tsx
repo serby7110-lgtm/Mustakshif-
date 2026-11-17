@@ -30,16 +30,20 @@ import {
 } from 'lucide-react';
 
 import { Tag, TagVariant } from '../components/primitives/Tag';
-import { MythEntry, MythCategory } from '../data/types';
+import { MythEntry, MythCategory, myths as unifiedMyths } from '../data/types';
 import { Civilization, getAllCivilizations } from '../data/civTypes';
-import mythsData from '../data/myths.json';
 import { useTheme } from '../theme/ThemeContext';
 import { storage } from '../data/storage';
 import { normalizeArabic } from '../utils/arabicSearch';
-import { getCivImageUrl } from '../utils/assets';
+import { getCivImageUrl, resolveHeroImageUrl } from '../utils/assets';
 import { useDebounce } from '../hooks/useDebounce';
 
 import { useI18n } from '../i18n/i18n';
+import {
+  getLocalizedEntry,
+  getLocalizedCivilization,
+  localizeTag,
+} from '../content';
 export interface MapScreenProps {
   onSelectEntry: (entry: MythEntry) => void;
   onSelectCivilization?: (civId: string) => void;
@@ -114,6 +118,9 @@ export const MYTH_MAP_POSITIONS: Record<string, MapPosition> = {
   sihr: { x: 68, y: 22, arabicRegionShort: 'بابل القديمة' },
   bahr_zulumat: { x: 10, y: 34, arabicRegionShort: 'بحر الظلمات' },
   'zarqa-al-yamama': { x: 67, y: 46, arabicRegionShort: 'اليمامة / نجد' },
+  'dhul-qarnayn': { x: 75, y: 20, arabicRegionShort: 'موضع السد غير محدد (؟)' },
+  sinbad: { x: 76, y: 31, arabicRegionShort: 'البصرة وبحار الهند' },
+  'ibn-battuta': { x: 14, y: 25, arabicRegionShort: 'طنجة والمشرق' },
 };
 
 // Complete geographic coordinate mapping for civilizations
@@ -145,14 +152,17 @@ export interface MapItem {
   heroImage?: string;
   summary: string;
   tags: string[];
+  rawTags?: string[];
   region: string;
+  regionShort?: string;
+  searchIndexExtra?: string;
 }
 
 export const MapScreen: React.FC<MapScreenProps> = ({
   onSelectEntry,
   onSelectCivilization,
 }) => {
-  const { t, dir } = useI18n();
+  const { t, lang, dir } = useI18n();
   const { tokens, isDark } = useTheme();
 
   // Top Bar Search & Filter states (with 300ms debounce)
@@ -175,91 +185,117 @@ export const MapScreen: React.FC<MapScreenProps> = ({
   // Bottom sheet swipe down gesture state
   const touchStartY = useRef<number | null>(null);
 
-  // All myth entries
-  const allMyths = useMemo(() => mythsData as unknown as MythEntry[], []);
+  // All myth entries (merged with long-form personalities)
+  const allMyths = useMemo(() => unifiedMyths ?? [], []);
 
   // All civilizations
-  const allCivilizations = useMemo(() => getAllCivilizations(), []);
+  const allCivilizations = useMemo(() => getAllCivilizations() ?? [], []);
 
   // Convert myths and civilizations to flat unified map items
   const allMapItems = useMemo<MapItem[]>(() => {
     const items: MapItem[] = [];
 
     // 1. Myth markers (8px diameter circle -> radius 4)
-    allMyths.forEach((myth) => {
-      const pos = MYTH_MAP_POSITIONS[myth.id] || {
+    allMyths.forEach((rawMyth) => {
+      if (!rawMyth) return;
+      const myth = getLocalizedEntry(rawMyth, lang);
+      const customPos = MYTH_MAP_POSITIONS[rawMyth.id];
+      const pos = customPos || {
         x: 50,
         y: 50,
-        arabicRegionShort: myth.region,
+        arabicRegionShort: rawMyth.region ?? '',
       };
 
       let categoryKey: MapItem['categoryKey'] = 'places';
       let color = '#0E5C4D';
 
-      if (myth.category === 'gods') {
+      if (rawMyth.category === 'gods') {
         categoryKey = 'gods';
         color = '#7FD1AE';
-      } else if (myth.category === 'creatures') {
+      } else if (rawMyth.category === 'creatures') {
         categoryKey = 'creatures';
         color = '#4A90D9';
-      } else if (myth.category === 'places') {
+      } else if (rawMyth.category === 'places') {
         categoryKey = 'places';
         color = '#0E5C4D';
-      } else if (myth.category === 'heroes') {
+      } else if (rawMyth.category === 'heroes') {
         categoryKey = 'heroes';
         color = '#E8602C';
-      } else if (myth.category === 'personalities' || myth.category === ('seers' as MythCategory)) {
+      } else if (
+        rawMyth.category === 'personalities' ||
+        rawMyth.category === ('seers' as MythCategory) ||
+        rawMyth.category === ('sa3aleek' as MythCategory) ||
+        rawMyth.category === ('kings' as MythCategory)
+      ) {
         categoryKey = 'personalities';
         color = '#9B7EDE';
-      } else if (myth.category === 'rituals') {
+      } else if (rawMyth.category === 'rituals') {
         categoryKey = 'rituals';
         color = '#D4A24C';
       }
 
+      const safeRawTags = Array.isArray(rawMyth.tags) ? rawMyth.tags : [];
+
+      const localizedPinRegion = customPos
+        ? t(`map.pinRegions.${rawMyth.id}`, { defaultValue: customPos.arabicRegionShort })
+        : (myth?.region ?? rawMyth.region ?? '');
+
       items.push({
-        id: myth.id,
-        name: myth.name,
+        id: rawMyth.id,
+        name: myth?.name ?? '',
         type: 'myth',
         categoryKey,
         cx: (pos.x / 100) * 1000,
         cy: (pos.y / 100) * 650,
         color,
         isSquare: false,
-        rawMyth: myth,
-        heroImage: myth.heroImage,
-        summary: myth.summary,
-        tags: myth.tags || [],
-        region: myth.region,
+        rawMyth,
+        heroImage: resolveHeroImageUrl(myth?.heroImage),
+        summary: myth?.summary ?? '',
+        tags: safeRawTags.map((tg) => localizeTag(tg, lang)),
+        rawTags: safeRawTags,
+        region: myth?.region ?? localizedPinRegion,
+        regionShort: localizedPinRegion,
+        searchIndexExtra: `${rawMyth.name ?? ''} ${rawMyth.region ?? ''} ${pos.arabicRegionShort ?? ''} ${localizedPinRegion} ${rawMyth.summary ?? ''} ${rawMyth.latinName ?? ''}`,
       });
     });
 
     // 2. Civilization markers (10x10px square with rounded corners in deep teal #0E5C4D)
-    allCivilizations.forEach((civ) => {
-      const pos = CIV_MAP_POSITIONS[civ.id] || {
+    allCivilizations.forEach((rawCiv) => {
+      if (!rawCiv) return;
+      const civ = getLocalizedCivilization(rawCiv, lang);
+      const customPos = CIV_MAP_POSITIONS[rawCiv.id];
+      const pos = customPos || {
         x: 60,
         y: 50,
-        arabicRegionShort: civ.region,
+        arabicRegionShort: rawCiv.region ?? '',
       };
 
+      const localizedPinRegion = customPos
+        ? t(`map.pinRegions.${rawCiv.id}`, { defaultValue: customPos.arabicRegionShort })
+        : (civ?.region ?? rawCiv.region ?? '');
+
       items.push({
-        id: civ.id,
-        name: civ.name,
+        id: rawCiv.id,
+        name: civ?.name ?? '',
         type: 'civilization',
         categoryKey: 'civilizations',
         cx: (pos.x / 100) * 1000,
         cy: (pos.y / 100) * 650,
         color: '#0E5C4D',
         isSquare: true,
-        rawCiv: civ,
-        heroImage: getCivImageUrl(civ.id),
-        summary: civ.chapters?.[0]?.text?.slice(0, 160) || civ.legacy || civ.economy || '',
-        tags: [civ.era, civ.region.split(' ')[0]],
-        region: civ.region,
+        rawCiv,
+        heroImage: resolveHeroImageUrl(getCivImageUrl(rawCiv.id)),
+        summary: civ?.chapters?.[0]?.text?.slice(0, 160) || civ?.legacy || civ?.economy || '',
+        tags: [civ?.era || t('common.undated'), (civ?.region ?? localizedPinRegion).split(' ')[0]].filter((tag): tag is string => Boolean(tag)),
+        region: civ?.region ?? localizedPinRegion,
+        regionShort: localizedPinRegion,
+        searchIndexExtra: `${rawCiv.name ?? ''} ${rawCiv.region ?? ''} ${pos.arabicRegionShort ?? ''} ${localizedPinRegion} ${rawCiv.era ?? ''}`,
       });
     });
 
     return items;
-  }, [allMyths, allCivilizations]);
+  }, [allMyths, allCivilizations, lang, t]);
 
   // Filter and search markers with Arabic normalization
   const filteredItems = useMemo<MapItem[]>(() => {
@@ -274,17 +310,21 @@ export const MapScreen: React.FC<MapScreenProps> = ({
     const q = debouncedSearchQuery.trim();
     if (q) {
       const normQ = normalizeArabic(q);
+      const lowerQ = q.toLowerCase();
       result = result.filter((item) => {
-        const normName = normalizeArabic(item.name);
-        const normSummary = normalizeArabic(item.summary);
-        const normRegion = normalizeArabic(item.region);
-        const normTags = item.tags.map((t) => normalizeArabic(t)).join(' ');
+        const normName = normalizeArabic(item?.name ?? '');
+        const normSummary = normalizeArabic(item?.summary ?? '');
+        const normRegion = normalizeArabic(item?.region ?? '');
+        const normTags = (item?.tags ?? []).map((tg) => normalizeArabic(tg)).join(' ');
+        const extra = (item?.searchIndexExtra || '').toLowerCase();
 
         return (
           normName.includes(normQ) ||
           normSummary.includes(normQ) ||
           normRegion.includes(normQ) ||
-          normTags.includes(normQ)
+          normTags.includes(normQ) ||
+          extra.includes(lowerQ) ||
+          normalizeArabic(extra).includes(normQ)
         );
       });
     }
@@ -594,13 +634,13 @@ export const MapScreen: React.FC<MapScreenProps> = ({
             style={{ color: tokens.deepAccent }}
             className="font-['Aref_Ruqaa',serif] text-2xl font-bold leading-tight"
           >
-            خريطة الأساطير والحضارات
+            {t('map.title')}
           </h2>
           <p
             style={{ color: tokens.textSecondary }}
             className="text-xs font-['Cairo',sans-serif] mt-0.5"
           >
-            استكشف المعالم والكيانات والممالك عبر خريطة مسطحة لدول العالم العربي
+            {t('map.subtitle')}
           </p>
         </div>
 
@@ -619,56 +659,55 @@ export const MapScreen: React.FC<MapScreenProps> = ({
             style={{ color: tokens.deepAccent }}
             className="text-[11px] font-bold font-mono"
           >
-            {filteredItems.length} موقعاً
+            {t('map.placesCount', { count: filteredItems.length })}
           </span>
         </div>
       </div>
 
-      {/* STEP 4: Top Bar Search Input + Filter Chips Row */}
+      {/* Top Bar Search Input + Filter Chips Row */}
       <div className="space-y-2.5">
-        {/* Search input with Arabic normalization */}
         <div className="relative">
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={`${t('map.search')} (مثلاً: الغول، عاد، مأرب، دومة الجندل...)`} /* ابحث في الخريطة */
+            placeholder={t('map.search')} /* ابحث في الخريطة */
             style={{
               backgroundColor: tokens.card,
               borderColor: tokens.border,
               color: tokens.textPrimary,
             }}
-            className="w-full pr-10 pl-9 py-2.5 rounded-2xl border text-xs sm:text-sm font-['Cairo',sans-serif] shadow-xs focus:outline-none focus:ring-2 focus:ring-[#7FD1AE] transition-all"
+            className="w-full ps-10 pe-9 py-2.5 rounded-2xl border text-xs sm:text-sm font-['Cairo',sans-serif] shadow-xs focus:outline-none focus:ring-2 focus:ring-[#7FD1AE] transition-all"
           />
           <Search
             size={16}
             style={{ color: tokens.textSecondary }}
-            className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
+            className="absolute start-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
           />
           {searchQuery && (
             <button
               type="button"
               onClick={() => setSearchQuery('')}
               style={{ color: tokens.textSecondary }}
-              className="absolute left-3 top-1/2 -translate-y-1/2 p-1 hover:opacity-80 cursor-pointer"
-              aria-label="مسح البحث"
+              className="absolute end-3 top-1/2 -translate-y-1/2 p-1 hover:opacity-80 cursor-pointer"
+              aria-label={t('home.clearSearch')}
             >
               <X size={14} />
             </button>
           )}
         </div>
 
-        {/* Scrollable Filter Chips: الكل، آلهة، كائنات، أماكن، أبطال، شخصيات، طقوس، حضارات */}
+        {/* Filter Chips: الكل، آلهة، كائنات، أماكن، أبطال، شخصيات، طقوس، حضارات */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar -mx-1 px-1">
           {[
             { id: 'all' as MapFilterCategory, label: t('map.all') },
-            { id: 'gods' as MapFilterCategory, label: 'آلهة' },
-            { id: 'creatures' as MapFilterCategory, label: 'كائنات' },
-            { id: 'places' as MapFilterCategory, label: 'أماكن' },
-            { id: 'heroes' as MapFilterCategory, label: 'أبطال' },
-            { id: 'personalities' as MapFilterCategory, label: 'شخصيات' },
-            { id: 'rituals' as MapFilterCategory, label: 'طقوس' },
-            { id: 'civilizations' as MapFilterCategory, label: 'حضارات' },
+            { id: 'gods' as MapFilterCategory, label: t('map.gods') },
+            { id: 'creatures' as MapFilterCategory, label: t('map.creatures') },
+            { id: 'places' as MapFilterCategory, label: t('map.places') },
+            { id: 'heroes' as MapFilterCategory, label: t('map.heroes') },
+            { id: 'personalities' as MapFilterCategory, label: t('map.personalities') },
+            { id: 'rituals' as MapFilterCategory, label: t('map.rituals') },
+            { id: 'civilizations' as MapFilterCategory, label: t('map.civilizations') },
           ].map((chip) => {
             const isActive = activeFilter === chip.id;
             return (
@@ -707,38 +746,38 @@ export const MapScreen: React.FC<MapScreenProps> = ({
         }}
         className="relative w-full aspect-[4/3] sm:aspect-[16/10] rounded-[24px] border-2 shadow-sm overflow-hidden select-none cursor-grab active:cursor-grabbing touch-none"
       >
-        {/* Top-left Zoom Controls */}
-        <div className="absolute top-3 left-3 z-30 flex items-center gap-1 bg-white/95 dark:bg-[#12332D]/95 backdrop-blur-md p-1 rounded-2xl border border-[#7FD1AE] shadow-xs pointer-events-auto">
+        {/* Top-right Zoom Controls (clear of bottom-left Legend box on narrow viewports) */}
+        <div className="absolute top-3 right-3 z-30 flex items-center gap-0.5 bg-white/95 dark:bg-[#12332D]/95 backdrop-blur-md p-1 rounded-2xl border border-[#7FD1AE] shadow-xs pointer-events-auto">
           <button
             type="button"
             onClick={handleZoomIn}
-            className="p-1.5 text-[#0E5C4D] dark:text-[#7FD1AE] hover:bg-[#F2FBF7] dark:hover:bg-[#0B2420] rounded-xl cursor-pointer min-h-[32px] min-w-[32px] flex items-center justify-center transition-colors"
-            title="تكبير"
-            aria-label="تكبير"
+            className="p-2 text-[#0E5C4D] dark:text-[#7FD1AE] hover:bg-[#F2FBF7] dark:hover:bg-[#0B2420] rounded-xl cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center transition-colors"
+            title={t('map.zoomIn')}
+            aria-label={t('map.zoomIn')}
           >
             <ZoomIn size={16} />
           </button>
           <button
             type="button"
             onClick={handleZoomOut}
-            className="p-1.5 text-[#0E5C4D] dark:text-[#7FD1AE] hover:bg-[#F2FBF7] dark:hover:bg-[#0B2420] rounded-xl cursor-pointer min-h-[32px] min-w-[32px] flex items-center justify-center transition-colors"
-            title="تصغير"
-            aria-label="تصغير"
+            className="p-2 text-[#0E5C4D] dark:text-[#7FD1AE] hover:bg-[#F2FBF7] dark:hover:bg-[#0B2420] rounded-xl cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center transition-colors"
+            title={t('map.zoomOut')}
+            aria-label={t('map.zoomOut')}
           >
             <ZoomOut size={16} />
           </button>
           <button
             type="button"
             onClick={handleResetZoom}
-            className="p-1.5 text-[#0E5C4D] dark:text-[#7FD1AE] hover:bg-[#F2FBF7] dark:hover:bg-[#0B2420] rounded-xl cursor-pointer min-h-[32px] min-w-[32px] flex items-center justify-center transition-colors"
-            title="إعادة ضبط"
-            aria-label="إعادة ضبط"
+            className="p-2 text-[#0E5C4D] dark:text-[#7FD1AE] hover:bg-[#F2FBF7] dark:hover:bg-[#0B2420] rounded-xl cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center transition-colors"
+            title={t('map.zoomReset')}
+            aria-label={t('map.zoomReset')}
           >
             <RotateCcw size={15} />
           </button>
         </div>
 
-        {/* STEP 5: Bottom-Left Legend Box (small, ~120x180px) */}
+        {/* Bottom-Left Legend Box */}
         <div
           style={{
             width: '125px',
@@ -754,45 +793,46 @@ export const MapScreen: React.FC<MapScreenProps> = ({
             {t('map.legend')}
           </h4>
 
+          {/* Legend categories: آلهة / كائنات / أماكن / أبطال / شخصيات / طقوس / حضارات */}
           <div className="space-y-1 text-[10px] font-['Cairo',sans-serif] font-medium leading-tight text-[#14312B] dark:text-[#E2F7ED]">
             <div className="flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full bg-[#7FD1AE] border border-white shrink-0" />
-              <span>آلهة</span>
+              <span>{t('map.gods')}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full bg-[#4A90D9] border border-white shrink-0" />
-              <span>كائنات</span>
+              <span>{t('map.creatures')}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full bg-[#0E5C4D] border border-white shrink-0" />
-              <span>أماكن</span>
+              <span>{t('map.places')}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full bg-[#E8602C] border border-white shrink-0" />
-              <span>أبطال</span>
+              <span>{t('map.heroes')}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full bg-[#9B7EDE] border border-white shrink-0" />
-              <span>شخصيات</span>
+              <span>{t('map.personalities')}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full bg-[#D4A24C] border border-white shrink-0" />
-              <span>طقوس</span>
+              <span>{t('map.rituals')}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-[2px] bg-[#0E5C4D] border border-white shrink-0" />
-              <span>حضارات</span>
+              <span>{t('map.civilizations')}</span>
             </div>
           </div>
         </div>
 
-        {/* STEP 6: Bottom-Right Compass Rose (simple 4-point star, teal, 32px) */}
+        {/* Bottom-Right Compass Rose (simple 4-point star, teal, 32px) */}
         <div
           className="absolute bottom-3 right-3 z-20 pointer-events-none select-none flex flex-col items-center justify-center p-1"
-          title="بوصلة الجهات"
+          title={t('map.legend')}
         >
           <span className="text-[10px] font-bold text-[#0E5C4D] dark:text-[#7FD1AE] font-['Aref_Ruqaa',serif] leading-none mb-0.5">
-            ش
+            {t('map.compassNorth')}
           </span>
           <svg
             width="32"
@@ -812,7 +852,7 @@ export const MapScreen: React.FC<MapScreenProps> = ({
           </svg>
         </div>
 
-        {/* STEP 8: Empty State when no results found */}
+        {/* Empty State when no results found */}
         {filteredItems.length === 0 && (
           <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-2.5 bg-white/80 dark:bg-[#0B2420]/85 backdrop-blur-xs p-6 text-center pointer-events-auto">
             <div
@@ -828,22 +868,29 @@ export const MapScreen: React.FC<MapScreenProps> = ({
               style={{ color: isDark ? '#7FD1AE' : '#0E5C4D' }}
               className="font-['Aref_Ruqaa',serif] text-base font-bold"
             >
-              لا نتائج — جرّب فلتر آخر
+              {t('map.emptyTitle') || 'لا نتائج — جرّب فلتر آخر'}
             </h3>
-            <p
-              style={{ color: tokens.textSecondary }}
-              className="text-xs font-['Cairo',sans-serif] max-w-xs"
+            <button
+              type="button"
+              onClick={() => {
+                setSearchQuery('');
+                setActiveFilter('all');
+              }}
+              style={{
+                backgroundColor: tokens.deepAccent,
+                color: isDark ? '#0B2420' : '#FFFFFF',
+              }}
+              className="px-4 py-1.5 rounded-full text-xs font-bold shadow-xs cursor-pointer"
             >
-              لم نعثر على مواقع مطابقة للبحث الحالي. يمكنك اختيار تصنيف آخر أو مسح كلمة البحث.
-            </p>
+              {t('map.emptyReset')}
+            </button>
           </div>
         )}
 
-        {/* Master Scalable SVG Map Canvas */}
+        {/* Master Scalable SVG Map Canvas (never horizontally mirrored across RTL/LTR) */}
         <svg
           viewBox="0 0 1000 650"
           className="w-full h-full block map-canvas-svg"
-          style={dir === 'ltr' ? { transform: 'scaleX(-1)' } : undefined}
           xmlns="http://www.w3.org/2000/svg"
         >
           <defs>
@@ -1016,32 +1063,32 @@ export const MapScreen: React.FC<MapScreenProps> = ({
               <path d="M 535,235 Q 530,320 545,410" />
             </g>
 
-            {/* Flat Region Labels in Arabic */}
+            {/* Localized Region Labels */}
             <g
               fontFamily="'Aref Ruqaa', serif"
               opacity={isDark ? '0.5' : '0.45'}
               pointerEvents="none"
             >
-              <text x="640" y="420" fill={isDark ? '#7FD1AE' : '#0E5C4D'} fontSize="18" fontWeight="bold">
-                نَجْدْ
+              <text x="640" y="420" fill={isDark ? '#7FD1AE' : '#0E5C4D'} fontSize="16" fontWeight="bold" textAnchor="middle">
+                {t('map.regions.najd')}
               </text>
-              <text x="565" y="420" fill={isDark ? '#7FD1AE' : '#0E5C4D'} fontSize="16" fontWeight="bold">
-                الحِجَازْ
+              <text x="575" y="420" fill={isDark ? '#7FD1AE' : '#0E5C4D'} fontSize="14" fontWeight="bold" textAnchor="middle">
+                {t('map.regions.hijaz')}
               </text>
-              <text x="635" y="550" fill={isDark ? '#7FD1AE' : '#0E5C4D'} fontSize="17" fontWeight="bold">
-                اليَمَنْ
+              <text x="645" y="550" fill={isDark ? '#7FD1AE' : '#0E5C4D'} fontSize="15" fontWeight="bold" textAnchor="middle">
+                {t('map.regions.yemen')}
               </text>
-              <text x="730" y="530" fill={isDark ? '#7FD1AE' : '#0E5C4D'} fontSize="15" fontWeight="bold">
-                الأَحْقَافْ
+              <text x="735" y="530" fill={isDark ? '#7FD1AE' : '#0E5C4D'} fontSize="14" fontWeight="bold" textAnchor="middle">
+                {t('map.regions.ahqaf')}
               </text>
-              <text x="590" y="190" fill={isDark ? '#7FD1AE' : '#0E5C4D'} fontSize="15" fontWeight="bold">
-                بِلَادُ الشَّامْ
+              <text x="595" y="190" fill={isDark ? '#7FD1AE' : '#0E5C4D'} fontSize="14" fontWeight="bold" textAnchor="middle">
+                {t('map.regions.sham')}
               </text>
-              <text x="680" y="190" fill={isDark ? '#7FD1AE' : '#0E5C4D'} fontSize="15" fontWeight="bold">
-                العِرَاقُ وَبَابِل
+              <text x="695" y="190" fill={isDark ? '#7FD1AE' : '#0E5C4D'} fontSize="14" fontWeight="bold" textAnchor="middle">
+                {t('map.regions.iraq')}
               </text>
-              <text x="460" y="320" fill={isDark ? '#7FD1AE' : '#0E5C4D'} fontSize="17" fontWeight="bold">
-                مِصْرُ وَالوَادِي
+              <text x="475" y="320" fill={isDark ? '#7FD1AE' : '#0E5C4D'} fontSize="15" fontWeight="bold" textAnchor="middle">
+                {t('map.regions.egypt')}
               </text>
             </g>
 
@@ -1139,9 +1186,9 @@ export const MapScreen: React.FC<MapScreenProps> = ({
                   fontWeight="bold"
                   fontFamily="'Aref Ruqaa', serif"
                 >
-                  {hoveredItem.name.length > 20
-                    ? hoveredItem.name.slice(0, 19) + '…'
-                    : hoveredItem.name}
+                  {(hoveredItem.name ?? '').length > 20
+                    ? (hoveredItem.name ?? '').slice(0, 19) + '…'
+                    : (hoveredItem.name ?? '')}
                 </text>
               </g>
             )}
@@ -1149,19 +1196,19 @@ export const MapScreen: React.FC<MapScreenProps> = ({
         </svg>
       </div>
 
-      {/* STEP 3: RTL Bottom Sheet (max height 40%, slides from bottom) */}
+      {/* Bottom Sheet (max height 40%, slides from bottom) */}
       {selectedItem && (
         <div
           className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-end justify-center p-0 sm:p-4 animate-in fade-in duration-200"
           onClick={() => setSelectedItem(null)}
-          dir="rtl"
+          dir={dir}
         >
           <div
             style={{
               backgroundColor: tokens.card,
               borderColor: tokens.border,
             }}
-            className="w-full max-w-md max-h-[40vh] overflow-y-auto rounded-t-[28px] sm:rounded-[28px] p-4 sm:p-5 shadow-2xl border-t sm:border animate-in slide-in-from-bottom-6 space-y-3 text-right"
+            className="w-full max-w-md max-h-[40vh] overflow-y-auto rounded-t-[28px] sm:rounded-[28px] p-4 sm:p-5 shadow-2xl border-t sm:border animate-in slide-in-from-bottom-6 space-y-3 text-start"
             onClick={(e) => e.stopPropagation()}
             onTouchStart={(e) => {
               touchStartY.current = e.touches[0].clientY;
@@ -1196,7 +1243,7 @@ export const MapScreen: React.FC<MapScreenProps> = ({
                   {selectedItem.heroImage ? (
                     <img
                       src={selectedItem.heroImage}
-                      alt={selectedItem.name}
+                      alt={selectedItem.name ?? ''}
                       className="w-full h-full object-cover"
                       loading="lazy"
                     />
@@ -1212,14 +1259,14 @@ export const MapScreen: React.FC<MapScreenProps> = ({
                     style={{ color: tokens.deepAccent }}
                     className="font-['Aref_Ruqaa',serif] text-base sm:text-lg font-bold leading-tight"
                   >
-                    {selectedItem.name}
+                    {selectedItem.name ?? ''}
                   </h3>
                   <p
                     style={{ color: tokens.textSecondary }}
                     className="text-[11px] font-medium mt-0.5 flex items-center gap-1 font-['Cairo',sans-serif]"
                   >
                     <MapPin size={12} className="text-[#7FD1AE] shrink-0" />
-                    <span>{selectedItem.region}</span>
+                    <span>{selectedItem.region || selectedItem.regionShort || ''}</span>
                   </p>
                 </div>
               </div>
@@ -1228,12 +1275,12 @@ export const MapScreen: React.FC<MapScreenProps> = ({
               <button
                 type="button"
                 onClick={() => setSelectedItem(null)}
-                aria-label="إغلاق البطاقة"
+                aria-label={t('common.close')}
                 style={{
                   backgroundColor: tokens.surface,
                   color: tokens.textSecondary,
                 }}
-                className="w-8 h-8 rounded-full hover:opacity-80 flex items-center justify-center transition-colors cursor-pointer shrink-0"
+                className="w-11 h-11 min-h-[44px] min-w-[44px] rounded-full hover:opacity-80 flex items-center justify-center transition-colors cursor-pointer shrink-0"
               >
                 <X size={16} />
               </button>
@@ -1244,21 +1291,21 @@ export const MapScreen: React.FC<MapScreenProps> = ({
               style={{ color: tokens.textPrimary }}
               className="text-xs font-['Cairo',sans-serif] leading-relaxed line-clamp-2"
             >
-              {selectedItem.summary}
+              {selectedItem.summary ?? ''}
             </p>
 
             {/* Tag Pills */}
-            {selectedItem.tags && selectedItem.tags.length > 0 && (
+            {Array.isArray(selectedItem.tags) && selectedItem.tags.length > 0 && (
               <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
-                {selectedItem.tags.slice(0, 3).map((tag) => (
-                  <Tag key={tag} variant={getTagVariant(tag)} size="sm">
+                {selectedItem.tags.slice(0, 3).map((tag, idx) => (
+                  <Tag key={`${tag}-${idx}`} variant={getTagVariant(selectedItem.rawTags?.[idx] || tag)} size="sm">
                     {tag}
                   </Tag>
                 ))}
               </div>
             )}
 
-            {/* "اقرأ القصة" Button */}
+            {/* Read CTA Button ("اقرأ القصة") */}
             <div className="pt-1">
               <button
                 type="button"
@@ -1280,8 +1327,12 @@ export const MapScreen: React.FC<MapScreenProps> = ({
                 }}
                 className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold shadow-md hover:opacity-90 active:scale-98 transition-all cursor-pointer font-['Cairo',sans-serif]"
               >
-                <span>{t('article.readStory')}</span>
-                <ChevronLeft size={16} className="transform scale-x-[-1]" />
+                <span>
+                  {selectedItem.type === 'civilization'
+                    ? t('map.readCiv')
+                    : (t('article.readStory') || 'اقرأ القصة')}
+                </span>
+                <ChevronLeft size={16} className={dir === 'ltr' ? 'rotate-180' : ''} />
               </button>
             </div>
           </div>

@@ -4,6 +4,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>مستكشف | Mustakshif — موسوعة الأساطير العربية</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0f766e">
   <meta name="description" content="موسوعة الأساطير والكائنات والرموز الفولكلورية العربية — تطبيق أندرويد يعمل دون اتصال بالإنترنت." />
   <style>
     :root {
@@ -125,5 +127,10 @@
       <a href="/app-ads.txt">ملف app-ads.txt</a>
     </nav>
   </main>
+  <script>
+    if (typeof navigator.serviceWorker !== 'undefined') {
+      navigator.serviceWorker.register('sw.js')
+    }
+  </script>
 </body>
 </html>

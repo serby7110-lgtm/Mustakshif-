@@ -156,6 +156,48 @@ object AnalyticsManager {
         }
     }
 
+    fun logPremiumBannerView() {
+        logCustomEvent("premium_banner_view") {}
+    }
+
+    fun logLockedEntryTap(entryId: String) {
+        logCustomEvent("locked_entry_tap") {
+            putString("entry_id", entryId)
+        }
+    }
+
+    fun logPaywallView(source: String = "article") {
+        logCustomEvent("paywall_view") {
+            putString("source", source)
+        }
+    }
+
+    fun logSubscribeStart(productId: String = "premium_monthly") {
+        logCustomEvent("subscribe_start") {
+            putString("product_id", productId)
+        }
+    }
+
+    fun logSubscribeSuccess(productId: String = "premium_monthly") {
+        logCustomEvent("subscribe_success") {
+            putString("product_id", productId)
+        }
+    }
+
+    fun logRestorePurchases() {
+        logCustomEvent("restore_purchases") {}
+    }
+
+    fun logManageSubscription() {
+        logCustomEvent("manage_subscription") {}
+    }
+
+    fun logTipPurchase(productId: String) {
+        logCustomEvent("tip_purchase") {
+            putString("product_id", productId)
+        }
+    }
+
     /**
      * Logs AdMob revenue impression to Firebase Analytics (ad_impression).
      */

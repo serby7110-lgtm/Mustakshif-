@@ -9,28 +9,33 @@ test('1. Cloudflare Web Analytics beacon is removed and replaced by native Fireb
   assert.ok(!html.includes('data-cf-beacon='), 'Must remove data-cf-beacon attribute');
 });
 
-test('2. Error Tracking: window.onerror and unhandledrejection save last 20 errors in localStorage under "app_errors"', () => {
+test('2. Error Tracking: src/logger.ts captures window error & unhandledrejection up to 50 entries', () => {
   const html = fs.readFileSync(path.resolve('index.html'), 'utf8');
-  assert.ok(html.includes("STORAGE_KEY = 'app_errors'"), 'Must define STORAGE_KEY app_errors');
-  assert.ok(html.includes('window.onerror = function'), 'Must wire window.onerror');
-  assert.ok(html.includes("addEventListener('unhandledrejection'"), 'Must wire unhandledrejection');
-  assert.ok(html.includes('MAX_ERRORS = 20'), 'Must cap at 20 errors');
-  assert.ok(html.includes('message:') && html.includes('time:') && html.includes('page:'), 'Must store message, time, page');
+  assert.ok(!html.includes("STORAGE_KEY = 'app_errors'"), 'Legacy duplicate app_errors script should be removed from index.html');
+
+  const loggerCode = fs.readFileSync(path.resolve('src', 'logger.ts'), 'utf8');
+  assert.ok(loggerCode.includes('MAX_ERROR_LOGS = 50'), 'Must cap error log at 50 entries');
+  assert.ok(loggerCode.includes("window.addEventListener('error'"), 'Must wire window error listener');
+  assert.ok(loggerCode.includes("window.addEventListener('unhandledrejection'"), 'Must wire unhandledrejection listener');
+  assert.ok(loggerCode.includes('screenSize:') && loggerCode.includes('lang:'), 'Must capture language and screen size');
 });
 
-test('3. Diagnostic Mode: Checks ?debug=1 and dynamically loads & initializes Eruda', () => {
+test('3. Diagnostic Mode: External unpinned CDN Eruda removed; local /debug DebugScreen provides diagnostics', () => {
   const html = fs.readFileSync(path.resolve('index.html'), 'utf8');
-  assert.ok(html.includes("params.get('debug') === '1'"), 'Must check for ?debug=1');
-  assert.ok(html.includes('cdn.jsdelivr.net/npm/eruda'), 'Must load Eruda CDN URL');
-  assert.ok(html.includes('eruda.init()'), 'Must initialize Eruda');
+  assert.ok(!html.includes('cdn.jsdelivr.net/npm/eruda'), 'Must remove unpinned external Eruda CDN script');
+
+  const appCode = fs.readFileSync(path.resolve('src', 'App.tsx'), 'utf8');
+  assert.ok(appCode.includes("'/debug'") && appCode.includes('DebugScreen'), 'App must provide local /debug DebugScreen');
 });
 
-test('4. Service Worker: Cache name carries version number that can be changed on every update', () => {
+test('4. Service Worker: Cache name is configured and cleans old caches on activate', () => {
   const swPublic = fs.readFileSync(path.resolve('public', 'sw.js'), 'utf8');
-  assert.ok(swPublic.includes('CACHE_VERSION'), 'public/sw.js must define CACHE_VERSION');
-  assert.ok(swPublic.includes("const CACHE = 'mustakshif-v1'"), 'public/sw.js must contain versioned cache name');
+  assert.ok(swPublic.includes('const CACHE = "pwabuilder-page"'), 'public/sw.js must contain cache name pwabuilder-page');
+  assert.ok(swPublic.includes('const offlineFallbackPage = "/offline.html"'), 'public/sw.js must configure /offline.html');
+  assert.ok(swPublic.includes('caches.delete'), 'public/sw.js must delete stale caches');
 
   const swRoot = fs.readFileSync(path.resolve('sw.js'), 'utf8');
-  assert.ok(swRoot.includes('CACHE_VERSION'), 'root sw.js must define CACHE_VERSION');
-  assert.ok(swRoot.includes("const CACHE = 'mustakshif-v1'"), 'root sw.js must contain versioned cache name');
+  assert.ok(swRoot.includes('const CACHE = "pwabuilder-page"'), 'root sw.js must contain cache name pwabuilder-page');
+  assert.ok(swRoot.includes('const offlineFallbackPage = "/offline.html"'), 'root sw.js must configure /offline.html');
+  assert.ok(swRoot.includes('caches.delete'), 'root sw.js must delete stale caches');
 });

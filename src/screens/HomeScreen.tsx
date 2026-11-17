@@ -23,25 +23,28 @@ import {
   Clock,
   Calendar,
   MapPin,
+  Settings,
+  Check,
 } from 'lucide-react';
 
 import { Card } from '../components/primitives/Card';
 import { Tag, TagVariant } from '../components/primitives/Tag';
 import { SectionTitle } from '../components/primitives/SectionTitle';
 import { Logo } from '../components/primitives/Logo';
+import { LockedHeroImage, PremiumPill } from '../components/primitives/LockedMediaBadges';
 import { MythEntry, MythCategory } from '../data/types';
-import { MYTH_ENTRIES, getEntryById } from '../data/seed';
+import { MYTH_ENTRIES, getAllEntries, getEntriesByCategory, getEntryById } from '../data/seed';
 import { getAllCivilizations } from '../data/civTypes';
 import { storage, LastReadChapter } from '../data/storage';
 import { searchEntries, searchCivilizations } from '../utils/arabicSearch';
-import { getCivImageUrl } from '../utils/assets';
+import { getCivImageUrl, resolveHeroImageUrl } from '../utils/assets';
 import { getEstimatedReadingTime, formatReadingTime } from '../utils/readingTime';
 import { useTheme } from '../theme/ThemeContext';
-import { legacyAr as ar } from '../i18n/legacyAr';
 import anqaBannerImg from '../assets/images/anqa_oasis_banner_1793094389649.jpg';
 import { SurpriseMeButton } from '../components/primitives/SurpriseMeButton';
-
+import { logAnalyticsEvent } from '../lib/firebase';
 import { useI18n } from '../i18n/i18n';
+import { getLocalizedEntry, getLocalizedCivilization, localizeTag } from '../content';
 const RunnerIcon = ({ size = 20, className = '' }: { size?: number; className?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <circle cx="15" cy="4" r="2" />
@@ -69,6 +72,8 @@ export interface HomeScreenProps {
   onToggleSave: (id: string, e?: React.MouseEvent) => void;
   onSelectCivilization?: (civId: string) => void;
   onExploreCivilizations?: () => void;
+  isPremiumActive?: boolean;
+  onOpenSubscription?: () => void;
 }
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({
@@ -79,11 +84,24 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   onToggleSave,
   onSelectCivilization,
   onExploreCivilizations,
+  isPremiumActive,
+  onOpenSubscription,
 }) => {
-  const { t, dir } = useI18n();
+  const { t, lang, dir } = useI18n();
   const { tokens, isDark } = useTheme();
+  const effectivePremium = isPremiumActive ?? storage.hasPremiumMonthly();
 
-  const allCivilizations = useMemo(() => getAllCivilizations(), []);
+  React.useEffect(() => {
+    if (!effectivePremium) {
+      logAnalyticsEvent('premium_banner_view');
+    }
+  }, [effectivePremium]);
+
+  const rawAllCivilizations = useMemo(() => getAllCivilizations() ?? [], []);
+  const allCivilizations = useMemo(
+    () => rawAllCivilizations.map((c) => getLocalizedCivilization(c, lang)),
+    [rawAllCivilizations, lang]
+  );
 
   const [searchQuery, setSearchQuery] = useState('');
   const [searchScope, setSearchScope] = useState<'all' | 'myths' | 'civs'>('all');
@@ -94,39 +112,66 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   const [lastRead] = useState<LastReadChapter | null>(() => storage.getLastReadChapter());
   const lastReadEntry = useMemo(() => {
     if (!lastRead?.mythId) return null;
-    return getEntryById(lastRead.mythId);
-  }, [lastRead]);
+    const raw = getEntryById(lastRead.mythId);
+    return raw ? getLocalizedEntry(raw, lang) : null;
+  }, [lastRead, lang]);
 
   // Phoenix entry for Hero Banner
   const anqaEntry = useMemo(() => {
-    return getEntryById('al-anqa') || MYTH_ENTRIES[1];
-  }, []);
+    const raw = getEntryById('al-anqa') ?? MYTH_ENTRIES[1] ?? MYTH_ENTRIES[0];
+    return raw ? getLocalizedEntry(raw, lang) : null;
+  }, [lang]);
 
   // Entries for "الأكثر قراءة": الغول (al-ghul), إرم ذات العماد (iram-dhat-al-imad), الجن (al-jinn)
   const mostReadEntries = useMemo(() => {
     const ids = ['al-ghul', 'iram-dhat-al-imad', 'al-jinn', 'al-lat', 'zarqa-al-yamama'];
     const selected = ids
       .map((id) => getEntryById(id))
-      .filter((e): e is MythEntry => Boolean(e));
+      .filter((e): e is MythEntry => Boolean(e))
+      .map((e) => getLocalizedEntry(e, lang));
     return showAllMostRead ? selected : selected.slice(0, 3);
-  }, [showAllMostRead]);
+  }, [showAllMostRead, lang]);
 
-  // Global search with Arabic normalization
+  const rawAllEntries = useMemo(() => getAllEntries() ?? [], []);
+  const allEntries = useMemo(
+    () => rawAllEntries.map((e) => getLocalizedEntry(e, lang)),
+    [rawAllEntries, lang]
+  );
+
+  // Global search across localized entries + Arabic fallback normalization
   const searchResults = useMemo(() => {
     if (searchScope === 'civs') return [];
-    return searchEntries(MYTH_ENTRIES, searchQuery);
-  }, [searchQuery, searchScope]);
+    const localizedMatches = searchEntries(allEntries, searchQuery);
+    if (lang === 'ar') return localizedMatches;
+    const seen = new Set(localizedMatches.map((m) => m.entry.id));
+    const arFallbackMatches = searchEntries(rawAllEntries, searchQuery)
+      .filter((m) => !seen.has(m.entry.id))
+      .map((m) => {
+        const loc = getLocalizedEntry(m.entry, lang);
+        return { ...m, entry: loc, snippet: loc.summary ?? '' };
+      });
+    return [...localizedMatches, ...arFallbackMatches];
+  }, [allEntries, rawAllEntries, searchQuery, searchScope, lang]);
 
-  // Civilizations search
+  // Civilizations search across localized + Arabic fallback
   const searchCivResults = useMemo(() => {
     if (searchScope === 'myths') return [];
-    return searchCivilizations(allCivilizations, searchQuery);
-  }, [allCivilizations, searchQuery, searchScope]);
+    const localizedMatches = searchCivilizations(allCivilizations, searchQuery);
+    if (lang === 'ar') return localizedMatches;
+    const seen = new Set(localizedMatches.map((m) => m.civ.id));
+    const arFallbackMatches = searchCivilizations(rawAllCivilizations, searchQuery)
+      .filter((m) => !seen.has(m.civ.id))
+      .map((m) => {
+        const loc = getLocalizedCivilization(m.civ, lang);
+        return { ...m, civ: loc, snippet: loc.economy || loc.region || '' };
+      });
+    return [...localizedMatches, ...arFallbackMatches];
+  }, [allCivilizations, rawAllCivilizations, searchQuery, searchScope, lang]);
 
   const handleMicClick = () => {
     setIsMicActive(true);
     setTimeout(() => {
-      setSearchQuery('غول');
+      setSearchQuery(lang === 'ar' ? 'غول' : lang === 'th' ? 'กูล' : 'Ghoul');
       setIsMicActive(false);
     }, 1000);
   };
@@ -136,6 +181,21 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     if (tag === 'تاريخ') return 'history';
     if (tag === 'خرافي') return 'supernatural';
     return 'neutral';
+  };
+
+  const getMatchedFieldLabel = (field: 'name' | 'summary' | 'tags' | 'body' | 'region') => {
+    switch (field) {
+      case 'name':
+        return t('home.matchedInName');
+      case 'summary':
+        return t('home.matchedInSummary');
+      case 'body':
+        return t('home.matchedInBody');
+      case 'tags':
+        return t('home.matchedInTags');
+      case 'region':
+        return t('home.matchedInRegion');
+    }
   };
 
   const renderHighlighted = (text: string, query: string) => {
@@ -164,9 +224,72 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
   return (
     <div className="space-y-6 animate-in fade-in duration-200" dir={dir}>
+      {/* 0. Home Subscription Banner (First element of Home, above category tiles) */}
+      {effectivePremium ? (
+        <div className="pt-1 flex justify-start">
+          <button
+            type="button"
+            data-testid="home-premium-active-chip"
+            onClick={() => onOpenSubscription?.()}
+            style={{
+              backgroundColor: 'rgba(61, 220, 151, 0.16)',
+              borderColor: '#3DDC97',
+              color: isDark ? '#9FE8CC' : '#0E5C4D',
+            }}
+            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border text-xs font-bold cursor-pointer hover:opacity-90 shadow-2xs"
+          >
+            <Check size={14} style={{ color: '#3DDC97' }} />
+            <span>{t('home.premiumActiveChip') || 'Premium مفعّل ✓'}</span>
+          </button>
+        </div>
+      ) : (
+        <div
+          data-testid="home-premium-banner"
+          style={{
+            background: 'linear-gradient(135deg, #E8F1FB 0%, #F2FBF7 100%)',
+            borderColor: '#4A90D9',
+          }}
+          className="mt-1 p-3.5 rounded-[18px] border-2 shadow-xs flex items-center justify-between gap-2.5"
+        >
+          <p
+            style={{ color: '#0E5C4D' }}
+            className="text-xs sm:text-sm font-bold font-['Cairo',sans-serif] leading-snug flex-1"
+          >
+            {t('home.premiumBanner') || 'افتح كل القصص الطويلة وأزل الإعلانات'}
+          </p>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <button
+              type="button"
+              onClick={() => onOpenSubscription?.()}
+              style={{
+                backgroundColor: '#4A90D9',
+                color: '#FFFFFF',
+              }}
+              className="px-3.5 py-2 rounded-full text-xs font-bold cursor-pointer hover:opacity-90 min-h-[44px]"
+            >
+              {t('home.premiumSubscribe')}
+            </button>
+            <button
+              type="button"
+              onClick={() => onOpenSubscription?.()}
+              aria-label={t('subscription.title')}
+              title={t('subscription.title')}
+              style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.85)',
+                color: '#0E5C4D',
+                borderColor: 'rgba(74, 144, 217, 0.35)',
+              }}
+              className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full border flex items-center justify-center cursor-pointer hover:opacity-90"
+            >
+              <Settings size={17} strokeWidth={2} />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* 1. Header: greeting + logo button */}
       <header className="flex items-center justify-between gap-4 pt-1">
-        <div className="text-right">
+        <div className="text-start">
           <h1
             style={{ color: tokens.deepAccent }}
             className="font-['Aref_Ruqaa',serif] text-2xl sm:text-3xl font-bold leading-tight tracking-wide"
@@ -177,15 +300,15 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             style={{ color: tokens.textSecondary }}
             className="text-xs font-['Cairo',sans-serif] mt-0.5"
           >
-            {ar.home.subgreeting}
+            {t('home.subgreeting')}
           </p>
         </div>
 
         <button
           type="button"
           onClick={onOpenProfile}
-          aria-label="الملف الشخصي وشارة مستكشف"
-          title="الملف الشخصي وشارة مستكشف"
+          aria-label={t('home.profileAria')}
+          title={t('home.profileAria')}
           style={{
             backgroundColor: tokens.card,
             borderColor: tokens.border,
@@ -199,91 +322,95 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               backgroundColor: tokens.primaryMint,
               borderColor: tokens.card,
             }}
-            className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2"
+            className="absolute -top-0.5 -end-0.5 w-2.5 h-2.5 rounded-full border-2"
           />
         </button>
       </header>
 
       {/* 1.5. "أكمل القراءة" Card at the very top (only if a last-read chapter exists) */}
-      {lastRead && lastReadEntry && (
-        <div
-          style={{
-            backgroundColor: tokens.card,
-            borderColor: tokens.border,
-          }}
-          className="p-4 sm:p-4.5 rounded-[22px] border shadow-sm relative overflow-hidden transition-all duration-200"
-        >
-          <div className="flex items-center justify-between gap-3 mb-2.5">
-            <div className="flex items-center gap-2">
-              <div
-                style={{
-                  backgroundColor: isDark ? 'rgba(127, 209, 174, 0.2)' : 'rgba(127, 209, 174, 0.25)',
-                  color: tokens.deepAccent,
-                }}
-                className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-              >
-                <BookOpen size={16} />
-              </div>
-              <span
-                style={{ color: tokens.deepAccent }}
-                className="text-xs font-bold font-['Aref_Ruqaa',serif]"
-              >
-                أكمل القراءة
-              </span>
-            </div>
-            <span
-              style={{ color: tokens.textSecondary }}
-              className="text-[11px] font-mono font-medium"
-            >
-              {lastRead.progressPercent}% مكتمل
-            </span>
-          </div>
-
-          <div className="flex items-end justify-between gap-3">
-            <div className="flex-1 min-w-0">
-              <h3
-                style={{ color: tokens.textPrimary }}
-                className="font-['Aref_Ruqaa',serif] text-lg font-bold truncate leading-snug"
-              >
-                {lastRead.mythName || lastReadEntry.name}
-              </h3>
-              <p
-                style={{ color: tokens.textSecondary }}
-                className="text-xs font-['Cairo',sans-serif] mt-0.5 truncate"
-              >
-                {lastRead.chapterTitle || 'الفصل السابق'}
-              </p>
-
-              {/* Progress bar */}
-              <div
-                style={{ backgroundColor: tokens.surface }}
-                className="w-full h-1.5 rounded-full overflow-hidden mt-2.5 border"
-              >
+      {lastRead && lastReadEntry && (() => {
+        const safeProgress = Number.isFinite(lastRead.progressPercent) ? lastRead.progressPercent : 0;
+        const safeChapterIdx = Number.isFinite(lastRead.chapterIndex) ? lastRead.chapterIndex : 0;
+        return (
+          <div
+            style={{
+              backgroundColor: tokens.card,
+              borderColor: tokens.border,
+            }}
+            className="p-4 sm:p-4.5 rounded-[22px] border shadow-sm relative overflow-hidden transition-all duration-200"
+          >
+            <div className="flex items-center justify-between gap-3 mb-2.5">
+              <div className="flex items-center gap-2">
                 <div
                   style={{
-                    width: `${Math.max(5, Math.min(100, lastRead.progressPercent))}%`,
-                    backgroundColor: tokens.primaryMint,
+                    backgroundColor: isDark ? 'rgba(127, 209, 174, 0.2)' : 'rgba(127, 209, 174, 0.25)',
+                    color: tokens.deepAccent,
                   }}
-                  className="h-full rounded-full transition-all duration-300"
-                />
+                  className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+                >
+                  <BookOpen size={16} />
+                </div>
+                <span
+                  style={{ color: tokens.deepAccent }}
+                  className="text-xs font-bold font-['Aref_Ruqaa',serif]"
+                >
+                  {t('home.continueReading') || 'أكمل القراءة'}
+                </span>
               </div>
+              <span
+                style={{ color: tokens.textSecondary }}
+                className="text-[11px] font-mono font-medium"
+              >
+                {t('home.progressComplete', { percent: safeProgress })}
+              </span>
             </div>
 
-            <button
-              type="button"
-              onClick={() => onSelectEntry(lastReadEntry, lastRead.chapterIndex)}
-              style={{
-                backgroundColor: tokens.primaryMint,
-                color: '#0E5C4D',
-              }}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold shadow-xs hover:opacity-90 transition-all cursor-pointer shrink-0 min-h-[44px]"
-            >
-              <span>متابعة</span>
-              <ChevronLeft size={16} />
-            </button>
+            <div className="flex items-end justify-between gap-3">
+              <div className="flex-1 min-w-0">
+                <h3
+                  style={{ color: tokens.textPrimary }}
+                  className="font-['Aref_Ruqaa',serif] text-lg font-bold truncate leading-snug"
+                >
+                  {lastReadEntry.name || lastRead.mythName || ''}
+                </h3>
+                <p
+                  style={{ color: tokens.textSecondary }}
+                  className="text-xs font-['Cairo',sans-serif] mt-0.5 truncate"
+                >
+                  {lastRead.chapterTitle || t('home.previousChapter')}
+                </p>
+
+                {/* Progress bar */}
+                <div
+                  style={{ backgroundColor: tokens.surface }}
+                  className="w-full h-1.5 rounded-full overflow-hidden mt-2.5 border"
+                >
+                  <div
+                    style={{
+                      width: `${Math.max(5, Math.min(100, safeProgress))}%`,
+                      backgroundColor: tokens.primaryMint,
+                    }}
+                    className="h-full rounded-full transition-all duration-300"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => onSelectEntry(lastReadEntry, safeChapterIdx)}
+                style={{
+                  backgroundColor: tokens.primaryMint,
+                  color: '#0E5C4D',
+                }}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold shadow-xs hover:opacity-90 transition-all cursor-pointer shrink-0 min-h-[44px]"
+              >
+                <span>{t('home.continueAction') || 'متابعة'}</span>
+                <ChevronLeft size={16} className={dir === 'ltr' ? 'rotate-180' : ''} />
+              </button>
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* 2. Global Search bar with Arabic normalization */}
       <div className="relative">
@@ -297,7 +424,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           {/* Magnifier Icon */}
           <div
             style={{ color: tokens.coolBlueAccent }}
-            className="pr-3.5 pl-2 flex items-center pointer-events-none"
+            className="ps-3.5 pe-2 flex items-center pointer-events-none"
           >
             <Search size={20} strokeWidth={2.2} />
           </div>
@@ -305,10 +432,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           {/* Search Input */}
           <input
             type="text"
-            dir="rtl"
+            dir={dir}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={ar.home.searchPlaceholder}
+            placeholder={t('home.searchPlaceholder')}
             style={{
               color: tokens.textPrimary,
             }}
@@ -321,8 +448,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               type="button"
               onClick={() => setSearchQuery('')}
               style={{ color: tokens.textSecondary }}
-              className="p-2 hover:opacity-80 cursor-pointer ml-1 min-h-[44px] min-w-[44px] flex items-center justify-center"
-              aria-label={ar.search.clearSearch}
+              className="p-2 hover:opacity-80 cursor-pointer ms-1 min-h-[44px] min-w-[44px] flex items-center justify-center"
+              aria-label={t('home.clearSearch')}
             >
               <X size={17} />
             </button>
@@ -332,10 +459,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           <button
             type="button"
             onClick={handleMicClick}
-            aria-label="البحث الصوتي"
-            title="البحث الصوتي"
+            aria-label={t('home.voiceSearch')}
+            title={t('home.voiceSearch')}
             style={{ color: tokens.coolBlueAccent }}
-            className={`pl-3 pr-2 py-2 hover:opacity-80 transition-colors cursor-pointer flex items-center min-h-[44px] min-w-[44px] justify-center ${
+            className={`pe-3 ps-2 py-2 hover:opacity-80 transition-colors cursor-pointer flex items-center min-h-[44px] min-w-[44px] justify-center ${
               isMicActive ? 'animate-pulse' : ''
             }`}
           >
@@ -370,9 +497,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             >
               <div className="flex items-center justify-between text-xs font-bold">
                 <span>
-                  {searchScope === 'all' && `النتائج (${searchResults.length + searchCivResults.length})`}
-                  {searchScope === 'myths' && `الأساطير (${searchResults.length})`}
-                  {searchScope === 'civs' && `الحضارات (${searchCivResults.length})`}
+                  {searchScope === 'all' && t('home.resultsCount', { count: searchResults.length + searchCivResults.length })}
+                  {searchScope === 'myths' && t('home.mythsCount', { count: searchResults.length })}
+                  {searchScope === 'civs' && t('home.civsCount', { count: searchCivResults.length })}
                 </span>
                 <button
                   type="button"
@@ -380,11 +507,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                   style={{ color: tokens.textSecondary }}
                   className="text-[11px] hover:underline cursor-pointer"
                 >
-                  {ar.search.closeSearch}
+                  {t('home.closeSearch')}
                 </button>
               </div>
 
-              {/* Scope toggle buttons: الكل | أساطير | حضارات */}
+              {/* Scope toggle buttons */}
               <div
                 style={{
                   backgroundColor: tokens.card,
@@ -392,7 +519,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 }}
                 className="flex items-center rounded-xl p-0.5 border text-xs"
                 role="group"
-                aria-label="تصفية نتائج البحث"
+                aria-label={t('home.searchFilterAria')}
               >
                 <button
                   type="button"
@@ -401,9 +528,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                     backgroundColor: searchScope === 'all' ? tokens.deepAccent : 'transparent',
                     color: searchScope === 'all' ? (isDark ? '#0B2420' : '#FFFFFF') : tokens.textSecondary,
                   }}
-                  className="flex-1 py-1 rounded-lg font-bold text-center transition-all cursor-pointer min-h-[32px]"
+                  className="flex-1 py-2 rounded-lg font-bold text-center transition-all cursor-pointer min-h-[44px]"
                 >
-                  {t('map.all')}
+                  {t('home.scopeAll')}
                 </button>
                 <button
                   type="button"
@@ -412,9 +539,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                     backgroundColor: searchScope === 'myths' ? tokens.deepAccent : 'transparent',
                     color: searchScope === 'myths' ? (isDark ? '#0B2420' : '#FFFFFF') : tokens.textSecondary,
                   }}
-                  className="flex-1 py-1 rounded-lg font-bold text-center transition-all cursor-pointer min-h-[32px]"
+                  className="flex-1 py-2 rounded-lg font-bold text-center transition-all cursor-pointer min-h-[44px]"
                 >
-                  أساطير
+                  {t('home.scopeMyths')}
                 </button>
                 <button
                   type="button"
@@ -423,9 +550,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                     backgroundColor: searchScope === 'civs' ? tokens.deepAccent : 'transparent',
                     color: searchScope === 'civs' ? (isDark ? '#0B2420' : '#FFFFFF') : tokens.textSecondary,
                   }}
-                  className="flex-1 py-1 rounded-lg font-bold text-center transition-all cursor-pointer min-h-[32px]"
+                  className="flex-1 py-2 rounded-lg font-bold text-center transition-all cursor-pointer min-h-[44px]"
                 >
-                  حضارات
+                  {t('home.scopeCivs')}
                 </button>
               </div>
             </div>
@@ -434,16 +561,16 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             {searchResults.length === 0 && searchCivResults.length === 0 ? (
               <div className="p-5 text-center space-y-1">
                 <p style={{ color: tokens.textPrimary }} className="text-xs font-bold">
-                  {ar.search.noResults(searchQuery)}
+                  {t('home.noResults', { query: searchQuery })}
                 </p>
                 <p style={{ color: tokens.textSecondary }} className="text-[11px]">
-                  {ar.search.noResultsHint}
+                  {t('home.noResultsHint')}
                 </p>
               </div>
             ) : (
               <>
                 {/* 1. Civilization results: show name + era + region and open CivilizationPage */}
-                {searchCivResults.map(({ civ, matchedField, snippet }) => (
+                {searchCivResults.map(({ civ, snippet }) => (
                   <div
                     key={`civ-${civ.id}`}
                     onClick={() => {
@@ -456,7 +583,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                       borderColor: tokens.borderSubtle,
                       backgroundColor: isDark ? 'rgba(127, 209, 174, 0.05)' : 'rgba(230, 248, 240, 0.3)',
                     }}
-                    className="p-3.5 hover:opacity-90 transition-colors cursor-pointer flex items-center justify-between gap-3 text-right group"
+                    className="p-3.5 hover:opacity-90 transition-colors cursor-pointer flex items-center justify-between gap-3 text-start group"
                   >
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
@@ -475,7 +602,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                           className="text-[10px] px-2 py-0.5 rounded-md font-bold border inline-flex items-center gap-1"
                         >
                           <Landmark size={10} />
-                          <span>حضارة</span>
+                          <span>{t('home.civilizationBadge')}</span>
                         </span>
                         <span
                           style={{
@@ -484,7 +611,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                           }}
                           className="text-[10px] px-2 py-0.5 rounded-md font-medium"
                         >
-                          {civ.era}
+                          {civ.era || t('common.undated')}
                         </span>
                       </div>
 
@@ -493,7 +620,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                         className="flex items-center gap-1.5 text-xs font-['Cairo',sans-serif] mb-1"
                       >
                         <MapPin size={11} className="shrink-0 opacity-70" />
-                        <span>{civ.region}</span>
+                        <span>{civ.region ?? ''}</span>
                       </div>
 
                       {snippet && (
@@ -508,76 +635,95 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
                     <div
                       style={{ color: tokens.deepAccent }}
-                      className="group-hover:-translate-x-1 transition-transform shrink-0 p-1"
+                      className={`${dir === 'ltr' ? 'group-hover:translate-x-1' : 'group-hover:-translate-x-1'} transition-transform shrink-0 p-1`}
                     >
-                      <ChevronLeft size={16} />
+                      <ChevronLeft size={16} className={dir === 'ltr' ? 'rotate-180' : ''} />
                     </div>
                   </div>
                 ))}
 
                 {/* 2. Myth entries results */}
-                {searchResults.map(({ entry, matchedField, snippet }) => (
-                  <div
-                    key={`myth-${entry.id}`}
-                    onClick={() => {
-                      setSearchQuery('');
-                      onSelectEntry(entry);
-                    }}
-                    style={{ borderColor: tokens.borderSubtle }}
-                    className="p-3.5 hover:opacity-90 transition-colors cursor-pointer flex items-center justify-between gap-3 text-right"
-                  >
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <span
-                          style={{ color: tokens.textPrimary }}
-                          className="font-bold text-sm font-['Aref_Ruqaa',serif]"
-                        >
-                          {renderHighlighted(entry.name, searchQuery)}
-                        </span>
-                        <span
-                          style={{
-                            color: tokens.deepAccent,
-                            backgroundColor: isDark ? 'rgba(127, 209, 174, 0.2)' : 'rgba(127, 209, 174, 0.25)',
-                          }}
-                          className="text-[10px] px-1.5 py-0.5 rounded-md font-semibold"
-                        >
-                          {entry.typeLabel}
-                        </span>
-                        <span
-                          style={{
-                            color: tokens.textSecondary,
-                            backgroundColor: tokens.coolBlueTint,
-                          }}
-                          className="text-[10px] px-1.5 py-0.5 rounded-md font-mono"
-                        >
-                          {ar.search.matchedIn[matchedField]}
-                        </span>
-                        <span
-                          style={{
-                            color: tokens.deepAccent,
-                            backgroundColor: tokens.surface,
-                          }}
-                          className="text-[10px] px-1.5 py-0.5 rounded-md font-mono border"
-                        >
-                          {formatReadingTime(getEstimatedReadingTime(entry))}
-                        </span>
+                {searchResults.map(({ entry, matchedField, snippet }) => {
+                  const isLocked = Boolean(entry.isPremium) && !effectivePremium;
+                  return (
+                    <div
+                      key={`myth-${entry.id}`}
+                      onClick={() => {
+                        setSearchQuery('');
+                        onSelectEntry(entry);
+                      }}
+                      style={{ borderColor: tokens.borderSubtle }}
+                      className="p-3.5 hover:opacity-90 transition-colors cursor-pointer flex items-center justify-between gap-3 text-start"
+                    >
+                      <div
+                        style={{
+                          backgroundColor: tokens.surface,
+                          borderColor: tokens.borderSubtle,
+                        }}
+                        className="relative w-12 h-12 rounded-xl overflow-hidden shrink-0 border"
+                      >
+                        <LockedHeroImage
+                          src={entry.heroImage}
+                          alt={entry.name}
+                          isLocked={isLocked}
+                          compact
+                        />
                       </div>
 
-                      <p
-                        style={{ color: tokens.textSecondary }}
-                        className="text-xs line-clamp-1 leading-relaxed"
-                      >
-                        {renderHighlighted(snippet || entry.summary, searchQuery)}
-                      </p>
-                    </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+                          <span
+                            style={{ color: tokens.textPrimary }}
+                            className="font-bold text-sm font-['Aref_Ruqaa',serif]"
+                          >
+                            {renderHighlighted(entry.name, searchQuery)}
+                          </span>
+                          {entry.isPremium && <PremiumPill />}
+                          <span
+                            style={{
+                              color: tokens.deepAccent,
+                              backgroundColor: isDark ? 'rgba(127, 209, 174, 0.2)' : 'rgba(127, 209, 174, 0.25)',
+                            }}
+                            className="text-[10px] px-1.5 py-0.5 rounded-md font-semibold"
+                          >
+                            {entry.typeLabel}
+                          </span>
+                          <span
+                            style={{
+                              color: tokens.textSecondary,
+                              backgroundColor: tokens.coolBlueTint,
+                            }}
+                            className="text-[10px] px-1.5 py-0.5 rounded-md font-mono"
+                          >
+                            {getMatchedFieldLabel(matchedField)}
+                          </span>
+                          <span
+                            style={{
+                              color: tokens.deepAccent,
+                              backgroundColor: tokens.surface,
+                            }}
+                            className="text-[10px] px-1.5 py-0.5 rounded-md font-mono border"
+                          >
+                            {formatReadingTime(getEstimatedReadingTime(entry), lang)}
+                          </span>
+                        </div>
 
-                    <ChevronLeft
-                      size={16}
-                      style={{ color: tokens.coolBlueAccent }}
-                      className="transform scale-x-[-1] shrink-0"
-                    />
-                  </div>
-                ))}
+                        <p
+                          style={{ color: tokens.textSecondary }}
+                          className="text-xs line-clamp-1 leading-relaxed"
+                        >
+                          {renderHighlighted(snippet || entry.summary, searchQuery)}
+                        </p>
+                      </div>
+
+                      <ChevronLeft
+                        size={16}
+                        style={{ color: tokens.coolBlueAccent }}
+                        className={`shrink-0 ${dir === 'ltr' ? 'rotate-180' : ''}`}
+                      />
+                    </div>
+                  );
+                })}
               </>
             )}
           </div>
@@ -588,7 +734,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       <div>
         <SectionTitle
           title={t('home.categories')}
-          subtitle={ar.home.categoriesSubtitle}
+          subtitle={t('home.categoriesSub')}
         />
 
         <div className="grid grid-cols-2 gap-3 mt-3">
@@ -600,7 +746,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               backgroundColor: tokens.coolBlueTint,
               borderColor: isDark ? 'rgba(127, 178, 232, 0.35)' : 'rgba(74, 144, 217, 0.3)',
             }}
-            className="p-4 rounded-[18px] border text-right flex flex-col justify-between h-28 hover:-translate-y-0.5 shadow-sm transition-all duration-200 cursor-pointer group min-h-[48px]"
+            className="p-3.5 rounded-[18px] border text-start flex flex-col justify-between gap-2.5 min-h-[124px] hover:-translate-y-0.5 shadow-sm transition-all duration-200 cursor-pointer group"
           >
             <div className="flex items-center justify-between">
               <div
@@ -620,7 +766,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 }}
                 className="text-[11px] font-bold px-2 py-0.5 rounded-full"
               >
-                ١٢ كائناً
+                {t('cat.creaturesCount', { count: getEntriesByCategory('creatures').length })}
               </span>
             </div>
             <div>
@@ -634,7 +780,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 style={{ color: tokens.textSecondary }}
                 className="text-[11px] font-['Cairo',sans-serif] font-medium"
               >
-                {ar.categories.creaturesSub}
+                {t('cat.creaturesSub')}
               </span>
             </div>
           </button>
@@ -647,7 +793,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               backgroundColor: tokens.surface,
               borderColor: tokens.border,
             }}
-            className="p-4 rounded-[18px] border text-right flex flex-col justify-between h-28 hover:-translate-y-0.5 shadow-sm transition-all duration-200 cursor-pointer group min-h-[48px]"
+            className="p-3.5 rounded-[18px] border text-start flex flex-col justify-between gap-2.5 min-h-[124px] hover:-translate-y-0.5 shadow-sm transition-all duration-200 cursor-pointer group"
           >
             <div className="flex items-center justify-between">
               <div
@@ -667,7 +813,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 }}
                 className="text-[11px] font-bold px-2 py-0.5 rounded-full"
               >
-                ١٠ أرباب
+                {t('cat.godsCount', { count: getEntriesByCategory('gods').length })}
               </span>
             </div>
             <div>
@@ -681,7 +827,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 style={{ color: tokens.textSecondary }}
                 className="text-[11px] font-['Cairo',sans-serif] font-medium"
               >
-                {ar.categories.godsSub}
+                {t('cat.godsSub')}
               </span>
             </div>
           </button>
@@ -694,7 +840,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               backgroundColor: isDark ? 'rgba(159, 232, 204, 0.12)' : 'rgba(14, 92, 77, 0.07)',
               borderColor: tokens.border,
             }}
-            className="p-4 rounded-[18px] border text-right flex flex-col justify-between h-28 hover:-translate-y-0.5 shadow-sm transition-all duration-200 cursor-pointer group min-h-[48px]"
+            className="p-3.5 rounded-[18px] border text-start flex flex-col justify-between gap-2.5 min-h-[124px] hover:-translate-y-0.5 shadow-sm transition-all duration-200 cursor-pointer group"
           >
             <div className="flex items-center justify-between">
               <div
@@ -714,7 +860,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 }}
                 className="text-[11px] font-bold px-2 py-0.5 rounded-full"
               >
-                ٨ طقوس
+                {t('cat.ritualsCount', { count: getEntriesByCategory('rituals').length })}
               </span>
             </div>
             <div>
@@ -728,7 +874,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 style={{ color: tokens.textSecondary }}
                 className="text-[11px] font-['Cairo',sans-serif] font-medium"
               >
-                {ar.categories.ritualsSub}
+                {t('cat.ritualsSub')}
               </span>
             </div>
           </button>
@@ -741,7 +887,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               backgroundColor: tokens.card,
               borderColor: tokens.border,
             }}
-            className="p-4 rounded-[18px] border text-right flex flex-col justify-between h-28 hover:-translate-y-0.5 shadow-sm transition-all duration-200 cursor-pointer group min-h-[48px]"
+            className="p-3.5 rounded-[18px] border text-start flex flex-col justify-between gap-2.5 min-h-[124px] hover:-translate-y-0.5 shadow-sm transition-all duration-200 cursor-pointer group"
           >
             <div className="flex items-center justify-between">
               <div
@@ -761,7 +907,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 }}
                 className="text-[11px] font-bold px-2 py-0.5 rounded-full"
               >
-                ١٠ مواقع
+                {t('cat.placesCount', { count: getEntriesByCategory('places').length })}
               </span>
             </div>
             <div>
@@ -775,7 +921,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 style={{ color: tokens.textSecondary }}
                 className="text-[11px] font-['Cairo',sans-serif] font-medium"
               >
-                {ar.categories.placesSub}
+                {t('cat.placesSub')}
               </span>
             </div>
           </button>
@@ -788,7 +934,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               backgroundColor: tokens.coolBlueTint,
               borderColor: isDark ? 'rgba(127, 178, 232, 0.35)' : 'rgba(74, 144, 217, 0.3)',
             }}
-            className="p-4 rounded-[18px] border text-right flex flex-col justify-between h-28 hover:-translate-y-0.5 shadow-sm transition-all duration-200 cursor-pointer group min-h-[48px]"
+            className="p-3.5 rounded-[18px] border text-start flex flex-col justify-between gap-2.5 min-h-[124px] hover:-translate-y-0.5 shadow-sm transition-all duration-200 cursor-pointer group"
           >
             <div className="flex items-center justify-between">
               <div
@@ -808,7 +954,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 }}
                 className="text-[11px] font-bold px-2 py-0.5 rounded-full"
               >
-                ٨ شخصيات
+                {t('cat.personalitiesCount', { count: getEntriesByCategory('personalities').length })}
               </span>
             </div>
             <div>
@@ -822,27 +968,27 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 style={{ color: tokens.textSecondary }}
                 className="text-[11px] font-['Cairo',sans-serif] font-medium"
               >
-                {ar.categories.personalitiesSub}
+                {t('cat.personalitiesSub')}
               </span>
             </div>
           </button>
 
-          {/* Tile 6: sa3aleek (الصعاليك) */}
+          {/* Tile 6: sa3aleek */}
           <button
             type="button"
             onClick={() => onSelectCategoryFilter?.('sa3aleek')}
             style={{
-              backgroundColor: isDark ? 'rgba(253, 231, 218, 0.14)' : '#FDE7DA',
-              borderColor: isDark ? 'rgba(253, 231, 218, 0.35)' : 'rgba(232, 100, 50, 0.28)',
+              backgroundColor: isDark ? tokens.surface : '#F2FBF7',
+              borderColor: isDark ? tokens.border : 'rgba(23, 135, 123, 0.25)',
             }}
-            className="p-4 rounded-[18px] border text-right flex flex-col justify-between h-28 hover:-translate-y-0.5 shadow-sm transition-all duration-200 cursor-pointer group min-h-[48px]"
+            className="p-3.5 rounded-[18px] border text-start flex flex-col justify-between gap-2.5 min-h-[124px] hover:-translate-y-0.5 shadow-sm transition-all duration-200 cursor-pointer group"
           >
             <div className="flex items-center justify-between">
               <div
                 style={{
                   backgroundColor: tokens.card,
                   borderColor: tokens.border,
-                  color: '#C24514',
+                  color: isDark ? tokens.deepAccent : '#17877B',
                 }}
                 className="w-9 h-9 rounded-xl border flex items-center justify-center group-hover:scale-110 transition-transform"
               >
@@ -850,17 +996,17 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               </div>
               <span
                 style={{
-                  color: '#C24514',
+                  color: isDark ? tokens.deepAccent : '#17877B',
                   backgroundColor: tokens.card,
                 }}
                 className="text-[11px] font-bold px-2 py-0.5 rounded-full"
               >
-                {t('cat.sa3aleek')}
+                {t('cat.sa3aleekCount', { count: getEntriesByCategory('sa3aleek').length })}
               </span>
             </div>
             <div>
               <span
-                style={{ color: tokens.textPrimary }}
+                style={{ color: isDark ? tokens.textPrimary : '#0E5C4D' }}
                 className="font-['Aref_Ruqaa',serif] text-lg font-bold block leading-tight"
               >
                 {t('cat.sa3aleek')}
@@ -869,27 +1015,27 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 style={{ color: tokens.textSecondary }}
                 className="text-[11px] font-['Cairo',sans-serif] font-medium"
               >
-                {ar.categories.sa3aleekSub}
+                {t('cat.sa3aleekSub')}
               </span>
             </div>
           </button>
 
-          {/* Tile 7: kings (ملوك وملكات) */}
+          {/* Tile 7: kings */}
           <button
             type="button"
             onClick={() => onSelectCategoryFilter?.('kings')}
             style={{
-              backgroundColor: isDark ? 'rgba(246, 235, 210, 0.14)' : '#F6EBD2',
-              borderColor: isDark ? 'rgba(246, 235, 210, 0.35)' : 'rgba(200, 160, 80, 0.3)',
+              backgroundColor: isDark ? tokens.coolBlueTint : '#E8F1FB',
+              borderColor: isDark ? 'rgba(127, 178, 232, 0.35)' : 'rgba(74, 144, 217, 0.3)',
             }}
-            className="p-4 rounded-[18px] border text-right flex flex-col justify-between h-28 hover:-translate-y-0.5 shadow-sm transition-all duration-200 cursor-pointer group min-h-[48px]"
+            className="p-3.5 rounded-[18px] border text-start flex flex-col justify-between gap-2.5 min-h-[124px] hover:-translate-y-0.5 shadow-sm transition-all duration-200 cursor-pointer group"
           >
             <div className="flex items-center justify-between">
               <div
                 style={{
                   backgroundColor: tokens.card,
                   borderColor: tokens.border,
-                  color: '#9C6F1E',
+                  color: isDark ? tokens.coolBlueAccent : '#4A90D9',
                 }}
                 className="w-9 h-9 rounded-xl border flex items-center justify-center group-hover:scale-110 transition-transform"
               >
@@ -897,17 +1043,17 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               </div>
               <span
                 style={{
-                  color: '#9C6F1E',
+                  color: isDark ? tokens.coolBlueAccent : '#4A90D9',
                   backgroundColor: tokens.card,
                 }}
                 className="text-[11px] font-bold px-2 py-0.5 rounded-full"
               >
-                العروش
+                {t('cat.kingsCount', { count: getEntriesByCategory('kings').length })}
               </span>
             </div>
             <div>
               <span
-                style={{ color: tokens.textPrimary }}
+                style={{ color: isDark ? tokens.textPrimary : '#0E5C4D' }}
                 className="font-['Aref_Ruqaa',serif] text-lg font-bold block leading-tight"
               >
                 {t('cat.kings')}
@@ -916,12 +1062,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 style={{ color: tokens.textSecondary }}
                 className="text-[11px] font-['Cairo',sans-serif] font-medium"
               >
-                {ar.categories.kingsSub}
+                {t('cat.kingsSub')}
               </span>
             </div>
           </button>
 
-          {/* Tile 8: seers (عرافون وكهان) */}
+          {/* Tile 8: seers */}
           <button
             type="button"
             onClick={() => onSelectCategoryFilter?.('seers')}
@@ -929,7 +1075,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               backgroundColor: isDark ? 'rgba(236, 231, 248, 0.14)' : '#ECE7F8',
               borderColor: isDark ? 'rgba(236, 231, 248, 0.35)' : 'rgba(150, 120, 220, 0.28)',
             }}
-            className="p-4 rounded-[18px] border text-right flex flex-col justify-between h-28 hover:-translate-y-0.5 shadow-sm transition-all duration-200 cursor-pointer group min-h-[48px] col-span-2 sm:col-span-1"
+            className="p-3.5 rounded-[18px] border text-start flex flex-col justify-between gap-2.5 min-h-[124px] hover:-translate-y-0.5 shadow-sm transition-all duration-200 cursor-pointer group col-span-2 sm:col-span-1"
           >
             <div className="flex items-center justify-between">
               <div
@@ -949,7 +1095,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 }}
                 className="text-[11px] font-bold px-2 py-0.5 rounded-full"
               >
-                الكهانة
+                {t('cat.seersCount', { count: getEntriesByCategory('seers').length })}
               </span>
             </div>
             <div>
@@ -963,7 +1109,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 style={{ color: tokens.textSecondary }}
                 className="text-[11px] font-['Cairo',sans-serif] font-medium"
               >
-                {ar.categories.seersSub}
+                {t('cat.seersSub')}
               </span>
             </div>
           </button>
@@ -971,13 +1117,14 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       </div>
 
       {/* 4. Hero banner "أسطورة اليوم" */}
+      {anqaEntry && (
       <div className="relative">
         {/* Dark mode only: subtle CSS twinkling stars behind the Home hero banner */}
         {isDark && (
           <div className="absolute -inset-2.5 pointer-events-none overflow-hidden rounded-[26px] z-0">
             <div className="hero-twinkling-star top-2 right-8 w-1.5 h-1.5" style={{ animationDuration: '2.8s', animationDelay: '0.2s', backgroundColor: tokens.primaryMint }} />
             <div className="hero-twinkling-star top-6 right-24 w-1 h-1" style={{ animationDuration: '3.4s', animationDelay: '0.8s', backgroundColor: '#FFFFFF' }} />
-            <div className="hero-twinkling-star top-12 right-1/3 w-1.5 h-1.5" style={{ animationDuration: '4.1s', animationDelay: '1.2s', backgroundColor: '#FDE7DA' }} />
+            <div className="hero-twinkling-star top-12 right-1/3 w-1.5 h-1.5" style={{ animationDuration: '4.1s', animationDelay: '1.2s', backgroundColor: '#E8F1FB' }} />
             <div className="hero-twinkling-star top-4 left-14 w-1 h-1" style={{ animationDuration: '2.5s', animationDelay: '0.5s', backgroundColor: '#7FD1AE' }} />
             <div className="hero-twinkling-star top-10 left-32 w-1.5 h-1.5" style={{ animationDuration: '3.8s', animationDelay: '1.7s', backgroundColor: '#4A90D9' }} />
             <div className="hero-twinkling-star top-14 left-1/4 w-1 h-1" style={{ animationDuration: '3.1s', animationDelay: '0.9s', backgroundColor: '#ECE7F8' }} />
@@ -994,7 +1141,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           <div className="relative h-60 sm:h-64 w-full overflow-hidden bg-black/40">
             <img
               src={anqaBannerImg}
-              alt="أسطورة العنقاء المحلقة فوق واحة النخيل"
+              alt={t('home.heroAlt')}
               className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
               loading="lazy"
               decoding="async"
@@ -1007,18 +1154,18 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 }}
                 className="inline-block self-start text-[11px] font-bold px-2.5 py-0.5 rounded-full mb-2 shadow-xs"
               >
-                {t('home.mythOfDay') || ar.home.heroBadge}
+                {t('home.mythOfDay')}
               </span>
 
               <h2 className="font-['Aref_Ruqaa',serif] text-2xl sm:text-3xl font-bold text-white leading-tight tracking-wide drop-shadow-sm">
-                {ar.home.heroTitle}
+                {t('home.heroTitle')}
               </h2>
 
               <p className="text-xs text-white/90 font-['Cairo',sans-serif] mt-1.5 leading-relaxed line-clamp-2 max-w-sm">
-                {anqaEntry.summary}
+                {anqaEntry.summary ?? ''}
               </p>
 
-              {/* Action pill button "اقرأ القصة ←" */}
+              {/* Action pill button */}
               <div className="mt-4 flex items-center justify-between">
                 <button
                   type="button"
@@ -1033,17 +1180,18 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                   className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold shadow-md transition-all duration-200 cursor-pointer min-h-[44px]"
                 >
                   <span>{t('article.readStory')}</span>
-                  <ChevronLeft size={16} />
+                  <ChevronLeft size={16} className={dir === 'ltr' ? 'rotate-180' : ''} />
                 </button>
 
                 <span className="text-[11px] text-white/90 font-medium">
-                  {formatReadingTime(getEstimatedReadingTime(anqaEntry))}
+                  {formatReadingTime(getEstimatedReadingTime(anqaEntry), lang)}
                 </span>
               </div>
             </div>
           </div>
         </div>
       </div>
+      )}
 
       {/* 4.5. Section "أقوامٌ وحضارات" (Horizontal scroll of civilization cards) */}
       <section className="space-y-3 pt-1">
@@ -1059,7 +1207,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               style={{ color: tokens.textSecondary }}
               className="text-xs font-['Cairo',sans-serif] mt-0.5"
             >
-              ممالك وحواضر شبه الجزيرة العربية عبر العصور
+              {t('home.civilizationsSub')}
             </p>
           </div>
           {onExploreCivilizations && (
@@ -1069,8 +1217,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               style={{ color: tokens.deepAccent }}
               className="text-xs font-bold hover:underline flex items-center gap-0.5 cursor-pointer min-h-[44px] px-1"
             >
-              <span>عرض الكل</span>
-              <ChevronLeft size={14} />
+              <span>{t('home.showAll')}</span>
+              <ChevronLeft size={14} className={dir === 'ltr' ? 'rotate-180' : ''} />
             </button>
           )}
         </div>
@@ -1097,7 +1245,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                         loading="lazy"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                      <div className="absolute top-2 right-2">
+                      <div className="absolute top-2 start-2">
                         <span
                           style={{
                             backgroundColor: isDark ? 'rgba(74, 144, 217, 0.4)' : 'rgba(232, 241, 251, 0.95)',
@@ -1106,15 +1254,15 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                           className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold shadow-xs backdrop-blur-xs"
                         >
                           <Calendar size={10} />
-                          <span>{civ.era}</span>
+                          <span>{civ.era || t('common.undated')}</span>
                         </span>
                       </div>
-                      <div className="absolute bottom-2 right-2.5 left-2.5 flex items-center justify-between text-white text-xs">
+                      <div className="absolute bottom-2 inset-x-2.5 flex items-center justify-between text-white text-xs">
                         <span className="font-['Aref_Ruqaa',serif] text-base font-bold drop-shadow-sm">
-                          {civ.name}
+                          {civ.name ?? ''}
                         </span>
                         <span className="text-[10px] opacity-90">
-                          {(civ.cities || []).length} حواضر
+                          {t('home.citiesCount', { count: (Array.isArray(civ.cities) ? civ.cities : []).length })}
                         </span>
                       </div>
                     </div>
@@ -1133,14 +1281,14 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                             className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold border"
                           >
                             <Calendar size={10} />
-                            <span>{civ.era}</span>
+                            <span>{civ.era || t('common.undated')}</span>
                           </span>
 
                           <span
                             style={{ color: tokens.textSecondary }}
                             className="text-[10px] font-medium"
                           >
-                            {(civ.cities || []).length} حواضر
+                            {t('home.citiesCount', { count: (Array.isArray(civ.cities) ? civ.cities : []).length })}
                           </span>
                         </div>
 
@@ -1148,7 +1296,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                           style={{ color: tokens.deepAccent }}
                           className="font-['Aref_Ruqaa',serif] text-lg font-bold"
                         >
-                          {civ.name}
+                          {civ.name ?? ''}
                         </h3>
                       </div>
                     )}
@@ -1158,15 +1306,18 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                       className="flex items-center gap-1 text-[11px]"
                     >
                       <MapPin size={11} className="shrink-0 opacity-70" />
-                      <span className="truncate">{civ.region}</span>
+                      <span className="truncate">{civ.region ?? ''}</span>
                     </div>
 
                     <div
                       style={{ color: tokens.coolBlueAccent }}
                       className="pt-2 border-t flex items-center justify-between text-xs font-bold"
                     >
-                      <span>استكشف الحضارة</span>
-                      <ChevronLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
+                      <span>{t('home.exploreCiv')}</span>
+                      <ChevronLeft
+                        size={14}
+                        className={`transition-transform ${dir === 'ltr' ? 'rotate-180 group-hover:translate-x-1' : 'group-hover:-translate-x-1'}`}
+                      />
                     </div>
                   </div>
                 </Card>
@@ -1181,20 +1332,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             onClick={onExploreCivilizations}
           >
             <div className="space-y-1">
-              <span
-                style={{
-                  backgroundColor: tokens.primaryMint,
-                  color: '#0E5C4D',
-                }}
-                className="inline-block text-[10px] font-bold px-2 py-0.5 rounded-full"
-              >
-                تبويب جديد
-              </span>
               <h3 style={{ color: tokens.deepAccent }} className="font-['Aref_Ruqaa',serif] text-base font-bold">
-                أقوامٌ وحضارات الجزيرة العربية
+                {t('home.civilizations')}
               </h3>
               <p style={{ color: tokens.textSecondary }} className="text-xs">
-                استكشف تاريخ ممالك عاد، ثمود، سبأ، مدين، والأنباط وحواضرها القديمة.
+                {t('home.civilizationsSub')}
               </p>
             </div>
             <div
@@ -1215,7 +1357,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       <div>
         <SectionTitle
           title={t('home.mostRead')}
-          subtitle={ar.home.mostReadSubtitle}
+          subtitle={t('home.mostReadSub')}
           action={
             <button
               type="button"
@@ -1223,75 +1365,83 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               style={{ color: tokens.deepAccent }}
               className="text-xs font-bold hover:underline flex items-center gap-0.5 cursor-pointer min-h-[44px] px-1"
             >
-              <span>{showAllMostRead ? ar.home.showLess : ar.home.showAll}</span>
-              <ChevronLeft size={14} />
+              <span>{showAllMostRead ? t('home.showLess') : t('home.showAll')}</span>
+              <ChevronLeft size={14} className={dir === 'ltr' ? 'rotate-180' : ''} />
             </button>
           }
         />
 
         <div className="mt-3 space-y-2.5">
-          {mostReadEntries.map((entry) => (
-            <Card
-              key={entry.id}
-              variant="white"
-              elevation="subtle"
-              interactive
-              className="p-3 sm:p-3.5 flex items-center justify-between gap-3 group min-h-[72px]"
-              onClick={() => onSelectEntry(entry)}
-            >
-              {/* Thumbnail */}
-              <div
-                style={{
-                  backgroundColor: tokens.surface,
-                  borderColor: tokens.borderSubtle,
-                }}
-                className="relative w-16 h-16 rounded-xl overflow-hidden shrink-0 border"
+          {mostReadEntries.map((entry) => {
+            const isLocked = Boolean(entry.isPremium) && !effectivePremium;
+            return (
+              <Card
+                key={entry.id}
+                variant="white"
+                elevation="subtle"
+                interactive
+                className="p-3 sm:p-3.5 flex items-center justify-between gap-3 group min-h-[72px]"
+                onClick={() => onSelectEntry(entry)}
               >
-                <img
-                  src={entry.heroImage}
-                  alt={entry.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  loading="lazy"
-                  decoding="async"
-                />
-              </div>
+                {/* Thumbnail */}
+                <div
+                  style={{
+                    backgroundColor: tokens.surface,
+                    borderColor: tokens.borderSubtle,
+                  }}
+                  className="relative w-16 h-16 rounded-xl overflow-hidden shrink-0 border"
+                >
+                  <LockedHeroImage
+                    src={resolveHeroImageUrl(entry.heroImage)}
+                    alt={entry.name}
+                    isLocked={isLocked}
+                    compact
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
 
-              {/* Center: Arabic title & subtitle */}
-              <div className="flex-1 min-w-0 text-right">
-                <h3
-                  style={{ color: tokens.textPrimary }}
-                  className="font-['Aref_Ruqaa',serif] text-base font-bold transition-colors truncate"
-                >
-                  {entry.name}
-                </h3>
-                <p
-                  style={{ color: tokens.textSecondary }}
-                  className="text-xs font-['Cairo',sans-serif] mt-0.5 line-clamp-1 leading-relaxed"
-                >
-                  {entry.summary}
-                </p>
-                <span
-                  style={{ color: tokens.deepAccent }}
-                  className="text-[10px] font-medium mt-1 block"
-                >
-                  {entry.region}
-                </span>
-              </div>
+                {/* Center: title & subtitle */}
+                <div className="flex-1 min-w-0 text-start">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <h3
+                      style={{ color: tokens.textPrimary }}
+                      className="font-['Aref_Ruqaa',serif] text-base font-bold transition-colors truncate"
+                    >
+                      {entry.name ?? ''}
+                    </h3>
+                    {entry.isPremium && <PremiumPill />}
+                  </div>
+                  <p
+                    style={{ color: tokens.textSecondary }}
+                    className="text-xs font-['Cairo',sans-serif] mt-0.5 line-clamp-1 leading-relaxed"
+                  >
+                    {entry.summary ?? ''}
+                  </p>
+                  <span
+                    style={{ color: tokens.deepAccent }}
+                    className="text-[10px] font-medium mt-1 block"
+                  >
+                    {entry.region ?? ''}
+                  </span>
+                </div>
 
-              {/* Left in RTL: Tag pill & reading time */}
-              <div className="shrink-0 flex flex-col items-end gap-1.5">
-                <Tag variant={getTagVariant(entry.tags[0])} size="sm">
-                  {entry.tags[0]}
-                </Tag>
-                <span
-                  style={{ color: tokens.textSecondary }}
-                  className="text-[10px] font-mono font-medium"
-                >
-                  {formatReadingTime(getEstimatedReadingTime(entry))}
-                </span>
-              </div>
-            </Card>
-          ))}
+                {/* End side: Tag pill & reading time */}
+                <div className="shrink-0 flex flex-col items-end gap-1.5">
+                  {entry.tags?.[0] && (
+                    <Tag variant={getTagVariant(entry.tags[0])} size="sm">
+                      {localizeTag(entry.tags[0], lang)}
+                    </Tag>
+                  )}
+                  <span
+                    style={{ color: tokens.textSecondary }}
+                    className="text-[10px] font-mono font-medium"
+                  >
+                    {formatReadingTime(getEstimatedReadingTime(entry), lang)}
+                  </span>
+                </div>
+              </Card>
+            );
+          })}
         </div>
       </div>
 

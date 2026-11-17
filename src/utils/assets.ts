@@ -37,3 +37,6 @@ export function getCivImageUrl(id: string): string {
   if (!id) return '';
   return CIV_IMAGES[id] || `/images/${id}.jpg`;
 }
+
+export { resolveHeroImageUrl } from './imageUrl';
+

@@ -1,14 +1,16 @@
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
- * 
+ *
  * Mustakshif ErrorBoundary Component (مستكشف)
- * Catches rendering errors in screens and shows Arabic fallback:
+ * Catches rendering errors in the application & screens and shows friendly fallback:
  * "حدث خطأ — أعد التحميل"
  */
 
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { RotateCcw, AlertTriangle } from 'lucide-react';
+import i18n from '../../i18n';
+import { recordError } from '../../logger';
 
 export interface ErrorBoundaryProps {
   children: ReactNode;
@@ -19,6 +21,20 @@ export interface ErrorBoundaryProps {
 interface ErrorBoundaryState {
   hasError: boolean;
   error?: Error;
+}
+
+function safeT(key: string, fallback: string): string {
+  try {
+    if (i18n && typeof i18n.t === 'function') {
+      const translated = i18n.t(key, { defaultValue: fallback });
+      if (typeof translated === 'string' && translated.trim() && translated !== key) {
+        return translated;
+      }
+    }
+  } catch {
+    // Fallback cleanly if i18n is not ready
+  }
+  return fallback;
 }
 
 export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
@@ -33,6 +49,12 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     console.error('[ErrorBoundary] Caught error:', error, errorInfo);
+    const combinedStack = [error?.stack, errorInfo?.componentStack].filter(Boolean).join('\n');
+    recordError({
+      message: error?.message || String(error || 'React rendering error'),
+      stack: combinedStack || undefined,
+      source: 'errorBoundary',
+    });
   }
 
   handleReset = (): void => {
@@ -48,11 +70,27 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
   render(): ReactNode {
     if (this.state.hasError) {
+      const currentDir =
+        typeof document !== 'undefined'
+          ? document.documentElement.dir || i18n.dir() || 'rtl'
+          : i18n.dir() || 'rtl';
+
+      const titleText = safeT('common.errorBoundaryTitle', 'حدث خطأ — أعد التحميل');
+      const descText =
+        this.props.fallbackMessage ||
+        safeT(
+          'debug.friendlyDesc',
+          'نعتذر عن هذا الخلل غير المتوقع. تم تسجيل تفاصيل الخطأ محلياً ويمكنك إعادة المحاولة أو تحديث التطبيق.'
+        );
+      const retryText = safeT('common.retry', 'إعادة المحاولة');
+      const reloadText = safeT('common.reloadPage', 'إعادة تحميل التطبيق');
+
       return (
         <div
-          dir="rtl"
+          dir={currentDir}
           role="alert"
           aria-live="assertive"
+          data-testid="error-boundary-fallback"
           className="min-h-[300px] w-full flex flex-col items-center justify-center p-6 text-center select-none"
         >
           <div className="max-w-md w-full bg-white dark:bg-[#12332D] border border-red-200 dark:border-red-900/50 rounded-3xl p-6 shadow-md space-y-4">
@@ -61,28 +99,28 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
             </div>
 
             <h3 className="font-['Aref_Ruqaa',serif] text-xl font-bold text-[#0E5C4D] dark:text-[#7FD1AE]">
-              حدث خطأ — أعد التحميل
+              {titleText}
             </h3>
 
             <p className="font-['Cairo',sans-serif] text-xs text-[#6B7C78] dark:text-[#A7E5C8]/80 leading-relaxed">
-              حدث خطأ غير متوقع أثناء عرض هذه الشاشة. يمكنك إعادة المحاولة أو تحديث الصفحة لمتابعة الاستكشاف.
+              {descText}
             </p>
 
-            <div className="flex items-center justify-center gap-3 pt-2">
+            <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
               <button
                 type="button"
                 onClick={this.handleReset}
                 className="px-5 py-2.5 rounded-xl bg-[#7FD1AE] text-[#0E5C4D] font-bold text-xs flex items-center gap-1.5 shadow-sm hover:opacity-90 cursor-pointer min-h-[44px] min-w-[44px]"
               >
                 <RotateCcw size={14} />
-                <span>إعادة المحاولة</span>
+                <span>{retryText}</span>
               </button>
               <button
                 type="button"
                 onClick={this.handleReload}
                 className="px-5 py-2.5 rounded-xl border border-[#0E5C4D]/30 dark:border-[#7FD1AE]/30 text-[#0E5C4D] dark:text-[#7FD1AE] font-bold text-xs shadow-xs hover:opacity-90 cursor-pointer min-h-[44px] min-w-[44px]"
               >
-                تحديث الصفحة
+                {reloadText}
               </button>
             </div>
           </div>

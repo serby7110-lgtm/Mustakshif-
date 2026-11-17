@@ -77,7 +77,7 @@ test('ContactScreen source code adheres strictly to STEPS 1-6 specification', ()
     'Must POST to Formspree endpoint'
   );
   assert.ok(
-    contactSrc.includes('_subject: `مستكشف: ${type} - ${subject.trim()}`'),
+    contactSrc.includes("_subject: `${t('app.title')}: ${localizedType} - ${subject.trim()}`"),
     'Payload must format _subject as specified'
   );
   assert.ok(

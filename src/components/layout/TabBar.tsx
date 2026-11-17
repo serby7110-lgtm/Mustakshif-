@@ -7,7 +7,7 @@ import React from 'react';
 import { Home, Landmark, Map, BookOpen, User } from 'lucide-react';
 import { useTheme } from '../../theme/ThemeContext';
 import { useI18n } from '../../i18n/i18n';
-import type { TranslationKey } from '../../i18n';
+import type { TranslationKey } from '../../i18n/index';
 
 export type TabId = 'home' | 'civilizations' | 'map' | 'library' | 'profile';
 
@@ -43,7 +43,7 @@ export const TabBar: React.FC<TabBarProps> = ({
   return (
     <nav
       role="navigation"
-      aria-label="شريط التنقل السفلي"
+      aria-label={t('nav.bottomNav')}
       style={{
         backgroundColor: isDark ? 'rgba(18, 51, 45, 0.96)' : 'rgba(255, 255, 255, 0.96)',
         borderColor: tokens.border,

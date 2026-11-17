@@ -6,7 +6,7 @@
  * Long-form historical storytelling with classical Arab aesthetics.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   ChevronLeft,
   ArrowRight,
@@ -14,7 +14,6 @@ import {
   BookOpen,
   Coins,
   Users,
-  Compass,
   Scroll,
   Sparkles,
   MapPin,
@@ -33,6 +32,8 @@ import { storage } from '../data/storage';
 import { MethodologyScreen } from './MethodologyScreen';
 
 import { useI18n } from '../i18n/i18n';
+import { getLocalizedCivilization, getLocalizedEntry } from '../content';
+import { copyTextSafely } from '../utils/clipboard';
 export interface CivilizationPageProps {
   civilization: Civilization;
   onBack: () => void;
@@ -41,13 +42,18 @@ export interface CivilizationPageProps {
 }
 
 export const CivilizationPage: React.FC<CivilizationPageProps> = ({
-  civilization,
+  civilization: rawCivilization,
   onBack,
   onSelectMythId,
   onOpenMethodology,
 }) => {
   const { t, lang, dir } = useI18n();
   const { tokens, isDark } = useTheme();
+
+  const civilization = useMemo(
+    () => (rawCivilization ? getLocalizedCivilization(rawCivilization, lang) : null),
+    [rawCivilization, lang]
+  );
 
   const [isMethodologyOpen, setIsMethodologyOpen] = useState(false);
 
@@ -60,8 +66,8 @@ export const CivilizationPage: React.FC<CivilizationPageProps> = ({
     storage.setDualNarrativeView(view);
   };
 
-  const hasTradition = Boolean(civilization.traditionView && civilization.traditionView.trim().length > 0);
-  const hasArchaeology = Boolean(civilization.archaeologyView && civilization.archaeologyView.trim().length > 0);
+  const hasTradition = Boolean(civilization?.traditionView && civilization.traditionView.trim().length > 0);
+  const hasArchaeology = Boolean(civilization?.archaeologyView && civilization.archaeologyView.trim().length > 0);
   const showDualSection = hasTradition || hasArchaeology;
 
   // Fallback if only one narrative is present
@@ -85,43 +91,65 @@ export const CivilizationPage: React.FC<CivilizationPageProps> = ({
   };
 
   const copyToClipboard = async (text: string, successToast: string) => {
-    try {
-      if (typeof navigator !== 'undefined' && navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(text);
-      } else {
-        const textarea = document.createElement('textarea');
-        textarea.value = text;
-        textarea.style.position = 'fixed';
-        textarea.style.opacity = '0';
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textarea);
-      }
-      showToast(successToast);
-    } catch {
-      showToast(successToast);
-    }
+    const copied = await copyTextSafely(text);
+    showToast(copied ? successToast : t('common.copyError'));
   };
 
   const handleCopyJson = () => {
+    if (!civilization) return;
     const jsonString = JSON.stringify(civilization, null, 2);
-    copyToClipboard(jsonString, 'نُسخ ملف الحضارة');
+    copyToClipboard(jsonString, t('civ.copiedJson') || 'نُسخ ملف الحضارة');
   };
 
   const handleCopyNarrative = () => {
+    if (!civilization) return;
     const narrativeString = formatCivilizationNarrative(civilization);
-    copyToClipboard(narrativeString, 'نُسخ السرد النصي');
+    copyToClipboard(narrativeString, t('civ.copiedNarrative') || 'نُسخ السرد النصي');
   };
 
   if (isMethodologyOpen) {
     return <MethodologyScreen onBack={() => setIsMethodologyOpen(false)} />;
   }
 
+  if (!civilization) {
+    return (
+      <article className="space-y-6 pb-12 animate-in fade-in duration-200 relative" dir={dir}>
+        <div className="flex items-center justify-between pt-1">
+          <button
+            type="button"
+            onClick={onBack}
+            style={{
+              backgroundColor: tokens.card,
+              color: tokens.deepAccent,
+              borderColor: tokens.border,
+            }}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border shadow-xs cursor-pointer"
+            aria-label={t('common.back')}
+          >
+            <ArrowRight size={16} className={dir === 'ltr' ? 'rotate-180' : ''} />
+            <span>{t('common.back')}</span>
+          </button>
+        </div>
+        <Card variant="white" elevation="subtle" className="p-8 text-center space-y-3 rounded-2xl">
+          <Landmark size={32} className="mx-auto" style={{ color: tokens.textSecondary }} />
+          <p style={{ color: tokens.textPrimary }} className="text-sm font-['Cairo',sans-serif]">
+            {t('civ.noChaptersYet')}
+          </p>
+        </Card>
+      </article>
+    );
+  }
+
+  const safeChapters = Array.isArray(civilization.chapters) ? civilization.chapters : [];
+  const safeCities = Array.isArray(civilization.cities) ? civilization.cities : [];
+  const safeQuranRefs = Array.isArray(civilization.quranRefs) ? civilization.quranRefs : [];
+  const safeArchaeology = Array.isArray(civilization.archaeology) ? civilization.archaeology : [];
+  const safeRelatedMyths = Array.isArray(civilization.relatedMyths) ? civilization.relatedMyths : [];
+
   return (
     <article className="space-y-6 pb-12 animate-in fade-in duration-200 relative" dir={dir}>
-      {/* STEP 4: Banner when lang !== 'ar' */}
-      {lang !== 'ar' && (
+      {/* Banner only when lang !== 'ar' AND some content fell back to Arabic */}
+      {lang !== 'ar' && Boolean(civilization.hasMissingTranslation) && (
         <div
           style={{
             backgroundColor: isDark ? 'rgba(127, 209, 174, 0.12)' : '#E8F7F0',
@@ -130,8 +158,7 @@ export const CivilizationPage: React.FC<CivilizationPageProps> = ({
           }}
           className="p-2.5 px-4 rounded-xl border text-xs font-semibold flex items-center justify-between gap-2 shadow-2xs"
         >
-          <span>{t('article.originalArabic')}</span>
-          <span className="text-sm">🇹🇳</span>
+          <span>{t('article.fallbackArabicNotice')}</span>
         </div>
       )}
       {/* Toast Notification */}
@@ -167,10 +194,10 @@ export const CivilizationPage: React.FC<CivilizationPageProps> = ({
             borderColor: tokens.border,
           }}
           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border shadow-xs hover:opacity-90 cursor-pointer transition-all active:scale-95"
-          aria-label="العودة إلى قائمة الحضارات"
+          aria-label={t('common.back')}
         >
-          <ArrowRight size={16} />
-          <span>العودة للحضارات</span>
+          <ArrowRight size={16} className={dir === 'ltr' ? 'rotate-180' : ''} />
+          <span>{t('common.back')}</span>
         </button>
 
         <span
@@ -203,11 +230,13 @@ export const CivilizationPage: React.FC<CivilizationPageProps> = ({
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
               <div className="absolute bottom-3 right-3 left-3 flex items-center justify-between text-white text-xs">
                 <span className="bg-black/60 backdrop-blur-md px-3 py-1 rounded-full font-medium border border-white/20">
-                  {civilization.region}
+                  {civilization.region ?? ''}
                 </span>
-                <span className="font-mono text-white/90 bg-black/50 backdrop-blur-xs px-2.5 py-0.5 rounded-md">
-                  {civilization.latinName}
-                </span>
+                {civilization.latinName && (
+                  <span className="font-mono text-white/90 bg-black/50 backdrop-blur-xs px-2.5 py-0.5 rounded-md">
+                    {civilization.latinName}
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -224,28 +253,30 @@ export const CivilizationPage: React.FC<CivilizationPageProps> = ({
             className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border shadow-xs"
           >
             <Calendar size={12} />
-            <span>{civilization.era}</span>
+            <span>{civilization.era || t('common.undated')}</span>
           </span>
 
           {/* Region pill */}
-          <span
-            style={{
-              backgroundColor: isDark ? 'rgba(127, 209, 174, 0.15)' : '#F2FBF7',
-              color: isDark ? '#7FD1AE' : '#0E5C4D',
-              borderColor: tokens.border,
-            }}
-            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border shadow-xs"
-          >
-            <MapPin size={12} />
-            <span>{civilization.region}</span>
-          </span>
+          {civilization.region && (
+            <span
+              style={{
+                backgroundColor: isDark ? 'rgba(127, 209, 174, 0.15)' : '#F2FBF7',
+                color: isDark ? '#7FD1AE' : '#0E5C4D',
+                borderColor: tokens.border,
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border shadow-xs"
+            >
+              <MapPin size={12} />
+              <span>{civilization.region}</span>
+            </span>
+          )}
         </div>
 
         <h1
           style={{ color: tokens.deepAccent }}
           className="font-['Aref_Ruqaa',serif] text-3xl sm:text-4xl md:text-5xl font-bold leading-tight"
         >
-          {civilization.name}
+          {civilization.name ?? ''}
         </h1>
 
         {civilization.latinName && (
@@ -258,21 +289,22 @@ export const CivilizationPage: React.FC<CivilizationPageProps> = ({
         )}
       </header>
 
-      {/* 2) "القصة": chapters as reading blocks with ornamental dividers */}
-      {civilization.chapters && civilization.chapters.length > 0 && (
-        <section className="space-y-4">
-          <div className="flex items-center gap-2">
-            <BookOpen size={18} style={{ color: tokens.deepAccent }} />
-            <h2
-              style={{ color: tokens.deepAccent }}
-              className="font-['Aref_Ruqaa',serif] text-xl font-bold"
-            >
-              {t('civ.story')}
-            </h2>
-          </div>
+      {/* 2) "القصة": chapters as reading blocks with ornamental dividers (or calm empty notice) */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-2">
+          <BookOpen size={18} style={{ color: tokens.deepAccent }} />
+          <h2
+            style={{ color: tokens.deepAccent }}
+            className="font-['Aref_Ruqaa',serif] text-xl font-bold"
+          >
+            {/* القصة */}
+            {t('civ.story')}
+          </h2>
+        </div>
 
+        {safeChapters.length > 0 ? (
           <div className="space-y-4">
-            {civilization.chapters.map((chapter, idx) => (
+            {safeChapters.map((chapter, idx) => (
               <React.Fragment key={idx}>
                 <Card
                   variant="white"
@@ -283,18 +315,18 @@ export const CivilizationPage: React.FC<CivilizationPageProps> = ({
                     style={{ color: tokens.deepAccent }}
                     className="font-['Aref_Ruqaa',serif] text-lg font-bold"
                   >
-                    {chapter.title}
+                    {chapter?.title ?? ''}
                   </h3>
                   <div
                     style={{ color: tokens.textPrimary }}
-                    className="font-['Cairo',sans-serif] text-sm sm:text-base leading-relaxed text-justify whitespace-pre-line"
+                    className="font-['Cairo',sans-serif] text-sm sm:text-base leading-relaxed text-start whitespace-pre-line"
                   >
-                    {chapter.text}
+                    {chapter?.text ?? ''}
                   </div>
                 </Card>
 
                 {/* Ornamental divider between chapters */}
-                {idx < civilization.chapters.length - 1 && (
+                {idx < safeChapters.length - 1 && (
                   <div className="flex items-center justify-center my-2 gap-3" aria-hidden="true">
                     <div
                       style={{
@@ -318,11 +350,15 @@ export const CivilizationPage: React.FC<CivilizationPageProps> = ({
               </React.Fragment>
             ))}
           </div>
-        </section>
-      )}
+        ) : (
+          <Card variant="white" elevation="subtle" className="p-5 rounded-2xl text-xs sm:text-sm font-['Cairo',sans-serif]">
+            <span style={{ color: tokens.textSecondary }}>{t('civ.noChaptersYet')}</span>
+          </Card>
+        )}
+      </section>
 
       {/* 3) "المدن": chips row */}
-      {civilization.cities && civilization.cities.length > 0 && (
+      {safeCities.length > 0 && (
         <section className="space-y-2.5">
           <h2
             style={{ color: tokens.deepAccent }}
@@ -332,7 +368,7 @@ export const CivilizationPage: React.FC<CivilizationPageProps> = ({
             {t('civ.cities') || 'المدن والحواضر'}
           </h2>
           <div className="flex flex-wrap items-center gap-2">
-            {civilization.cities.map((city, idx) => (
+            {safeCities.map((city, idx) => (
               <span
                 key={idx}
                 style={{
@@ -357,6 +393,7 @@ export const CivilizationPage: React.FC<CivilizationPageProps> = ({
             style={{ color: tokens.deepAccent }}
             className="font-['Aref_Ruqaa',serif] text-lg font-bold"
           >
+            {/* الاقتصاد والمجتمع */}
             {t('civ.economy')}
           </h2>
           <Card variant="white" elevation="subtle" className="p-4 sm:p-5 space-y-3 rounded-2xl">
@@ -364,7 +401,7 @@ export const CivilizationPage: React.FC<CivilizationPageProps> = ({
               <div className="space-y-1">
                 <div className="flex items-center gap-1.5 text-xs font-bold" style={{ color: tokens.deepAccent }}>
                   <Coins size={14} />
-                  <span>النشاط الاقتصادي والتجاري</span>
+                  <span>{t('civ.economy')}</span>
                 </div>
                 <p style={{ color: tokens.textPrimary }} className="text-sm font-['Cairo',sans-serif] leading-relaxed">
                   {civilization.economy}
@@ -378,7 +415,7 @@ export const CivilizationPage: React.FC<CivilizationPageProps> = ({
               <div className="space-y-1">
                 <div className="flex items-center gap-1.5 text-xs font-bold" style={{ color: tokens.deepAccent }}>
                   <Users size={14} />
-                  <span>البنية الاجتماعية ونظام الحكم</span>
+                  <span>{t('civ.economy')}</span>
                 </div>
                 <p style={{ color: tokens.textPrimary }} className="text-sm font-['Cairo',sans-serif] leading-relaxed">
                   {civilization.society}
@@ -414,6 +451,7 @@ export const CivilizationPage: React.FC<CivilizationPageProps> = ({
             style={{ color: tokens.deepAccent }}
             className="font-['Aref_Ruqaa',serif] text-lg font-bold"
           >
+            {/* النبي المرسل */}
             {t('civ.prophet')}
           </h2>
           <div
@@ -428,15 +466,12 @@ export const CivilizationPage: React.FC<CivilizationPageProps> = ({
               <Sparkles size={16} />
               <span className="font-['Aref_Ruqaa',serif] text-base">{civilization.prophet}</span>
             </div>
-            <p className="text-xs sm:text-sm font-['Cairo',sans-serif] opacity-90 leading-relaxed">
-              بُعث فيهم لدعوتهم إلى التوحيد والعدل وترك الطغيان.
-            </p>
           </div>
         </section>
       )}
 
       {/* 7) "في القرآن": chips of quranRefs */}
-      {civilization.quranRefs && civilization.quranRefs.length > 0 && (
+      {safeQuranRefs.length > 0 && (
         <section className="space-y-2.5">
           <h2
             style={{ color: tokens.deepAccent }}
@@ -446,7 +481,7 @@ export const CivilizationPage: React.FC<CivilizationPageProps> = ({
             {t('civ.quran') || 'في القرآن الكريم'}
           </h2>
           <div className="flex flex-wrap items-center gap-2">
-            {civilization.quranRefs.map((ref, idx) => (
+            {safeQuranRefs.map((ref, idx) => (
               <span
                 key={idx}
                 style={{
@@ -465,17 +500,18 @@ export const CivilizationPage: React.FC<CivilizationPageProps> = ({
       )}
 
       {/* 8) "الآثار اليوم": list of archaeology items with small column icons */}
-      {civilization.archaeology && civilization.archaeology.length > 0 && (
+      {safeArchaeology.length > 0 && (
         <section className="space-y-2.5">
           <h2
             style={{ color: tokens.deepAccent }}
             className="font-['Aref_Ruqaa',serif] text-lg font-bold"
           >
+            {/* الآثار اليوم */}
             {t('civ.archaeology')}
           </h2>
           <Card variant="white" elevation="subtle" className="p-4 sm:p-5 rounded-2xl">
             <ul className="space-y-2.5">
-              {civilization.archaeology.map((item, idx) => (
+              {safeArchaeology.map((item, idx) => (
                 <li key={idx} className="flex items-start gap-2.5 text-xs sm:text-sm">
                   <div
                     style={{
@@ -506,7 +542,8 @@ export const CivilizationPage: React.FC<CivilizationPageProps> = ({
                 style={{ color: tokens.deepAccent }}
                 className="font-['Aref_Ruqaa',serif] text-lg font-bold"
               >
-                القراءة التاريخية
+                {/* القراءة التاريخية */}
+                {t('article.historicalReading')}
               </h2>
               <button
                 type="button"
@@ -534,7 +571,7 @@ export const CivilizationPage: React.FC<CivilizationPageProps> = ({
                 style={{ color: tokens.textSecondary }}
                 className="text-xs font-['Cairo',sans-serif] opacity-80"
               >
-                وجهتا نظر للتاريخ والذاكرة
+                {t('civ.dualSub')}
               </span>
             )}
           </div>
@@ -548,7 +585,7 @@ export const CivilizationPage: React.FC<CivilizationPageProps> = ({
               }}
               className="flex items-center gap-2 p-1 rounded-2xl border"
               role="tablist"
-              aria-label="اختيار الرواية التاريخية"
+              aria-label={t('article.historicalReading')}
             >
               <button
                 type="button"
@@ -571,7 +608,7 @@ export const CivilizationPage: React.FC<CivilizationPageProps> = ({
                 }`}
               >
                 <Scroll size={14} />
-                <span>{t('civ.tradition')}</span>
+                <span>{t('civ.tradition') || 'رواية التراث'}</span>
               </button>
 
               <button
@@ -595,7 +632,7 @@ export const CivilizationPage: React.FC<CivilizationPageProps> = ({
                 }`}
               >
                 <Landmark size={14} />
-                <span>{t('civ.archaeologyView')}</span>
+                <span>{t('civ.archaeologyView') || 'رواية الآثار'}</span>
               </button>
             </div>
           )}
@@ -626,13 +663,17 @@ export const CivilizationPage: React.FC<CivilizationPageProps> = ({
                 className="px-2.5 py-1 rounded-lg text-xs font-bold inline-flex items-center gap-1.5 border font-['Cairo',sans-serif]"
               >
                 {effectiveNarrativeView === 'tradition' ? <Scroll size={13} /> : <Landmark size={13} />}
-                <span>{effectiveNarrativeView === 'tradition' ? 'رواية التراث' : 'رواية الآثار'}</span>
+                <span>
+                  {effectiveNarrativeView === 'tradition'
+                    ? (t('civ.tradition') || 'رواية التراث')
+                    : (t('civ.archaeologyView') || 'رواية الآثار')}
+                </span>
               </span>
             </div>
 
             <p
               style={{ color: tokens.textPrimary }}
-              className="text-xs sm:text-sm font-['Cairo',sans-serif] leading-relaxed text-justify"
+              className="text-xs sm:text-sm font-['Cairo',sans-serif] leading-relaxed text-start"
             >
               {effectiveNarrativeView === 'tradition'
                 ? civilization.traditionView
@@ -649,6 +690,7 @@ export const CivilizationPage: React.FC<CivilizationPageProps> = ({
             style={{ color: tokens.deepAccent }}
             className="font-['Aref_Ruqaa',serif] text-lg font-bold"
           >
+            {/* ملاحظة المؤرخ */}
             {t('civ.historian')}
           </h2>
           <div
@@ -683,7 +725,7 @@ export const CivilizationPage: React.FC<CivilizationPageProps> = ({
           >
             <p
               style={{ color: tokens.textPrimary }}
-              className="text-sm font-['Cairo',sans-serif] leading-relaxed text-justify"
+              className="text-sm font-['Cairo',sans-serif] leading-relaxed text-start"
             >
               {civilization.legacy}
             </p>
@@ -701,7 +743,7 @@ export const CivilizationPage: React.FC<CivilizationPageProps> = ({
                 minHeight: '44px',
               }}
               className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border text-xs sm:text-sm font-bold transition-all duration-150 cursor-pointer min-h-[44px] hover:opacity-85 active:scale-98 font-['Cairo',sans-serif]"
-              title="نسخ ملف الحضارة كـ JSON"
+              title={t('article.copyJson')}
             >
               <FileCode size={16} />
               <span>{t('article.copyJson')}</span>
@@ -717,31 +759,33 @@ export const CivilizationPage: React.FC<CivilizationPageProps> = ({
                 minHeight: '44px',
               }}
               className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border text-xs sm:text-sm font-bold transition-all duration-150 cursor-pointer min-h-[44px] hover:opacity-85 active:scale-98 font-['Cairo',sans-serif]"
-              title="نسخ السرد التاريخي كنص"
+              title={t('civ.copyNarrative')}
             >
               <FileText size={16} />
               {/* انسخ كنص سردي */}
-              <span>{t('article.copyText') || 'انسخ كنص سردي'}</span>
+              <span>{t('civ.copyNarrative')}</span>
             </button>
           </div>
         </section>
       )}
 
       {/* 11) "صلة بالأساطير": chips linking relatedMyths ids to the Article screen */}
-      {civilization.relatedMyths && civilization.relatedMyths.length > 0 && (
+      {safeRelatedMyths.length > 0 && (
         <section className="space-y-2.5 pt-2">
           <h2
             style={{ color: tokens.deepAccent }}
             className="font-['Aref_Ruqaa',serif] text-lg font-bold"
           >
+            {/* صلة بالأساطير */}
             {t('civ.relatedMyths')}
           </h2>
           <p style={{ color: tokens.textSecondary }} className="text-xs">
-            أساطير وشخصيات فولكلورية ترتبط بسيرة هذه الحضارة (اضغط لقراءة تفاصيل الأسطورة):
+            {t('civ.openMyth')}
           </p>
           <div className="flex flex-wrap items-center gap-2">
-            {civilization.relatedMyths.map((mythId, idx) => {
-              const matchedEntry = getEntryById(mythId);
+            {safeRelatedMyths.map((mythId, idx) => {
+              const rawMatched = getEntryById(mythId);
+              const matchedEntry = rawMatched ? getLocalizedEntry(rawMatched, lang) : undefined;
               const label = matchedEntry ? matchedEntry.name : mythId;
               return (
                 <button
@@ -765,7 +809,7 @@ export const CivilizationPage: React.FC<CivilizationPageProps> = ({
                       ({matchedEntry.typeLabel})
                     </span>
                   )}
-                  <ChevronLeft size={14} className="opacity-60" />
+                  <ChevronLeft size={14} className={`opacity-60 ${dir === 'ltr' ? 'rotate-180' : ''}`} />
                 </button>
               );
             })}

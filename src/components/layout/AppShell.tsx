@@ -3,11 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { ChevronDown, Check, Globe } from 'lucide-react';
 import { TabBar, TabId } from './TabBar';
 import { Logo } from '../primitives/Logo';
 import { useTheme } from '../../theme/ThemeContext';
-import { useI18n } from '../../i18n/i18n';
+import { LANGUAGES, useI18n } from '../../i18n/i18n';
 
 export interface AppShellProps {
   activeTab: TabId;
@@ -18,22 +19,48 @@ export interface AppShellProps {
   headerTrailing?: React.ReactNode;
   hideTabBar?: boolean;
   hideHeader?: boolean;
+  onLogoTap?: () => void;
   children: React.ReactNode;
 }
 
 export const AppShell: React.FC<AppShellProps> = ({
   activeTab,
   onTabChange,
-  headerTitle = 'مُسْتَكْشِف',
-  headerSubtitle = 'موسوعة الأساطير العربية',
+  headerTitle,
+  headerSubtitle,
   headerLeading,
   headerTrailing,
   hideTabBar = false,
   hideHeader = false,
+  onLogoTap,
   children,
 }) => {
   const { tokens, isDark } = useTheme();
-  const { lang, dir, flag } = useI18n();
+  const { lang, dir, flag, setLang, t } = useI18n();
+  const [langMenuOpen, setLangMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement | null>(null);
+
+  const resolvedTitle = headerTitle ?? t('app.title');
+  const resolvedSubtitle = headerSubtitle ?? t('app.subtitle');
+  const currentMeta = LANGUAGES.find((l) => l.lang === lang) ?? LANGUAGES[0];
+
+  useEffect(() => {
+    if (!langMenuOpen) return;
+    const handleOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setLangMenuOpen(false);
+      }
+    };
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setLangMenuOpen(false);
+    };
+    document.addEventListener('mousedown', handleOutside);
+    document.addEventListener('keydown', handleKey);
+    return () => {
+      document.removeEventListener('mousedown', handleOutside);
+      document.removeEventListener('keydown', handleKey);
+    };
+  }, [langMenuOpen]);
 
   return (
     <div
@@ -62,51 +89,119 @@ export const AppShell: React.FC<AppShellProps> = ({
             }}
             className="sticky top-0 z-30 backdrop-blur-md border-b px-4 py-3 transition-colors"
           >
-            <div className="flex items-center justify-between gap-3">
-              {/* Right side in RTL: Title & Brand */}
-              <div className="flex items-center gap-2.5">
+            <div className="flex items-center justify-between gap-2">
+              {/* Start side: Title & Brand */}
+              <div className="flex items-center gap-2.5 min-w-0">
                 {headerLeading ? (
                   headerLeading
                 ) : (
-                  <div
+                  <button
+                    type="button"
+                    onClick={onLogoTap}
+                    data-testid="app-logo-trigger"
+                    aria-label={t('app.title')}
                     style={{
                       backgroundColor: tokens.card,
                       borderColor: tokens.border,
                     }}
-                    className="w-9 h-9 rounded-2xl border flex items-center justify-center shadow-xs"
+                    className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-2xl border flex items-center justify-center shadow-xs shrink-0 cursor-pointer focus:outline-none"
                   >
                     <Logo size={24} />
-                  </div>
+                  </button>
                 )}
-                <div className="text-start">
+                <div className="text-start min-w-0">
                   <h1
                     style={{ color: tokens.deepAccent }}
-                    className="font-['Aref_Ruqaa',serif] text-2xl font-bold leading-none tracking-wide"
+                    className="font-['Aref_Ruqaa',serif] text-xl sm:text-2xl font-bold leading-none tracking-wide truncate"
                   >
-                    {headerTitle}
+                    {resolvedTitle}
                   </h1>
-                  {headerSubtitle && (
+                  {resolvedSubtitle && (
                     <p
                       style={{ color: tokens.textSecondary }}
-                      className="text-[11px] font-['Cairo',sans-serif] mt-0.5 font-medium"
+                      className="text-[11px] font-['Cairo',sans-serif] mt-0.5 font-medium truncate"
                     >
-                      {headerSubtitle}
+                      {resolvedSubtitle}
                     </p>
                   )}
                 </div>
               </div>
 
-              {/* Left side in RTL: Trailing actions */}
-              <div className="flex items-center gap-1.5">
-                <span
-                  role="img"
-                  aria-label={lang}
-                  title={lang}
-                  style={{ backgroundColor: tokens.card, borderColor: tokens.border }}
-                  className="w-8 h-8 rounded-full border flex items-center justify-center text-base leading-none shadow-xs"
-                >
-                  {flag}
-                </span>
+              {/* End side: Language Selector + Trailing actions */}
+              <div className="flex items-center gap-1.5 shrink-0">
+                <div ref={menuRef} className="relative">
+                  <button
+                    type="button"
+                    data-testid="header-lang-selector"
+                    onClick={() => setLangMenuOpen((prev) => !prev)}
+                    aria-label={t('common.selectLanguage')}
+                    aria-haspopup="menu"
+                    aria-expanded={langMenuOpen}
+                    style={{
+                      backgroundColor: tokens.card,
+                      borderColor: langMenuOpen ? tokens.primaryMint : tokens.border,
+                      color: tokens.deepAccent,
+                    }}
+                    className="min-h-[44px] px-2.5 py-1.5 rounded-full border flex items-center gap-1 text-[11px] font-bold shadow-xs hover:opacity-90 transition-all cursor-pointer"
+                  >
+                    <Globe size={13} className="shrink-0 opacity-80" />
+                    <span className="text-sm leading-none" aria-hidden="true">
+                      {flag}
+                    </span>
+                    <span className="max-w-[120px] truncate">{currentMeta.nativeName}</span>
+                    <ChevronDown
+                      size={12}
+                      className={`shrink-0 transition-transform duration-200 ${langMenuOpen ? 'rotate-180' : ''}`}
+                    />
+                  </button>
+
+                  {langMenuOpen && (
+                    <div
+                      role="menu"
+                      aria-label={t('common.selectLanguage')}
+                      data-testid="header-lang-menu"
+                      style={{
+                        backgroundColor: tokens.card,
+                        borderColor: tokens.border,
+                        color: tokens.textPrimary,
+                      }}
+                      className="absolute end-0 mt-2 w-52 rounded-2xl border shadow-xl p-1.5 z-50 space-y-1 animate-in fade-in slide-in-from-top-1 duration-150"
+                    >
+                      {LANGUAGES.map((item) => {
+                        const isSelected = item.lang === lang;
+                        return (
+                          <button
+                            key={item.lang}
+                            type="button"
+                            role="menuitemradio"
+                            aria-checked={isSelected}
+                            data-testid={`header-lang-option-${item.lang}`}
+                            onClick={() => {
+                              setLang(item.lang);
+                              setLangMenuOpen(false);
+                            }}
+                            style={{
+                              backgroundColor: isSelected
+                                ? (isDark ? 'rgba(127, 209, 174, 0.18)' : '#F2FBF7')
+                                : 'transparent',
+                              color: isSelected ? tokens.deepAccent : tokens.textPrimary,
+                            }}
+                            className="w-full px-3 py-2 rounded-xl flex items-center justify-between gap-2 text-xs font-bold hover:opacity-90 transition-colors cursor-pointer text-start"
+                          >
+                            <span className="flex items-center gap-2 min-w-0">
+                              <span className="text-base leading-none shrink-0" aria-hidden="true">
+                                {item.flag}
+                              </span>
+                              <span className="truncate">{item.nativeName}</span>
+                            </span>
+                            {isSelected && <Check size={14} style={{ color: tokens.deepAccent }} className="shrink-0" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
                 {headerTrailing}
               </div>
             </div>

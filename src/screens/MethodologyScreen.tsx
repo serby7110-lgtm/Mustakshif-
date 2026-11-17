@@ -43,10 +43,10 @@ export const MethodologyScreen: React.FC<MethodologyScreenProps> = ({ onBack }) 
               borderColor: tokens.border,
             }}
             className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold border shadow-xs hover:opacity-90 cursor-pointer transition-all active:scale-95"
-            aria-label="العودة"
+            aria-label={t('method.back')}
           >
-            <ArrowRight size={16} />
-            <span>العودة</span>
+            <ArrowRight size={16} className={dir === 'ltr' ? 'rotate-180' : ''} />
+            <span>{t('method.back')}</span>
           </button>
         ) : (
           <div />
@@ -61,7 +61,7 @@ export const MethodologyScreen: React.FC<MethodologyScreenProps> = ({ onBack }) 
           className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border"
         >
           <Info size={14} />
-          <span>شفافية التوثيق</span>
+          <span>{t('method.badge')}</span>
         </div>
       </div>
 
@@ -71,7 +71,8 @@ export const MethodologyScreen: React.FC<MethodologyScreenProps> = ({ onBack }) 
           style={{ color: tokens.deepAccent }}
           className="font-['Aref_Ruqaa',serif] text-2xl sm:text-3xl font-bold leading-tight"
         >
-          {t('method.title')}
+          {/* عن المنهج */}
+          {t('method.title') || 'عن المنهج'}
         </h1>
         <p
           style={{
@@ -81,7 +82,7 @@ export const MethodologyScreen: React.FC<MethodologyScreenProps> = ({ onBack }) 
           }}
           className="text-xs sm:text-sm font-['Cairo',sans-serif] leading-relaxed p-4 rounded-2xl border shadow-xs"
         >
-          «مستكشف» لا يخلط المرويَّ بالموثَّق. كل نص في التطبيق يحمل واحدة من أربع شارات، ليعرف القارئ والكاتب والباحث ماذا يمسك تماماً.
+          {t('method.intro') || '«مستكشف» لا يخلط المرويَّ بالموثَّق. كل نص في التطبيق يحمل واحدة من أربع شارات، ليعرف القارئ والكاتب والباحث ماذا يمسك تماماً.'}
         </p>
       </header>
 
@@ -91,7 +92,7 @@ export const MethodologyScreen: React.FC<MethodologyScreenProps> = ({ onBack }) 
           style={{ color: tokens.deepAccent }}
           className="font-['Aref_Ruqaa',serif] text-lg font-bold"
         >
-          شارات التوثيق الأربع
+          {t('method.fourBadges')}
         </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -137,7 +138,7 @@ export const MethodologyScreen: React.FC<MethodologyScreenProps> = ({ onBack }) 
               style={{ color: tokens.textSecondary }}
               className="text-xs sm:text-sm font-['Cairo',sans-serif] leading-relaxed"
             >
-              منقول من القرآن أو الحديث أو كتاب موثوق مطبوع. قابل للنسخ مع مصدره، ولا زيادة فيه ولا نقص.
+              {t('method.verbatimDesc') || 'منقول من القرآن أو الحديث أو كتاب موثوق مطبوع. قابل للنسخ مع مصدره، ولا زيادة فيه ولا نقص.'}
             </p>
           </Card>
 
@@ -183,7 +184,7 @@ export const MethodologyScreen: React.FC<MethodologyScreenProps> = ({ onBack }) 
               style={{ color: tokens.textSecondary }}
               className="text-xs sm:text-sm font-['Cairo',sans-serif] leading-relaxed"
             >
-              تلخيص بروح الكتاب القديم (الجاحظ، الكلبي، المسعودي…) لا بألفاظه. أمانةً في العزو: لا ننسب للكتاب لفظاً لم يكتبه.
+              {t('method.styledDesc') || 'تلخيص بروح الكتاب القديم (الجاحظ، الكلبي، المسعودي…) لا بألفاظه. أمانةً في العزو: لا ننسب للكتاب لفظاً لم يكتبه.'}
             </p>
           </Card>
 
@@ -207,7 +208,7 @@ export const MethodologyScreen: React.FC<MethodologyScreenProps> = ({ onBack }) 
                 className="px-3 py-1 rounded-full text-xs font-bold border inline-flex items-center gap-1.5 font-['Cairo',sans-serif]"
               >
                 <Sparkles size={13} />
-                <span>{t('method.folk')}</span>
+                <span>{/* الرواية الشعبية */}{t('method.folk')}</span>
               </span>
               <span
                 style={{ color: tokens.textSecondary }}
@@ -228,7 +229,7 @@ export const MethodologyScreen: React.FC<MethodologyScreenProps> = ({ onBack }) 
               style={{ color: tokens.textSecondary }}
               className="text-xs sm:text-sm font-['Cairo',sans-serif] leading-relaxed"
             >
-              ما يرويه الحكواتيون والجدّات والأسواق — ذاكرة الناس. تُحفظ كتراث ثقافي جدير بالتدوين، لا كتاريخ موثَّق.
+              {t('method.folkDesc') || 'ما يرويه الحكواتيون والجدّات والأسواق — ذاكرة الناس. تُحفظ كتراث ثقافي جدير بالتدوين، لا كتاريخ موثَّق.'}
             </p>
           </Card>
 
@@ -252,7 +253,7 @@ export const MethodologyScreen: React.FC<MethodologyScreenProps> = ({ onBack }) 
                 className="px-3 py-1 rounded-full text-xs font-bold border inline-flex items-center gap-1.5 font-['Cairo',sans-serif]"
               >
                 <Landmark size={13} />
-                <span>{t('method.analysis')}</span>
+                <span>{/* التحليل التاريخي */}{t('method.analysis')}</span>
               </span>
               <span
                 style={{ color: tokens.textSecondary }}
@@ -273,7 +274,7 @@ export const MethodologyScreen: React.FC<MethodologyScreenProps> = ({ onBack }) 
               style={{ color: tokens.textSecondary }}
               className="text-xs sm:text-sm font-['Cairo',sans-serif] leading-relaxed"
             >
-              ما تقوله الآثار والنقوش والتاريخ المقارن — بما فيه مواضع الاتفاق والخلاف مع الرواية. وحين تختلف الروايتان نعرضهما جنباً إلى جنب.
+              {t('method.analysisDesc') || 'ما تقوله الآثار والنقوش والتاريخ المقارن — بما فيه مواضع الاتفاق والخلاف مع الرواية. وحين تختلف الروايتان نعرضهما جنباً إلى جنب.'}
             </p>
           </Card>
         </div>
@@ -303,7 +304,8 @@ export const MethodologyScreen: React.FC<MethodologyScreenProps> = ({ onBack }) 
               style={{ color: tokens.deepAccent }}
               className="font-['Aref_Ruqaa',serif] text-lg font-bold"
             >
-              لماذا روايتان؟
+              {/* لماذا روايتان؟ */}
+              {t('method.whyTwoTitle') || 'لماذا روايتان؟'}
             </h2>
           </div>
 
@@ -311,7 +313,7 @@ export const MethodologyScreen: React.FC<MethodologyScreenProps> = ({ onBack }) 
             style={{ color: tokens.textPrimary }}
             className="text-xs sm:text-sm font-['Cairo',sans-serif] leading-relaxed"
           >
-            لأن التراث ليس عدو العلم، ولا العلم عدو التراث: الأول يحفظ المعنى، والثاني يحقق الزمن. والقارئ الناضج يحتاجهما معاً.
+            {t('method.whyTwoDesc') || 'لأن التراث ليس عدو العلم، ولا العلم عدو التراث: الأول يحفظ المعنى، والثاني يحقق الزمن. والقارئ الناضج يحتاجهما معاً.'}
           </p>
         </Card>
       </section>
@@ -340,7 +342,8 @@ export const MethodologyScreen: React.FC<MethodologyScreenProps> = ({ onBack }) 
               style={{ color: tokens.deepAccent }}
               className="font-['Aref_Ruqaa',serif] text-lg font-bold"
             >
-              كيف أستشهد؟
+              {/* كيف أستشهد؟ */}
+              {t('method.howToCiteTitle') || 'كيف أستشهد؟'}
             </h2>
           </div>
 
@@ -348,7 +351,7 @@ export const MethodologyScreen: React.FC<MethodologyScreenProps> = ({ onBack }) 
             style={{ color: tokens.textPrimary }}
             className="text-xs sm:text-sm font-['Cairo',sans-serif] leading-relaxed"
           >
-            الصيغة المقترحة: «تطبيق مستكشف — أساطير وحضارات العرب، بطاقة X، قسم Y، شارة Z». وفي البحوث العلمية تُفضَّل شارة «نص حرفي» مع مصدرها.
+            {t('method.howToCiteDesc') || 'الصيغة المقترحة: «تطبيق مستكشف — أساطير وحضارات العرب، بطاقة X، قسم Y، شارة Z». وفي البحوث العلمية تُفضَّل شارة «نص حرفي» مع مصدرها.'}
           </p>
         </Card>
       </section>

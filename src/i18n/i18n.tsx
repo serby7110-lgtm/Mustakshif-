@@ -1,84 +1,84 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo } from 'react';
+import { I18nextProvider, useTranslation as useReactI18next } from 'react-i18next';
+import i18nInstance, {
+  APP_LANGUAGES,
+  AppLang,
+  applyDocumentLanguage,
+  changeAppLanguage,
+  getLangDirection,
+  normalizeLang,
+} from '../i18n';
 import { translations, TranslationKey } from './index';
 
-export type Lang = keyof typeof translations;
+export type Lang = AppLang;
 export type Language = Lang;
 
 export interface LanguageMeta {
   code: Lang;
   lang: Lang;
   label: string;
+  nativeName: string;
   flag: string;
   dir: 'rtl' | 'ltr';
 }
 
-export const LANGS: LanguageMeta[] = [
-  { code: 'ar', lang: 'ar', label: 'العربية', flag: '🇹🇳', dir: 'rtl' },
-  { code: 'en', lang: 'en', label: 'English', flag: '🇬🇧', dir: 'ltr' },
-  { code: 'id', lang: 'id', label: 'Bahasa Indonesia', flag: '🇮🇩', dir: 'ltr' },
-  { code: 'th', lang: 'th', label: 'ไทย', flag: '🇹🇭', dir: 'ltr' },
-];
-
+export const LANGS: LanguageMeta[] = APP_LANGUAGES;
 export const LANGUAGES = LANGS;
 
-const STORAGE_KEY = 'mustakshif:lang';
-
-const isLang = (value: unknown): value is Lang =>
-  typeof value === 'string' && Object.prototype.hasOwnProperty.call(translations, value);
-
-const readStoredLang = (): Lang => {
-  try {
-    const stored = typeof window !== 'undefined' ? window.localStorage.getItem(STORAGE_KEY) : null;
-    if (isLang(stored)) return stored;
-  } catch {
-    // localStorage unavailable (private mode, etc.)
-  }
-  return 'ar';
-};
+export type AnyTranslationKey = TranslationKey | (string & {});
 
 export interface I18nContextValue {
   lang: Lang;
   dir: 'rtl' | 'ltr';
   flag: string;
   setLang: (lang: Lang) => void;
-  t: (key: TranslationKey) => string;
+  t: (key: AnyTranslationKey, options?: Record<string, unknown>) => string;
 }
 
 const I18nContext = createContext<I18nContextValue | null>(null);
 
-export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [lang, setLangState] = useState<Lang>(readStoredLang);
+const I18nBridge: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { t: i18nextT, i18n } = useReactI18next();
+  const lang = normalizeLang(i18n.resolvedLanguage || i18n.language);
   const meta = LANGS.find((l) => l.code === lang) ?? LANGS[0];
-
-  const setLang = useCallback((next: Lang) => {
-    setLangState(next);
-    try {
-      window.localStorage.setItem(STORAGE_KEY, next);
-    } catch {
-      // ignore persistence failures
-    }
-  }, []);
+  const dir = getLangDirection(lang);
 
   useEffect(() => {
-    const root = document.documentElement;
-    root.setAttribute('lang', lang);
-    root.setAttribute('dir', meta.dir);
-  }, [lang, meta.dir]);
+    applyDocumentLanguage(lang);
+  }, [lang]);
+
+  const setLang = useCallback((next: Lang) => {
+    void changeAppLanguage(next);
+  }, []);
 
   const t = useCallback(
-    (key: TranslationKey): string => {
-      const dict = translations[lang] as Record<string, string>;
-      return dict[key] ?? translations.ar[key] ?? key;
+    (key: AnyTranslationKey, options?: Record<string, unknown>): string => {
+      if (i18n.exists(key)) {
+        return String(i18nextT(key, options as Record<string, string | number>));
+      }
+      const legacyDict = translations[lang] as Record<string, string>;
+      const arDict = translations.ar as Record<string, string>;
+      if (legacyDict[key] !== undefined) return legacyDict[key];
+      if (arDict[key] !== undefined) return arDict[key];
+      return String(i18nextT(key, options as Record<string, string | number>));
     },
-    [lang]
+    [i18nextT, i18n, lang]
   );
 
   const value = useMemo(
-    () => ({ lang, dir: meta.dir, flag: meta.flag, setLang, t }),
-    [lang, meta.dir, meta.flag, setLang, t]
+    () => ({ lang, dir, flag: meta.flag, setLang, t }),
+    [lang, dir, meta.flag, setLang, t]
   );
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
+};
+
+export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  return (
+    <I18nextProvider i18n={i18nInstance}>
+      <I18nBridge>{children}</I18nBridge>
+    </I18nextProvider>
+  );
 };
 
 export const useI18n = (): I18nContextValue => {

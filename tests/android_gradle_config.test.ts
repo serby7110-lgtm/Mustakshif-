@@ -52,10 +52,10 @@ test('5. Dependency audit: all libraries compatible with minSdk 21 without confl
   assert.ok(content.includes('com.google.android.material:material'), 'Must include material components');
 });
 
-test('6. Version bumped: versionCode = 2 and versionName = "1.1.0"', () => {
+test('6. Version bumped: versionCode = 3 and versionName = "1.4.0"', () => {
   const gradlePath = path.resolve('app', 'build.gradle.kts');
   const content = fs.readFileSync(gradlePath, 'utf8');
 
-  assert.ok(content.includes('versionCode = 2'), 'versionCode must be bumped to 2');
-  assert.ok(content.includes('versionName = "1.1.0"'), 'versionName must be "1.1.0"');
+  assert.ok(content.includes('versionCode = 3'), 'versionCode must be bumped to 3');
+  assert.ok(content.includes('versionName = "1.4.0"'), 'versionName must be "1.4.0"');
 });

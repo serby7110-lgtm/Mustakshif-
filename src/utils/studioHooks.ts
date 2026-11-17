@@ -44,34 +44,37 @@ export const STUDIO_CATEGORY_OPTIONS: CategoryFilterOption[] = [
  */
 export function resolveMythForStoryKey(
   storyKey: string,
-  mythEntries: MythEntry[]
+  mythEntries: MythEntry[] = []
 ): MythEntry | undefined {
-  if (!storyKey) return undefined;
+  if (!storyKey || !Array.isArray(mythEntries)) return undefined;
+  const safeEntries = mythEntries.filter(Boolean);
 
   // Direct ID match
-  const exact = mythEntries.find((m) => m.id === storyKey);
+  const exact = safeEntries.find((m) => m.id === storyKey);
   if (exact) return exact;
 
   // Prefix al- match
-  const withAl = mythEntries.find((m) => m.id === `al-${storyKey}`);
+  const withAl = safeEntries.find((m) => m.id === `al-${storyKey}`);
   if (withAl) return withAl;
 
   // Stripped al- match
   if (storyKey.startsWith('al-')) {
     const stripped = storyKey.slice(3);
-    const withoutAl = mythEntries.find((m) => m.id === stripped);
+    const withoutAl = safeEntries.find((m) => m.id === stripped);
     if (withoutAl) return withoutAl;
   }
 
   // Known alias mappings
   if (storyKey === 'irm') {
-    const iram = mythEntries.find((m) => m.id === 'iram-dhat-al-imad' || m.id === 'irm');
+    const iram = safeEntries.find((m) => m.id === 'iram-dhat-al-imad' || m.id === 'irm');
     if (iram) return iram;
   }
 
   // Name substring fallback
-  const byName = mythEntries.find(
-    (m) => m.name.includes(storyKey) || (m.latinName && m.latinName.toLowerCase().includes(storyKey.toLowerCase()))
+  const byName = safeEntries.find(
+    (m) =>
+      (m.name ?? '').includes(storyKey) ||
+      (m.latinName && m.latinName.toLowerCase().includes(storyKey.toLowerCase()))
   );
   if (byName) return byName;
 
@@ -82,18 +85,20 @@ export function resolveMythForStoryKey(
  * Extracts and aggregates all gameHooks and writingHooks from stories
  */
 export function getAggregatedHooks(
-  stories: DeepStoriesMap,
-  mythEntries: MythEntry[]
+  stories: DeepStoriesMap = {},
+  mythEntries: MythEntry[] = []
 ): AggregatedHook[] {
+  if (!stories || typeof stories !== 'object') return [];
+  const safeEntries = Array.isArray(mythEntries) ? mythEntries : [];
   const result: AggregatedHook[] = [];
 
   for (const [storyKey, story] of Object.entries(stories)) {
     if (!story) continue;
 
-    const matchedMyth = resolveMythForStoryKey(storyKey, mythEntries);
-    const mythId = matchedMyth ? matchedMyth.id : storyKey;
-    const mythName = matchedMyth ? matchedMyth.name : storyKey;
-    const mythCategory = matchedMyth ? matchedMyth.category : 'other';
+    const matchedMyth = resolveMythForStoryKey(storyKey, safeEntries);
+    const mythId = matchedMyth?.id ?? storyKey;
+    const mythName = matchedMyth?.name ?? storyKey;
+    const mythCategory = matchedMyth?.category ?? 'other';
     const themes = Array.isArray(story.themes) ? story.themes : [];
 
     // Game hooks
@@ -135,7 +140,8 @@ export function getAggregatedHooks(
 /**
  * Returns the unique union of all themes across all stories
  */
-export function extractAllThemes(stories: DeepStoriesMap): string[] {
+export function extractAllThemes(stories: DeepStoriesMap = {}): string[] {
+  if (!stories || typeof stories !== 'object') return [];
   const set = new Set<string>();
   for (const story of Object.values(stories)) {
     if (!story || !Array.isArray(story.themes)) continue;
@@ -153,11 +159,13 @@ export function extractAllThemes(stories: DeepStoriesMap): string[] {
  * Filters hooks by selected category and theme
  */
 export function filterHooks(
-  hooks: AggregatedHook[],
+  hooks: AggregatedHook[] = [],
   selectedCategory: string,
   selectedTheme: string
 ): AggregatedHook[] {
+  if (!Array.isArray(hooks)) return [];
   return hooks.filter((hook) => {
+    if (!hook) return false;
     // Category match
     if (selectedCategory && selectedCategory !== 'all') {
       if (hook.mythCategory !== selectedCategory) {
@@ -167,7 +175,7 @@ export function filterHooks(
 
     // Theme match
     if (selectedTheme && selectedTheme !== 'all') {
-      if (!hook.themes.includes(selectedTheme)) {
+      if (!Array.isArray(hook.themes) || !hook.themes.includes(selectedTheme)) {
         return false;
       }
     }
@@ -198,25 +206,27 @@ export interface AggregatedQuote {
  * Extracts and aggregates all quotes from stories.json
  */
 export function getAggregatedQuotes(
-  stories: DeepStoriesMap,
-  mythEntries: MythEntry[]
+  stories: DeepStoriesMap = {},
+  mythEntries: MythEntry[] = []
 ): AggregatedQuote[] {
+  if (!stories || typeof stories !== 'object') return [];
+  const safeEntries = Array.isArray(mythEntries) ? mythEntries : [];
   const result: AggregatedQuote[] = [];
 
   for (const [storyKey, story] of Object.entries(stories)) {
     if (!story || !Array.isArray(story.quotes)) continue;
 
-    const matchedMyth = resolveMythForStoryKey(storyKey, mythEntries);
-    const mythId = matchedMyth ? matchedMyth.id : storyKey;
-    const mythName = matchedMyth ? matchedMyth.name : storyKey;
+    const matchedMyth = resolveMythForStoryKey(storyKey, safeEntries);
+    const mythId = matchedMyth?.id ?? storyKey;
+    const mythName = matchedMyth?.name ?? storyKey;
 
     story.quotes.forEach((q, index) => {
-      if (!q || !q.text) return;
+      if (!q || typeof q.text !== 'string' || !q.text.trim()) return;
       result.push({
         id: `${storyKey}_quote_${index}`,
         text: q.text.trim(),
-        source: (q.source || '').trim(),
-        type: (q.type || 'نص حرفي').trim(),
+        source: (q.source ?? '').trim(),
+        type: (q.type ?? 'نص حرفي').trim(),
         mythId,
         mythName,
       });
@@ -231,15 +241,17 @@ export function getAggregatedQuotes(
  * with Arabic normalization (alef/hamza/taa-marbuta folding).
  */
 export function filterQuotes(
-  quotes: AggregatedQuote[],
+  quotes: AggregatedQuote[] = [],
   typeFilter: string,
   searchQuery: string,
   normalizer?: (t: string) => string
 ): AggregatedQuote[] {
-  const normalize = normalizer || ((t: string) => t.trim().toLowerCase());
+  if (!Array.isArray(quotes)) return [];
+  const normalize = normalizer || ((t: string) => (t ?? '').trim().toLowerCase());
   const normQuery = searchQuery ? normalize(searchQuery) : '';
 
   return quotes.filter((quote) => {
+    if (!quote) return false;
     // Type filter
     if (typeFilter && typeFilter !== 'all' && typeFilter !== 'الكل') {
       if (quote.type !== typeFilter) {
@@ -249,9 +261,9 @@ export function filterQuotes(
 
     // Search filter across text, source, and mythName
     if (normQuery) {
-      const normText = normalize(quote.text);
-      const normSource = normalize(quote.source);
-      const normMyth = normalize(quote.mythName);
+      const normText = normalize(quote.text ?? '');
+      const normSource = normalize(quote.source ?? '');
+      const normMyth = normalize(quote.mythName ?? '');
 
       if (
         !normText.includes(normQuery) &&
@@ -269,8 +281,8 @@ export function filterQuotes(
 /**
  * Formats quote for copy: text + " — " + source
  */
-export function formatQuoteForCopy(quote: AggregatedQuote): string {
+export function formatQuoteForCopy(quote?: AggregatedQuote | null): string {
   if (!quote) return '';
-  return `${quote.text} — ${quote.source}`;
+  return `${quote.text ?? ''} — ${quote.source ?? ''}`;
 }
 

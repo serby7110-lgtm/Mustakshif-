@@ -227,15 +227,35 @@ body.dark-teal,
   text-align: left;
 }
 
-/* Map SVG: flip horizontally when dir="ltr" */
-[dir="ltr"] .map-canvas-svg,
-[dir="ltr"] .map-svg-container svg {
-  transform: scaleX(-1);
+/* Language-specific typography */
+html[lang="ar"] body,
+html[lang="ar"] .font-\[\'Cairo\'\,sans-serif\] {
+  font-family: 'Cairo', 'Noto Naskh Arabic', 'Tajawal', system-ui, sans-serif;
 }
 
-/* Icons: mirror chevron/back icons when RTL */
+html[lang="th"] body,
+html[lang="th"] [class*="font-['Cairo'"],
+html[lang="th"] [class*="font-['Aref_Ruqaa'"],
+html[lang="th"] [class*="font-['Amiri'"],
+html[lang="th"] [class*="font-['Tajawal'"] {
+  font-family: 'Noto Sans Thai', 'Cairo', system-ui, sans-serif !important;
+}
+
+html[lang="en"] [class*="font-['Aref_Ruqaa'"],
+html[lang="id"] [class*="font-['Aref_Ruqaa'"] {
+  font-family: 'Cairo', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+}
+
+/* Note: Geographic map canvas is never mirrored in LTR so East/West remain accurate */
+
+/* Icons: mirror chevron/back icons when RTL or LTR */
 [dir="rtl"] .icon-back-mirror,
 [dir="rtl"] .rtl-mirror,
 [dir="rtl"] .chevron-mirror {
   transform: scaleX(-1);
 }
+
+[dir="ltr"] .rtl-chevron-forward {
+  transform: scaleX(-1);
+}
+

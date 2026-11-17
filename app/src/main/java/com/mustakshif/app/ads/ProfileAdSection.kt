@@ -28,6 +28,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.mustakshif.app.R
+import com.mustakshif.app.data.EntitlementManager
 import com.mustakshif.app.firebase.RemoteConfigManager
 import com.mustakshif.app.theme.CoolBlueAccent
 import com.mustakshif.app.theme.DarkCoolBlueAccent
@@ -40,6 +41,7 @@ import com.mustakshif.app.theme.PrimaryEmerald
  * Profile Ad Transparency Section:
  * - Profile disclosure note: "قد يعرض التطبيق إعلانات لدعم استمراريته."
  * - Optional UMP privacy settings button when required by region
+ * - Hidden when premium_monthly entitlement is active
  */
 @Composable
 fun ProfileAdSection(
@@ -56,8 +58,9 @@ fun ProfileAdSection(
 
     val privacyRequired by ConsentManager.isPrivacyOptionsRequired.collectAsState()
     val remoteConfig by RemoteConfigManager.values.collectAsState()
+    val hasPremiumMonthly by EntitlementManager.hasPremiumMonthly.collectAsState()
 
-    if (!remoteConfig.adsEnabled && !privacyRequired) {
+    if (hasPremiumMonthly || (!remoteConfig.adsEnabled && !privacyRequired)) {
         return
     }
 

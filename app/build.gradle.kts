@@ -23,8 +23,8 @@ android {
         applicationId = "com.sink.mustakshif"
         minSdk = 21
         targetSdk = 35
-        versionCode = 2
-        versionName = "1.1.0"
+        versionCode = 3
+        versionName = "1.4.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -172,6 +172,9 @@ dependencies {
     // Google Mobile Ads & UMP Consent (API 21+ compatible)
     implementation("com.google.android.gms:play-services-ads:23.6.0")
     implementation("com.google.android.ump:user-messaging-platform:3.1.0")
+
+    // Google Play Billing (API 21+ compatible) - sole source of truth for premium_monthly
+    implementation("com.android.billingclient:billing-ktx:7.1.1")
 
     // Firebase BoM (minSdk-21-safe 33.x) - Analytics, Crashlytics, Remote Config & optional FCM
     implementation(platform("com.google.firebase:firebase-bom:33.7.0"))

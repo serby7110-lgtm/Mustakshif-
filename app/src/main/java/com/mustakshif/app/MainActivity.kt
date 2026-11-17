@@ -106,6 +106,13 @@ class MainActivity : ComponentActivity() {
         setContent {
             val remoteConfig by RemoteConfigManager.values.collectAsState()
             val showAppOpenOverlay by AdManager.isShowingAppOpenOverlay.collectAsState()
+            val hasPremiumMonthly by com.mustakshif.app.data.EntitlementManager.hasPremiumMonthly.collectAsState()
+
+            LaunchedEffect(hasPremiumMonthly) {
+                if (hasPremiumMonthly) {
+                    AdManager.clearLoadedAds()
+                }
+            }
 
             LaunchedEffect(remoteConfig.adsEnabled, remoteConfig.appOpenEnabled, remoteConfig.interstitialEnabled) {
                 if (!remoteConfig.adsEnabled) {
@@ -134,10 +141,15 @@ class MainActivity : ComponentActivity() {
                                     .weight(1f)
                                     .fillMaxWidth()
                             ) {
+                                if (currentScreen == AppScreen.SUBSCRIPTION) {
+                                    com.mustakshif.app.ui.SubscriptionScreen(
+                                        onBack = { onScreenChanged(AppScreen.HOME) }
+                                    )
+                                }
                                 // Native Mustakshif Reader Content (currentScreen, activeMythId)
                             }
 
-                            // Anchored above bottom navigation; hidden in Article and when consent/ad/RemoteConfig unavailable
+                            // Anchored above bottom navigation; hidden in Article/Subscription and when Premium or consent/RemoteConfig unavailable
                             BannerAdSlot(screen = currentScreen)
                         }
 
@@ -227,6 +239,11 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        com.mustakshif.app.data.EntitlementManager.refreshEntitlements(this)
+    }
+
     override fun onStop() {
         super.onStop()
         // Stop audio reading when screen exits or moves to background
@@ -235,6 +252,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        com.mustakshif.app.data.EntitlementManager.disconnect()
         ttsManager?.shutdown()
         ttsManager = null
     }

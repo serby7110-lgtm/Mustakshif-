@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import {
   Bookmark,
   X,
@@ -14,27 +14,40 @@ import { AppShell } from './components/layout/AppShell';
 import { TabId } from './components/layout/TabBar';
 import { Tag, TagVariant } from './components/primitives/Tag';
 import { IconButton } from './components/primitives/IconButton';
-import { MYTH_ENTRIES, getEntriesByCategory, getEntryById } from './data/seed';
+import { MYTH_ENTRIES, getAllEntries, getEntriesByCategory, getEntryById } from './data/seed';
 import { MythEntry, MythCategory, CATEGORY_LABELS } from './data/types';
 import { storage, FontSize } from './data/storage';
 import { ThemeProvider, useTheme } from './theme/ThemeContext';
-import { legacyAr as ar } from './i18n/legacyAr';
+import { I18nProvider, useI18n } from './i18n/i18n';
+import { getLocalizedEntry, localizeTag } from './content';
 
 import { HomeScreen } from './screens/HomeScreen';
-import { ArticleScreen } from './screens/ArticleScreen';
-import { CivilizationsScreen } from './screens/CivilizationsScreen';
-import { MapScreen } from './screens/MapScreen';
-import { LibraryScreen } from './screens/LibraryScreen';
-import { ProfileScreen } from './screens/ProfileScreen';
 import { OnboardingScreen } from './screens/OnboardingScreen';
 import { SplashScreen } from './screens/SplashScreen';
-import { MethodologyScreen } from './screens/MethodologyScreen';
+import { LockedHeroImage, PremiumPill } from './components/primitives/LockedMediaBadges';
+import { logAnalyticsEvent } from './lib/firebase';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
-import { AuthProvider } from './context/AuthContext';
-import { I18nProvider } from './i18n/i18n';
+
+const ArticleScreen = lazy(() => import('./screens/ArticleScreen'));
+const CivilizationsScreen = lazy(() =>
+  import('./screens/CivilizationsScreen').then((m) => ({ default: m.CivilizationsScreen }))
+);
+const MapScreen = lazy(() => import('./screens/MapScreen'));
+const LibraryScreen = lazy(() => import('./screens/LibraryScreen'));
+const ProfileScreen = lazy(() => import('./screens/ProfileScreen'));
+const MethodologyScreen = lazy(() => import('./screens/MethodologyScreen'));
+const SubscriptionScreen = lazy(() => import('./screens/SubscriptionScreen'));
+const DebugScreen = lazy(() => import('./screens/DebugScreen'));
+
+function isDebugLocation(): boolean {
+  if (typeof window === 'undefined') return false;
+  const path = window.location.pathname.replace(/\/+$/, '');
+  return path === '/debug' || window.location.hash === '#/debug';
+}
 
 function AppContent() {
   const { theme, isDark, toggleTheme, tokens } = useTheme();
+  const { t, lang, dir } = useI18n();
 
   // Splash Screen shown for ~1.5s on app start
   const [showSplash, setShowSplash] = useState<boolean>(() => {
@@ -48,8 +61,8 @@ function AppContent() {
   });
 
   // Persistent States from storage (Bookmarks, History, FontSize, Onboarding)
-  const [savedIds, setSavedIds] = useState<string[]>(() => storage.getBookmarks());
-  const [historyIds, setHistoryIds] = useState<string[]>(() => storage.getHistory());
+  const [savedIds, setSavedIds] = useState<string[]>(() => storage.getBookmarks() ?? []);
+  const [historyIds, setHistoryIds] = useState<string[]>(() => storage.getHistory() ?? []);
   const [fontSize, setFontSize] = useState<FontSize>(() => storage.getFontSize());
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState<boolean>(() =>
     storage.getHasCompletedOnboarding()
@@ -62,6 +75,31 @@ function AppContent() {
   const [categoryFilterModal, setCategoryFilterModal] = useState<MythCategory | null>(null);
   const [selectedCivId, setSelectedCivId] = useState<string | null>(null);
   const [showMethodology, setShowMethodology] = useState<boolean>(false);
+  const [showSubscription, setShowSubscription] = useState<boolean>(false);
+  const [showDebug, setShowDebug] = useState<boolean>(() => isDebugLocation());
+  const [isPremiumActive, setIsPremiumActive] = useState<boolean>(() => storage.hasPremiumMonthly());
+  const logoTapCountRef = useRef<number>(0);
+  const logoTapTimerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    const syncEntitlement = () => {
+      setIsPremiumActive(storage.hasPremiumMonthly());
+    };
+    const syncDebugRoute = () => {
+      setShowDebug(isDebugLocation());
+    };
+    window.addEventListener('mustakshif:entitlement-changed', syncEntitlement);
+    window.addEventListener('popstate', syncDebugRoute);
+    window.addEventListener('hashchange', syncDebugRoute);
+    return () => {
+      window.removeEventListener('mustakshif:entitlement-changed', syncEntitlement);
+      window.removeEventListener('popstate', syncDebugRoute);
+      window.removeEventListener('hashchange', syncDebugRoute);
+      if (logoTapTimerRef.current != null) {
+        window.clearTimeout(logoTapTimerRef.current);
+      }
+    };
+  }, []);
 
   // Persist bookmarks
   useEffect(() => {
@@ -80,29 +118,42 @@ function AppContent() {
 
   const toggleSave = (id: string, e?: React.MouseEvent) => {
     e?.stopPropagation();
-    setSavedIds((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [id, ...prev]
-    );
+    setSavedIds((prev) => {
+      const list = prev ?? [];
+      return list.includes(id) ? list.filter((item) => item !== id) : [id, ...list];
+    });
   };
 
   const handleOpenEntry = (entry: MythEntry, chapterIndex?: number) => {
-    setHistoryIds((prev) => [entry.id, ...prev.filter((id) => id !== entry.id)]);
+    if (!entry) return;
+    if (entry.isPremium && !isPremiumActive) {
+      logAnalyticsEvent('locked_entry_tap', { entry_id: entry.id });
+    }
+    setHistoryIds((prev) => {
+      const list = prev ?? [];
+      return [entry.id, ...list.filter((id) => id !== entry.id)];
+    });
     setEntryStack([entry]);
     setSelectedEntry(entry);
     setTargetChapterIndex(chapterIndex);
   };
 
   const handleSelectRelated = (rel: MythEntry) => {
-    setHistoryIds((prev) => [rel.id, ...prev.filter((id) => id !== rel.id)]);
+    if (!rel) return;
+    setHistoryIds((prev) => {
+      const list = prev ?? [];
+      return [rel.id, ...list.filter((id) => id !== rel.id)];
+    });
     setEntryStack((prev) => {
-      if (prev.length > 0 && prev[prev.length - 1].id === rel.id) {
-        return prev;
+      const list = prev ?? [];
+      if (list.length > 0 && list[list.length - 1]?.id === rel.id) {
+        return list;
       }
-      const existingIdx = prev.findIndex((item) => item.id === rel.id);
+      const existingIdx = list.findIndex((item) => item.id === rel.id);
       if (existingIdx !== -1) {
-        return prev.slice(0, existingIdx + 1);
+        return list.slice(0, existingIdx + 1);
       }
-      return [...prev, rel];
+      return [...list, rel];
     });
     setSelectedEntry(rel);
     setTargetChapterIndex(undefined);
@@ -138,6 +189,50 @@ function AppContent() {
     return 'neutral';
   };
 
+  const handleLogoTap = () => {
+    if (logoTapTimerRef.current != null) {
+      window.clearTimeout(logoTapTimerRef.current);
+    }
+    logoTapCountRef.current += 1;
+    if (logoTapCountRef.current >= 5) {
+      logoTapCountRef.current = 0;
+      logoTapTimerRef.current = null;
+      setShowDebug(true);
+      return;
+    }
+    logoTapTimerRef.current = window.setTimeout(() => {
+      logoTapCountRef.current = 0;
+      logoTapTimerRef.current = null;
+    }, 2500);
+  };
+
+  const handleCloseDebug = () => {
+    setShowDebug(false);
+    if (typeof window !== 'undefined' && isDebugLocation()) {
+      const nextUrl = `/${window.location.search || ''}`;
+      window.history.replaceState(null, '', nextUrl);
+    }
+  };
+
+  // 0. Hidden Diagnostics / Error Log page (/debug or 5 taps on the logo)
+  if (showDebug) {
+    return (
+      <div className={isDark ? 'dark dark-teal' : ''}>
+        <ErrorBoundary>
+          <Suspense
+            fallback={
+              <div className="min-h-screen flex items-center justify-center p-6 text-sm font-bold opacity-75">
+                {t('common.loading')}
+              </div>
+            }
+          >
+            <DebugScreen onBack={handleCloseDebug} />
+          </Suspense>
+        </ErrorBoundary>
+      </div>
+    );
+  }
+
   // 1. Splash screen shown for ~1.5s on app start
   if (showSplash) {
     return (
@@ -156,6 +251,8 @@ function AppContent() {
     );
   }
 
+  const localizedSelected = selectedEntry ? getLocalizedEntry(selectedEntry, lang) : null;
+
   return (
     <div className={isDark ? 'dark dark-teal' : ''}>
       <AppShell
@@ -165,17 +262,19 @@ function AppContent() {
           setSelectedCivId(null);
           setCategoryFilterModal(null);
           setShowMethodology(false);
+          setShowSubscription(false);
           setActiveTab(tab);
         }}
-        hideTabBar={Boolean(selectedEntry || showMethodology)}
-        hideHeader={Boolean(selectedEntry || showMethodology)}
-        headerTitle={selectedEntry ? selectedEntry.name : ar.app.title}
-        headerSubtitle={selectedEntry ? selectedEntry.typeLabel : ar.app.subtitle}
+        hideTabBar={Boolean(selectedEntry || showMethodology || showSubscription)}
+        hideHeader={Boolean(selectedEntry || showMethodology || showSubscription)}
+        onLogoTap={handleLogoTap}
+        headerTitle={localizedSelected?.name || t('app.title')}
+        headerSubtitle={localizedSelected?.typeLabel || t('app.subtitle')}
         headerTrailing={
           <div className="flex items-center gap-1.5">
             <IconButton
-              icon={<Bookmark size={18} className={savedIds.length > 0 ? 'fill-current' : ''} />}
-              label={ar.tabs.library}
+              icon={<Bookmark size={18} className={(savedIds ?? []).length > 0 ? 'fill-current' : ''} />}
+              label={t('nav.library')}
               variant="surface"
               size="md"
               onClick={() => {
@@ -187,114 +286,141 @@ function AppContent() {
         }
       >
         {/* Category Filter Modal / Bottom Sheet */}
-        {categoryFilterModal && (
-          <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-end sm:items-center justify-center p-3 animate-in fade-in duration-200">
-            <div
-              style={{
-                backgroundColor: tokens.card,
-                borderColor: tokens.border,
-              }}
-              className="w-full max-w-md rounded-[24px] p-5 shadow-2xl border animate-in slide-in-from-bottom-4 space-y-4 max-h-[85vh] overflow-y-auto"
-            >
-              <div
-                style={{ borderColor: tokens.borderSubtle }}
-                className="flex items-center justify-between pb-3 border-b"
-              >
-                <div>
-                  <h3
-                    style={{ color: tokens.deepAccent }}
-                    className="font-['Aref_Ruqaa',serif] text-xl font-bold"
-                  >
-                    {CATEGORY_LABELS[categoryFilterModal]}
-                  </h3>
-                  <p
-                    style={{ color: tokens.textSecondary }}
-                    className="text-xs"
-                  >
-                    {getEntriesByCategory(categoryFilterModal).length} مدخلة موثقة
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setCategoryFilterModal(null)}
-                  style={{ color: tokens.textSecondary }}
-                  className="p-2 rounded-xl hover:opacity-80 cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
-                  aria-label="إغلاق"
-                >
-                  <X size={20} />
-                </button>
-              </div>
+        {categoryFilterModal && (() => {
+          const modalEntries = (getEntriesByCategory(categoryFilterModal) ?? []).filter(Boolean);
+          const documentedCount = modalEntries.filter(
+            (e) =>
+              (Array.isArray(e?.sources) && e.sources.length > 0) ||
+              (Array.isArray(e?.evidenceLabels) && e.evidenceLabels.length > 0)
+          ).length;
 
-              <div className="space-y-2.5">
-                {getEntriesByCategory(categoryFilterModal).map((item) => (
-                  <div
-                    key={item.id}
-                    onClick={() => {
-                      setCategoryFilterModal(null);
-                      handleOpenEntry(item);
-                    }}
-                    style={{
-                      backgroundColor: tokens.surface,
-                      borderColor: tokens.border,
-                    }}
-                    className="p-3.5 rounded-2xl hover:opacity-90 transition-all border flex items-center justify-between gap-3 cursor-pointer group min-h-[52px]"
-                  >
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1.5 flex-wrap mb-1">
-                        <span
-                          style={{ color: tokens.textPrimary }}
-                          className="font-['Aref_Ruqaa',serif] text-base font-bold group-hover:opacity-90"
-                        >
-                          {item.name}
-                        </span>
-                        {item.isLongForm && (
-                          <span
-                            style={{
-                              backgroundColor: tokens.primaryMint,
-                              color: '#0E5C4D',
-                            }}
-                            className="px-2 py-0.5 rounded-full text-[10px] font-bold"
-                          >
-                            طويلة
-                          </span>
-                        )}
-                        {item.isPremium && (
-                          <span
-                            style={{
-                              backgroundColor: tokens.coolBlueTint,
-                              color: tokens.coolBlueAccent,
-                              borderColor: tokens.border,
-                            }}
-                            className="px-2 py-0.5 rounded-full text-[10px] font-bold border"
-                          >
-                            Premium
-                          </span>
-                        )}
-                        <Tag variant={getTagVariant(item.tags[0])} size="sm">
-                          {item.tags[0]}
-                        </Tag>
-                      </div>
-                      <p
-                        style={{ color: tokens.textSecondary }}
-                        className="text-xs line-clamp-1"
-                      >
-                        {item.summary}
-                      </p>
-                    </div>
-                    <ChevronLeft
-                      size={16}
+          return (
+            <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-end sm:items-center justify-center p-3 animate-in fade-in duration-200">
+              <div
+                style={{
+                  backgroundColor: tokens.card,
+                  borderColor: tokens.border,
+                }}
+                className="w-full max-w-md rounded-[24px] p-5 shadow-2xl border animate-in slide-in-from-bottom-4 space-y-4 max-h-[85vh] overflow-y-auto"
+              >
+                <div
+                  style={{ borderColor: tokens.borderSubtle }}
+                  className="flex items-center justify-between pb-3 border-b"
+                >
+                  <div>
+                    <h3
                       style={{ color: tokens.deepAccent }}
-                      className="shrink-0"
-                    />
+                      className="font-['Aref_Ruqaa',serif] text-xl font-bold"
+                    >
+                      {t(`cat.${categoryFilterModal}`, { defaultValue: CATEGORY_LABELS[categoryFilterModal] })}
+                    </h3>
+                    <p
+                      style={{ color: tokens.textSecondary }}
+                      className="text-xs"
+                    >
+                      {t('home.documentedCount', { count: documentedCount })}
+                    </p>
                   </div>
-                ))}
+                  <button
+                    type="button"
+                    onClick={() => setCategoryFilterModal(null)}
+                    style={{ color: tokens.textSecondary }}
+                    className="p-2 rounded-xl hover:opacity-80 cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
+                    aria-label={t('common.close')}
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+
+                <div className="space-y-2.5">
+                  {modalEntries.map((rawItem) => {
+                    const item = getLocalizedEntry(rawItem, lang);
+                    const isLocked = Boolean(item?.isPremium) && !isPremiumActive;
+                    return (
+                      <div
+                        key={rawItem.id}
+                        onClick={() => {
+                          setCategoryFilterModal(null);
+                          handleOpenEntry(rawItem);
+                        }}
+                        style={{
+                          backgroundColor: tokens.surface,
+                          borderColor: tokens.border,
+                        }}
+                        className="p-3.5 rounded-2xl hover:opacity-90 transition-all border flex items-center justify-between gap-3 cursor-pointer group min-h-[52px]"
+                      >
+                        <div className="relative w-12 h-12 rounded-xl overflow-hidden shrink-0 border" style={{ borderColor: tokens.borderSubtle }}>
+                          <LockedHeroImage
+                            src={item?.heroImage}
+                            alt={item?.name ?? ''}
+                            isLocked={isLocked}
+                            compact
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5 flex-wrap mb-1">
+                            <span
+                              style={{ color: tokens.textPrimary }}
+                              className="font-['Aref_Ruqaa',serif] text-base font-bold group-hover:opacity-90"
+                            >
+                              {item?.name ?? ''}
+                            </span>
+                            {item?.isLongForm && (
+                              <span
+                                style={{
+                                  backgroundColor: tokens.primaryMint,
+                                  color: '#0E5C4D',
+                                }}
+                                className="px-2 py-0.5 rounded-full text-[10px] font-bold"
+                              >
+                                {t('longForm.longPill') || 'طويلة'}
+                              </span>
+                            )}
+                            {item?.isPremium && <PremiumPill />}
+                            {Array.isArray(item?.tags) && item.tags[0] && (
+                              <Tag variant={getTagVariant(item.tags[0])} size="sm">
+                                {localizeTag(item.tags[0], lang)}
+                              </Tag>
+                            )}
+                          </div>
+                          <p
+                            style={{ color: tokens.textSecondary }}
+                            className="text-xs line-clamp-1"
+                          >
+                            {item?.summary ?? ''}
+                          </p>
+                        </div>
+                        <ChevronLeft
+                          size={16}
+                          style={{ color: tokens.deepAccent }}
+                          className={`shrink-0 ${dir === 'ltr' ? 'rotate-180' : ''}`}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
-        {/* When methodology screen is requested */}
-        {showMethodology ? (
+        {/* When subscription screen is requested */}
+        <Suspense
+          fallback={
+            <div className="flex items-center justify-center py-16 text-sm font-bold opacity-70">
+              {t('common.loading')}
+            </div>
+          }
+        >
+        {showSubscription ? (
+          <ErrorBoundary>
+            <SubscriptionScreen
+              onBack={() => setShowSubscription(false)}
+              isPremiumActive={isPremiumActive}
+              onEntitlementUpdated={(active) => setIsPremiumActive(active)}
+            />
+          </ErrorBoundary>
+        ) : showMethodology ? (
           <ErrorBoundary>
             <MethodologyScreen onBack={() => setShowMethodology(false)} />
           </ErrorBoundary>
@@ -305,7 +431,7 @@ function AppContent() {
               entryId={selectedEntry.id}
               onBack={handleBackFromArticle}
               onSelectRelated={handleSelectRelated}
-              isSaved={savedIds.includes(selectedEntry.id)}
+              isSaved={(savedIds ?? []).includes(selectedEntry.id)}
               onToggleSave={(id) => toggleSave(id)}
               initialChapterIndex={targetChapterIndex}
               onSelectCivilization={(civId) => {
@@ -314,6 +440,12 @@ function AppContent() {
                 setActiveTab('civilizations');
               }}
               onOpenMethodology={() => setShowMethodology(true)}
+              isPremiumActive={isPremiumActive}
+              onPremiumChange={(active) => setIsPremiumActive(active)}
+              onOpenSubscription={() => {
+                setSelectedEntry(null);
+                setShowSubscription(true);
+              }}
             />
           </ErrorBoundary>
         ) : (
@@ -335,6 +467,8 @@ function AppContent() {
                     setSelectedCivId(null);
                     setActiveTab('civilizations');
                   }}
+                  isPremiumActive={isPremiumActive}
+                  onOpenSubscription={() => setShowSubscription(true)}
                 />
               </ErrorBoundary>
             )}
@@ -345,7 +479,7 @@ function AppContent() {
                 <CivilizationsScreen
                   selectedCivId={selectedCivId}
                   onClearSelectedCiv={() => setSelectedCivId(null)}
-                  onSelectMythId={(mythId) => {
+                  onSelectMythId={(mythId: string) => {
                     const entry = getEntryById(mythId);
                     if (entry) {
                       handleOpenEntry(entry);
@@ -380,6 +514,7 @@ function AppContent() {
                   onToggleSave={toggleSave}
                   onClearHistory={handleClearHistory}
                   onExploreClick={() => setActiveTab('home')}
+                  isPremiumActive={isPremiumActive}
                 />
               </ErrorBoundary>
             )}
@@ -392,16 +527,19 @@ function AppContent() {
                   onToggleTheme={toggleTheme}
                   fontSize={fontSize}
                   onChangeFontSize={setFontSize}
-                  savedCount={savedIds.length}
-                  historyCount={historyIds.length}
-                  totalMythCount={MYTH_ENTRIES.length}
+                  savedCount={(savedIds ?? []).length}
+                  historyCount={(historyIds ?? []).length}
+                  totalMythCount={(getAllEntries() ?? []).length}
                   onReplayOnboarding={() => setHasCompletedOnboarding(false)}
                   onOpenMethodology={() => setShowMethodology(true)}
+                  isPremiumActive={isPremiumActive}
+                  onOpenSubscription={() => setShowSubscription(true)}
                 />
               </ErrorBoundary>
             )}
           </>
         )}
+        </Suspense>
       </AppShell>
     </div>
   );
@@ -409,12 +547,12 @@ function AppContent() {
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <AuthProvider>
+    <ErrorBoundary>
+      <ThemeProvider>
         <I18nProvider>
           <AppContent />
         </I18nProvider>
-      </AuthProvider>
-    </ThemeProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }

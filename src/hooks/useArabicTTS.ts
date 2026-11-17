@@ -39,12 +39,17 @@ export function useArabicTTS(): UseArabicTTSResult {
   // Find preferred Arabic voice if available
   const getArabicVoice = useCallback((): SpeechSynthesisVoice | null => {
     if (!isSupported) return null;
-    const voices = window.speechSynthesis.getVoices() || [];
-    return (
-      voices.find((v) => v.lang === 'ar-SA') ||
-      voices.find((v) => v.lang.toLowerCase().startsWith('ar')) ||
-      null
-    );
+    try {
+      const voices = window.speechSynthesis.getVoices() || [];
+      return (
+        voices.find((v) => v.lang === 'ar-SA') ||
+        voices.find((v) => v.lang.toLowerCase().startsWith('ar')) ||
+        null
+      );
+    } catch (err) {
+      console.warn('[useArabicTTS] Failed to query speech voices:', err);
+      return null;
+    }
   }, [isSupported]);
 
   // Stop all active speech and clear the queue
@@ -224,13 +229,13 @@ export function useArabicTTS(): UseArabicTTSResult {
 
     try {
       window.speechSynthesis.resume();
+      if (!window.speechSynthesis.speaking && activeIndexRef.current < queueRef.current.length) {
+        speakIndex(activeIndexRef.current);
+      }
     } catch {
-      // noop
-    }
-
-    // If synth is not speaking (e.g. fallback cadence or browser resume quirk), re-trigger current index
-    if (!window.speechSynthesis.speaking && activeIndexRef.current < queueRef.current.length) {
-      speakIndex(activeIndexRef.current);
+      if (activeIndexRef.current < queueRef.current.length) {
+        speakIndex(activeIndexRef.current);
+      }
     }
   }, [isSupported, speakIndex]);
 

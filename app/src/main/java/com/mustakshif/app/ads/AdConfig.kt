@@ -12,7 +12,8 @@ enum class AppScreen {
     MAP,
     LIBRARY,
     STUDIO,
-    PROFILE
+    PROFILE,
+    SUBSCRIPTION
 }
 
 /**

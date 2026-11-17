@@ -1,0 +1,32 @@
+{
+  "background_color": "#549d54",
+  "dir": "rtl",
+  "display": "standalone",
+  "name": "مستكشف",
+  "orientation": "landscape",
+  "scope": "/",
+  "short_name": "MUK",
+  "start_url": "/",
+  "theme_color": "#08e4e8",
+  "icons": [
+    {
+      "src": "https://ai.studio/favicon.ico",
+      "type": "image/x-icon",
+      "isSquare": false,
+      "isPng": false,
+      "isWebp": false,
+      "isJpg": false,
+      "width": 0,
+      "is512x512": false,
+      "is256x256": false,
+      "is192x192": false
+    }
+  ],
+  "id": "https://ai.studio/apps/90a2dbac-fdc5-476a-b2b4-a1eaae4990ff",
+  "description": "موسوعة تفاعلية تضم  أساطير و حضارات عربية، برواية التراث والآثار معاً. مصمم للباحثين وكتّاب القصص وصنّاع الألعاب.",
+  "lang": "ar",
+  "categories": [
+    "books",
+    "education"
+  ]
+}

@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0f766e" />
+    <title>مستكشف — وضع عدم الاتصال</title>
+    <style>
+      :root {
+        --bg: #ffffff;
+        --surface: #f2fbf7;
+        --primary: #0e5c4d;
+        --mint: #7fd1ae;
+        --blue: #4a90d9;
+        --blue-soft: #e8f1fb;
+        --text: #14312b;
+        --muted: #5a726c;
+        --border: #d7efe6;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0b2420;
+          --surface: #12332d;
+          --primary: #9fe8cc;
+          --mint: #7fd1ae;
+          --blue: #7fb2e8;
+          --blue-soft: #163a4a;
+          --text: #e8f6f0;
+          --muted: #9db8b0;
+          --border: #1c443c;
+        }
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        font-family: system-ui, -apple-system, 'Segoe UI', Tahoma, Arial, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+      }
+      .card {
+        width: 100%;
+        max-width: 480px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        padding: 36px 28px;
+        text-align: center;
+      }
+      .logo {
+        width: 68px;
+        height: 68px;
+        margin: 0 auto 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 20px;
+        background: var(--blue-soft);
+        border: 1px solid var(--border);
+      }
+      h1 {
+        margin: 0 0 10px;
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--primary);
+      }
+      p {
+        margin: 0 0 24px;
+        font-size: 1rem;
+        line-height: 1.75;
+        color: var(--muted);
+      }
+      button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px 24px;
+        border: 0;
+        border-radius: 14px;
+        background: #0f766e;
+        color: #ffffff;
+        font-family: inherit;
+        font-size: 0.98rem;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #0e5c4d;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="card" role="main">
+      <div class="logo" aria-hidden="true">
+        <svg width="36" height="36" viewBox="0 0 48 48" fill="none">
+          <rect x="9" y="9" width="30" height="30" rx="2" stroke="#0E5C4D" stroke-width="2.5" />
+          <rect x="9" y="9" width="30" height="30" rx="2" transform="rotate(45 24 24)" stroke="#7FD1AE" stroke-width="2.5" />
+          <circle cx="24" cy="24" r="4.5" fill="#4A90D9" />
+        </svg>
+      </div>
+      <h1>أنت غير متصل بالإنترنت حالياً</h1>
+      <p>
+        تعذّر تحميل هذه الصفحة الآن. تحقّق من اتصالك بالشبكة ثم أعد المحاولة للعودة إلى موسوعة مستكشف.
+      </p>
+      <button type="button" onclick="window.location.reload()">إعادة المحاولة</button>
+    </main>
+  </body>
+</html>

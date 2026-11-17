@@ -1,22 +1,26 @@
 import {createRoot} from 'react-dom/client';
+import { initErrorLogger } from './logger';
+import './i18n';
 import App from './App.tsx';
 import './index.css';
+import './index.tsx';
+import { getAllEntries } from './data/seed';
+import { getAllCivilizations } from './data/civTypes';
+import { DEEP_STORIES } from './data/storyTypes';
 
-// QA & Performance Audit Summary
-console.log(
-  `%c[Mustakshif QA & Performance Summary]\n` +
-  `- Total myths: 62\n` +
-  `- Total civilizations: 10\n` +
-  `- Total deep stories: 15\n` +
-  `- Total images: 52\n` +
-  `- Build size: JS 1,081 kB (gzip: 276.7 kB), CSS 62.5 kB (gzip: 10.9 kB), HTML 2.69 kB`,
-  'color: #0E5C4D; font-weight: bold;'
-);
+initErrorLogger();
 
-if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
-  navigator.serviceWorker.ready.then(() => {
-    console.log('service worker registered');
-  });
+if (import.meta.env?.DEV) {
+  console.log(
+    `%c[Mustakshif Dev Summary]\n` +
+      `- Total myths: ${getAllEntries().length}\n` +
+      `- Total civilizations: ${getAllCivilizations().length}\n` +
+      `- Total deep stories: ${Object.keys(DEEP_STORIES).length}`,
+    'color: #0E5C4D; font-weight: bold;'
+  );
 }
 
-createRoot(document.getElementById('root')!).render(<App />);
+const rootEl = document.getElementById('root');
+if (rootEl) {
+  createRoot(rootEl).render(<App />);
+}

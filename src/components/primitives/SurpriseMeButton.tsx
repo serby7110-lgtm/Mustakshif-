@@ -11,6 +11,7 @@ import { Dices, Sparkles } from 'lucide-react';
 import { MythEntry } from '../../data/types';
 import { getAllEntries } from '../../data/seed';
 import { useTheme } from '../../theme/ThemeContext';
+import { useI18n } from '../../i18n/i18n';
 
 export interface SurpriseMeButtonProps {
   onSelectEntry: (entry: MythEntry) => void;
@@ -22,6 +23,7 @@ export const SurpriseMeButton: React.FC<SurpriseMeButtonProps> = ({
   className = '',
 }) => {
   const { tokens, isDark } = useTheme();
+  const { t, dir } = useI18n();
   const [isFlipping, setIsFlipping] = useState(false);
 
   const handleSurprise = () => {
@@ -43,14 +45,14 @@ export const SurpriseMeButton: React.FC<SurpriseMeButtonProps> = ({
 
   return (
     <div
-      className={`fixed bottom-20 left-4 z-40 max-w-md pointer-events-auto ${className}`}
-      dir="rtl"
+      className={`fixed bottom-20 end-4 z-40 max-w-md pointer-events-auto ${className}`}
+      dir={dir}
     >
       <button
         type="button"
         onClick={handleSurprise}
-        aria-label="فاجئني باكتشاف أسطورة عشوائية"
-        title="فاجئني (أسطورة عشوائية)"
+        aria-label={t('home.surpriseMe')}
+        title={t('home.surpriseMe')}
         style={{
           backgroundColor: isDark ? '#16384C' : '#EAF2FA',
           borderColor: tokens.coolBlueAccent,
@@ -76,7 +78,7 @@ export const SurpriseMeButton: React.FC<SurpriseMeButtonProps> = ({
         </div>
 
         <span className="font-['Aref_Ruqaa',serif] text-sm font-bold tracking-wide">
-          فاجئني
+          {t('home.surpriseMe')}
         </span>
 
         <Sparkles

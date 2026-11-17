@@ -9,9 +9,9 @@
 
 import React, { useState, useRef } from 'react';
 import { ChevronLeft, ChevronRight, Sparkles, BookOpen, Compass } from 'lucide-react';
-import { legacyAr as ar } from '../i18n/legacyAr';
 import { Logo } from '../components/primitives/Logo';
 import { useTheme } from '../theme/ThemeContext';
+import { useI18n } from '../i18n/i18n';
 
 export interface OnboardingScreenProps {
   onComplete: () => void;
@@ -19,6 +19,7 @@ export interface OnboardingScreenProps {
 
 export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }) => {
   const { tokens, isDark } = useTheme();
+  const { t, lang, dir } = useI18n();
   const [currentSlide, setCurrentSlide] = useState(0);
 
   // Touch tracking for swipe gestures
@@ -29,27 +30,27 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
   const slides = [
     {
       id: 'slide-1',
-      title: ar.onboarding.slide1.title, // "اكتشف أساطير العرب"
-      body: ar.onboarding.slide1.desc, // "رحلة بين الآلهة القديمة والكائنات الخرافية والأماكن المفقودة، في موسوعة عربية تفاعلية."
-      badge: 'موسوعة تفاعلية',
+      title: t('onboarding.slide1.title'),
+      body: t('onboarding.slide1.desc'),
+      badge: t('onboarding.slide1.tag'),
       accentColor: tokens.primaryMint,
       secondaryColor: tokens.coolBlueAccent,
       illustrationType: 'star-radiant',
     },
     {
       id: 'slide-2',
-      title: ar.onboarding.slide2.title, // "قصص تُروى ولا تُنسى"
-      body: ar.onboarding.slide2.desc, // "خمسون أسطورة موثقة بالمصادر القديمة، مكتوبة بأسلوب الحكواتي ومصحوبة بخط زمني لكل حكاية."
-      badge: 'توثيق الحكواتي',
+      title: t('onboarding.slide2.title'),
+      body: t('onboarding.slide2.desc'),
+      badge: t('onboarding.slide2.tag'),
       accentColor: tokens.coolBlueAccent,
       secondaryColor: tokens.primaryMint,
       illustrationType: 'star-book',
     },
     {
       id: 'slide-3',
-      title: ar.onboarding.slide3.title, // "خريطة الأساطير"
-      body: ar.onboarding.slide3.desc, // "تتبّع مواضع الأساطير على خريطة العالم العربي، واحفظ ما يعجبك في مكتبتك الخاصة."
-      badge: 'أطلس العالم العربي',
+      title: t('onboarding.slide3.title'),
+      body: t('onboarding.slide3.desc'),
+      badge: t('onboarding.slide3.tag'),
       accentColor: tokens.deepAccent,
       secondaryColor: tokens.primaryMint,
       illustrationType: 'star-compass',
@@ -84,13 +85,14 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
     if (touchStartX.current === null || touchEndX.current === null) return;
     const distance = touchStartX.current - touchEndX.current;
 
-    // In RTL, swiping left (negative distance) advances to next, swipe right (positive distance) goes back
-    if (distance > minSwipeDistance) {
-      // Swiped left in RTL: advance to next
-      handleNext();
-    } else if (distance < -minSwipeDistance) {
-      // Swiped right in RTL: go to previous
-      handlePrev();
+    if (Math.abs(distance) > minSwipeDistance) {
+      if (dir === 'rtl') {
+        if (distance < 0) handleNext();
+        else handlePrev();
+      } else {
+        if (distance > 0) handleNext();
+        else handlePrev();
+      }
     }
 
     touchStartX.current = null;
@@ -101,8 +103,9 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
 
   return (
     <div
-      dir="rtl"
-      lang="ar"
+      /* dir="rtl" default */
+      dir={dir}
+      lang={lang}
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
@@ -112,7 +115,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
       }}
       className="min-h-screen flex flex-col justify-between p-6 max-w-md mx-auto relative select-none animate-in fade-in duration-300 font-['Cairo',sans-serif]"
     >
-      {/* Top Header: Brand on right (RTL), "تخطَّ" text button on left (RTL) */}
+      {/* Top Header */}
       <header className="flex items-center justify-between pt-2">
         <div className="flex items-center gap-2.5">
           <div
@@ -128,19 +131,19 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
             style={{ color: tokens.deepAccent }}
             className="font-['Aref_Ruqaa',serif] text-xl font-bold tracking-wide"
           >
-            {ar.app.title}
+            {t('app.title')}
           </span>
         </div>
 
-        {/* Text button "تخطَّ" */}
+        {/* Skip button */}
         <button
           type="button"
           onClick={onComplete}
           style={{ color: tokens.textSecondary }}
           className="text-xs sm:text-sm font-bold hover:opacity-80 px-3 py-2 rounded-xl transition-colors cursor-pointer min-h-[44px] flex items-center"
-          aria-label={ar.onboarding.skip}
+          aria-label={t('onboarding.skip')}
         >
-          {ar.onboarding.skip}
+          {t('onboarding.skip')}
         </button>
       </header>
 
@@ -182,7 +185,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
                   borderColor: tokens.border,
                   color: tokens.deepAccent,
                 }}
-                className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full border shadow-xs flex items-center justify-center text-[11px]"
+                className="absolute -bottom-1 -end-1 w-6 h-6 rounded-full border shadow-xs flex items-center justify-center text-[11px]"
               >
                 {currentSlide === 0 && <Sparkles size={12} style={{ color: tokens.primaryMint }} />}
                 {currentSlide === 1 && <BookOpen size={12} style={{ color: tokens.coolBlueAccent }} />}
@@ -193,11 +196,11 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
             {/* Subtle Arabesque decorative corner stars */}
             <span
               style={{ backgroundColor: tokens.primaryMint }}
-              className="absolute top-2.5 right-2.5 w-1.5 h-1.5 rounded-full opacity-80"
+              className="absolute top-2.5 end-2.5 w-1.5 h-1.5 rounded-full opacity-80"
             />
             <span
               style={{ backgroundColor: tokens.coolBlueAccent }}
-              className="absolute bottom-2.5 left-2.5 w-1.5 h-1.5 rounded-full opacity-80"
+              className="absolute bottom-2.5 start-2.5 w-1.5 h-1.5 rounded-full opacity-80"
             />
           </div>
         </div>
@@ -238,9 +241,9 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
       <footer className="space-y-5 pb-4">
         {/* Dots Indicator */}
         <div
-          className="flex items-center justify-center gap-2"
+          className="flex items-center justify-center gap-0.5"
           role="tablist"
-          aria-label="مؤشر الشرائح"
+          aria-label={t('onboarding.dotsLabel')}
         >
           {slides.map((_, idx) => (
             <button
@@ -249,14 +252,18 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
               onClick={() => setCurrentSlide(idx)}
               role="tab"
               aria-selected={currentSlide === idx}
-              aria-label={`الشريحة ${idx + 1}`}
-              style={{
-                backgroundColor: currentSlide === idx ? tokens.deepAccent : tokens.border,
-              }}
-              className={`h-2.5 rounded-full transition-all duration-300 cursor-pointer ${
-                currentSlide === idx ? 'w-8' : 'w-2.5 opacity-60 hover:opacity-100'
-              }`}
-            />
+              aria-label={t('onboarding.slideAria', { num: idx + 1 })}
+              className="min-w-[44px] min-h-[44px] flex items-center justify-center cursor-pointer"
+            >
+              <span
+                style={{
+                  backgroundColor: currentSlide === idx ? tokens.deepAccent : tokens.border,
+                }}
+                className={`block h-2.5 rounded-full transition-all duration-300 ${
+                  currentSlide === idx ? 'w-8' : 'w-2.5 opacity-60 hover:opacity-100'
+                }`}
+              />
+            </button>
           ))}
         </div>
 
@@ -273,25 +280,25 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
                 color: tokens.textSecondary,
               }}
               className="px-4 py-3 rounded-2xl border text-xs font-bold hover:opacity-90 transition-all min-h-[48px] flex items-center justify-center gap-1.5 cursor-pointer shadow-xs min-w-[70px]"
-              aria-label={ar.onboarding.prev}
+              aria-label={t('onboarding.prev')}
             >
-              <ChevronRight size={16} />
-              <span>{ar.onboarding.prev}</span>
+              <ChevronRight size={16} className={dir === 'ltr' ? 'rotate-180' : ''} />
+              <span>{t('onboarding.prev')}</span>
             </button>
           )}
 
-          {/* Primary Action Button: "ابدأ الرحلة" in Primary Mint #7FD1AE */}
+          {/* Primary Action Button */}
           <button
             type="button"
             onClick={handleNext}
             style={{
-              backgroundColor: '#7FD1AE', // Primary Mint
-              color: '#0E5C4D', // Deep Teal text for readable, high contrast
+              backgroundColor: '#7FD1AE',
+              color: '#0E5C4D',
             }}
             className="flex-1 py-3.5 px-6 rounded-2xl text-sm font-bold shadow-md shadow-[#7FD1AE]/20 hover:brightness-105 active:scale-98 transition-all min-h-[48px] flex items-center justify-center gap-2 cursor-pointer"
           >
-            <span>{currentSlide === slides.length - 1 ? 'ابدأ الرحلة' : 'التالي'}</span>
-            <ChevronLeft size={18} className="transform scale-x-[-1]" />
+            <span>{currentSlide === slides.length - 1 ? (t('onboarding.start') || 'ابدأ الرحلة') : t('onboarding.next')}</span>
+            <ChevronLeft size={18} className={dir === 'ltr' ? 'rotate-180' : ''} />
           </button>
         </div>
 
@@ -302,9 +309,9 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
               type="button"
               onClick={onComplete}
               style={{ color: tokens.textSecondary }}
-              className="text-xs font-bold hover:underline py-1 px-3 cursor-pointer"
+              className="text-xs font-bold hover:underline py-2 px-4 cursor-pointer min-h-[44px] inline-flex items-center justify-center"
             >
-              {ar.onboarding.skip}
+              {t('onboarding.skip')}
             </button>
           </div>
         )}

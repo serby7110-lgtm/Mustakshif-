@@ -53,8 +53,8 @@ export const IconButton: React.FC<IconButtonProps> = ({
   }[variant];
 
   const sizeStyles = {
-    sm: 'w-8 h-8 rounded-xl text-sm p-1.5',
-    md: 'w-10 h-10 rounded-2xl text-base p-2',
+    sm: 'min-w-[44px] min-h-[44px] rounded-xl text-sm p-2',
+    md: 'w-11 h-11 min-w-[44px] min-h-[44px] rounded-2xl text-base p-2',
     lg: 'w-12 h-12 rounded-2xl text-lg p-2.5',
   }[size];
 

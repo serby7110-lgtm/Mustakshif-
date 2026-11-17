@@ -33,6 +33,7 @@ import { getCivImageUrl } from '../utils/assets';
 import { storage } from '../data/storage';
 
 import { useI18n } from '../i18n/i18n';
+import { getLocalizedCivilization, getLocalizedEntry } from '../content';
 export interface CivilizationsScreenProps {
   onSelectMythId?: (mythId: string) => void;
   selectedCivId?: string | null;
@@ -46,8 +47,18 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
   onClearSelectedCiv,
   onOpenMethodology,
 }) => {
-  const { t } = useI18n();
+  const { t, lang, dir } = useI18n();
   const { tokens, isDark } = useTheme();
+
+  const formatHistYear = useCallback(
+    (year?: number | null) => {
+      if (typeof year !== 'number' || !Number.isFinite(year)) {
+        return t('common.undated');
+      }
+      return year < 0 ? `${Math.abs(year)} ${t('civ.yearBc')}` : `${year} ${t('civ.yearCe')}`;
+    },
+    [t]
+  );
 
   // Selected civilization for detail view
   const [activeCiv, setActiveCiv] = useState<Civilization | null>(null);
@@ -115,18 +126,29 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
   // Timeline: Myth stars toggle (default ON)
   const [showMythStars, setShowMythStars] = useState<boolean>(true);
 
-  // All myths with chronological approxYear data
+  // All myths with chronological approxYear data (localized)
   const mythsWithYear = useMemo(() => {
-    return getAllEntries().filter((m) => typeof m.approxYear === 'number');
-  }, []);
+    return (getAllEntries() ?? [])
+      .filter((m) => typeof m?.approxYear === 'number' && Number.isFinite(m.approxYear))
+      .map((m) => getLocalizedEntry(m, lang));
+  }, [lang]);
 
-  // All civilizations loaded from data
-  const allCivilizations = useMemo(() => getAllCivilizations(), []);
+  // All civilizations loaded from data (localized)
+  const rawAllCivilizations = useMemo(() => getAllCivilizations() ?? [], []);
+  const allCivilizations = useMemo(
+    () => rawAllCivilizations.map((c) => getLocalizedCivilization(c, lang)),
+    [rawAllCivilizations, lang]
+  );
 
   // Sorted civilizations for tour in chronological order (oldest to newest)
   const sortedTourCivs = useMemo(() => {
     return [...allCivilizations].sort((a, b) => (a.startYear ?? -1000) - (b.startYear ?? -1000));
   }, [allCivilizations]);
+
+  // Reset era filter when language changes so labels align cleanly
+  useEffect(() => {
+    setSelectedEra('all');
+  }, [lang]);
 
   // Auto-dismiss toast
   useEffect(() => {
@@ -158,9 +180,9 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
     setIsDwellingCardVisible(false);
 
     if (isNatural) {
-      setToastMessage('انتهت الرحلة عند 600م — على أعتاب عصر جديد');
+      setToastMessage(t('civ.ended') || 'انتهت الرحلة عند 600م — على أعتاب عصر جديد');
     }
-  }, []);
+  }, [t]);
 
   // Switch away from timeline mode terminates tour
   useEffect(() => {
@@ -246,9 +268,11 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
           setTourOffset(state.targetOffset);
           setCurrentTourYear(state.targetYear);
           const currentCiv = sortedTourCivs[state.currentIndex];
-          setDwellingCiv(currentCiv);
-          setSelectedTimelineCiv(currentCiv);
-          setIsDwellingCardVisible(true);
+          if (currentCiv) {
+            setDwellingCiv(currentCiv);
+            setSelectedTimelineCiv(currentCiv);
+            setIsDwellingCardVisible(true);
+          }
 
           state.phase = 'dwell';
           state.phaseStartTime = timestamp;
@@ -269,14 +293,14 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
           setIsDwellingCardVisible(false);
 
           const nextIndex = state.currentIndex + 1;
-          if (nextIndex >= sortedTourCivs.length) {
+          const nextCiv = sortedTourCivs[nextIndex];
+          if (!nextCiv || nextIndex >= sortedTourCivs.length) {
             // Reached natural end of the tour
             handleEndTour(true);
             return;
           }
 
           // Advance to next civilization
-          const nextCiv = sortedTourCivs[nextIndex];
           const nextMidYear = Math.round(((nextCiv.startYear ?? 0) + (nextCiv.endYear ?? 0)) / 2);
           const nextPct = (nextMidYear - (-2500)) / 3100;
           const nextTargetOffset = Math.max(
@@ -369,7 +393,7 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
   }
 
   return (
-    <div className="space-y-4 pb-8 animate-in fade-in duration-200" dir="rtl">
+    <div className="space-y-4 pb-8 animate-in fade-in duration-200" dir={dir}>
       {/* 1. Header with Title & Icon */}
       <div className="flex items-center justify-between gap-3 pt-1">
         <div>
@@ -377,13 +401,13 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
             style={{ color: tokens.deepAccent }}
             className="font-['Aref_Ruqaa',serif] text-2xl sm:text-3xl font-bold leading-tight"
           >
-            الحضارات والأقوام
+            {t('civ.title')}
           </h2>
           <p
             style={{ color: tokens.textSecondary }}
             className="text-xs font-['Cairo',sans-serif] mt-0.5"
           >
-            سجل الممالك القديمة وحواضر شبه الجزيرة العربية ({allCivilizations.length} حضارة)
+            {t('civ.subtitle')} ({allCivilizations.length})
           </p>
         </div>
         <div
@@ -406,7 +430,7 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
         }}
         className="flex items-center rounded-2xl p-1 border shadow-xs"
         role="tablist"
-        aria-label="نمط عرض الحضارات"
+        aria-label={t('civ.title')}
       >
         <button
           type="button"
@@ -473,11 +497,11 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
                       }}
                       className="px-2 py-0.5 rounded-full text-[10px] font-bold font-mono"
                     >
-                      {currentTourYear < 0 ? `${Math.abs(currentTourYear)} ق.م` : `${currentTourYear} م`}
+                      {formatHistYear(currentTourYear)}
                     </span>
                   </div>
                   <span style={{ color: tokens.textSecondary }} className="text-[10px] sm:text-[11px] block opacity-85">
-                    {isTourPaused ? 'متوقف مؤقتاً — اضغط في أي مكان للمتابعة' : 'جولة سينمائية تلقائية — اضغط في أي مكان للإيقاف المؤقت'}
+                    {isTourPaused ? t('civ.resumeJourney') : t('civ.pauseJourney')}
                   </span>
                 </div>
               </div>
@@ -495,14 +519,14 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
                   borderColor: isDark ? 'rgba(239, 68, 68, 0.3)' : '#FCA5A5',
                 }}
                 className="px-3.5 py-1 rounded-full text-xs font-bold border hover:opacity-85 active:scale-95 transition-all cursor-pointer font-['Cairo',sans-serif] shadow-xs shrink-0"
-                title="إنهاء الرحلة والعودة"
+                title={t('civ.stopJourney')}
               >
-                إنهاء
+                {t('civ.stopJourney') || 'إنهاء'}
               </button>
             </div>
           )}
 
-          {/* Horizontally scrollable timeline canvas, RTL (oldest eras on the RIGHT) */}
+          {/* Horizontally scrollable timeline canvas */}
           <div
             onClick={isTourActive ? handleToggleTourPause : undefined}
             style={{
@@ -517,12 +541,12 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
               <div className="flex items-center gap-2">
                 <Clock size={16} style={{ color: tokens.deepAccent }} />
                 <h3 style={{ color: tokens.deepAccent }} className="font-['Aref_Ruqaa',serif] text-base font-bold">
-                  التسلسل الزمني لممالك وحضارات الجزيرة
+                  {t('timeline.timeline')}
                 </h3>
               </div>
 
               <div className="flex items-center gap-2.5 flex-wrap">
-                {/* Legend line: "★ أسطورة | ▬ حضارة" */}
+                {/* Legend line: /* ★ أسطورة | ▬ حضارة */ }
                 <span
                   style={{
                     color: tokens.textSecondary,
@@ -532,10 +556,10 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
                   className="text-xs font-['Cairo',sans-serif] px-2.5 py-1 rounded-xl border select-none inline-flex items-center gap-1.5"
                 >
                   <span style={{ color: '#7FD1AE' }} className="font-bold">★</span>
-                  <span>أسطورة</span>
+                  <span>{t('civ.timelineLegendMyth')}</span>
                   <span className="opacity-30">|</span>
                   <span style={{ color: tokens.coolBlueAccent }} className="font-bold">▬</span>
-                  <span>حضارة</span>
+                  <span>{t('civ.timelineLegendCiv')}</span>
                 </span>
 
                 {/* Toggle chip: "نجوم الأساطير" (default ON) */}
@@ -556,16 +580,16 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
                   }}
                   className="px-3 py-1 rounded-full text-xs font-bold border transition-all cursor-pointer inline-flex items-center gap-1.5 font-['Cairo',sans-serif] shadow-xs active:scale-95"
                   aria-pressed={showMythStars}
-                  title="إظهار أو إخفاء نجوم الأساطير"
+                  title={t('civ.mythStars')}
                 >
                   <svg width="13" height="13" viewBox="0 0 24 24" fill={showMythStars ? '#7FD1AE' : 'currentColor'} className="shrink-0">
                     <path d="M12 2L14.8 9.2L22 12L14.8 14.8L12 22L9.2 14.8L2 12L9.2 9.2Z" />
                   </svg>
-                  <span>نجوم الأساطير</span>
+                  <span>{t('civ.mythStars') || 'نجوم الأساطير'}</span>
                 </button>
 
                 <span style={{ color: tokens.textSecondary }} className="text-[11px] font-mono opacity-80">
-                  2500 ق.م – 600 م
+                  {formatHistYear(-2500)} – {formatHistYear(600)}
                 </span>
               </div>
             </div>
@@ -574,42 +598,32 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
             <div
               ref={scrollContainerRef}
               className="overflow-x-auto pb-4 pt-2 -mx-2 px-2 no-scrollbar"
-              dir="rtl"
+              dir={dir}
             >
               <div
                 ref={timelineTrackRef}
                 style={{
-                  transform: isTourActive ? `translate3d(${tourOffset}px, 0, 0)` : undefined,
+                  transform: isTourActive ? `translate3d(${dir === 'rtl' ? tourOffset : -tourOffset}px, 0, 0)` : undefined,
                   willChange: isTourActive ? 'transform' : undefined,
                 }}
                 className="min-w-[760px] relative transition-none"
               >
                 {/* 1. Header Gridlines every 500 years with labels */}
-                {/* Range: -2500 to 600 => total span 3100 years */}
-                {/* In RTL: Right is -2500 (oldest), Left is 600 (newest) */}
                 <div className="relative h-7 border-b mb-3" style={{ borderColor: tokens.borderSubtle }}>
-                  {[
-                    { year: -2500, label: '2500 ق.م' },
-                    { year: -2000, label: '2000 ق.م' },
-                    { year: -1500, label: '1500 ق.م' },
-                    { year: -1000, label: '1000 ق.م' },
-                    { year: -500, label: '500 ق.م' },
-                    { year: 1, label: '1 م' },
-                    { year: 500, label: '500 م' },
-                  ].map((tick) => {
-                    // Right percentage from -2500
-                    const rightPct = ((tick.year - (-2500)) / 3100) * 100;
+                  {[-2500, -2000, -1500, -1000, -500, 1, 500].map((year) => {
+                    const pct = ((year - (-2500)) / 3100) * 100;
+                    const posStyle = dir === 'rtl' ? { right: `${pct}%` } : { left: `${pct}%` };
                     return (
                       <div
-                        key={tick.year}
-                        style={{ right: `${rightPct}%` }}
+                        key={year}
+                        style={posStyle}
                         className="absolute top-0 -translate-x-1/2 flex flex-col items-center pointer-events-none"
                       >
                         <span
                           style={{ color: tokens.textSecondary }}
                           className="text-[10px] font-mono font-bold whitespace-nowrap"
                         >
-                          {tick.label}
+                          {formatHistYear(year)}
                         </span>
                         <div
                           style={{ backgroundColor: tokens.borderSubtle }}
@@ -622,13 +636,13 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
 
                 {/* Vertical background gridlines spanning the rows */}
                 <div className="absolute top-7 bottom-0 inset-x-0 pointer-events-none">
-                  {[ -2500, -2000, -1500, -1000, -500, 1, 500 ].map((year) => {
-                    const rightPct = ((year - (-2500)) / 3100) * 100;
+                  {[-2500, -2000, -1500, -1000, -500, 1, 500].map((year) => {
+                    const pct = ((year - (-2500)) / 3100) * 100;
                     return (
                       <div
                         key={`line-${year}`}
                         style={{
-                          right: `${rightPct}%`,
+                          [dir === 'rtl' ? 'right' : 'left']: `${pct}%`,
                           backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
                         }}
                         className="absolute top-0 bottom-0 w-px -translate-x-1/2"
@@ -646,11 +660,11 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
                           <path d="M12 2L14.8 9.2L22 12L14.8 14.8L12 22L9.2 14.8L2 12L9.2 9.2Z" />
                         </svg>
                         <span style={{ color: tokens.deepAccent }} className="font-['Aref_Ruqaa',serif] text-xs font-bold">
-                          نجوم الأساطير
+                          {t('civ.mythStars')}
                         </span>
                       </div>
                       <span style={{ color: tokens.textSecondary }} className="text-[10px] font-['Cairo',sans-serif] opacity-75">
-                        اضغط على أي نجمة لفتح شاشة الأسطورة
+                        {t('civ.openMyth')}
                       </span>
                     </div>
 
@@ -663,10 +677,8 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
                     >
                       {mythsWithYear.map((myth) => {
                         const clampedYear = Math.max(-2500, Math.min(600, myth.approxYear!));
-                        const rightPct = ((clampedYear - (-2500)) / 3100) * 100;
-                        const yearLabel = myth.approxYear! < 0
-                          ? `${Math.abs(myth.approxYear!)} ق.م`
-                          : `${myth.approxYear!} م`;
+                        const pct = ((clampedYear - (-2500)) / 3100) * 100;
+                        const yearLabel = formatHistYear(myth.approxYear!);
 
                         // Stars passing under the viewport get a brief twinkle scale animation
                         const isTwinkling =
@@ -683,14 +695,14 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
                               onSelectMythId && onSelectMythId(myth.id);
                             }}
                             style={{
-                              right: `${rightPct}%`,
+                              [dir === 'rtl' ? 'right' : 'left']: `${pct}%`,
                               top: '50%',
                             }}
                             className={`absolute -translate-y-1/2 -translate-x-1/2 p-1.5 rounded-full transition-all duration-200 cursor-pointer group z-20 focus:outline-none ${
                               isTwinkling ? 'scale-150 animate-pulse' : 'hover:scale-135 active:scale-95'
                             }`}
-                            title={`${myth.name} (${yearLabel}) — اضغط للقراءة`}
-                            aria-label={`أسطورة ${myth.name}: نحو ${yearLabel}`}
+                            title={`${myth.name} (${yearLabel})`}
+                            aria-label={`${myth.name}: ${yearLabel}`}
                           >
                             {/* Four-point star (mint #7FD1AE, 14px) */}
                             <svg
@@ -755,7 +767,7 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
                         {isDwelling && (
                           <div
                             style={{
-                              right: `${rightPct}%`,
+                              [dir === 'rtl' ? 'right' : 'left']: `${rightPct}%`,
                               backgroundColor: tokens.card,
                               borderColor: isDark ? '#7FD1AE' : '#0E5C4D',
                               color: tokens.textPrimary,
@@ -769,7 +781,7 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
                                 style={{ color: tokens.textPrimary }}
                                 className="font-['Aref_Ruqaa',serif] text-sm sm:text-base font-bold truncate"
                               >
-                                {civ.name}
+                                {civ.name ?? ''}
                               </span>
                               <span
                                 style={{
@@ -779,7 +791,7 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
                                 }}
                                 className="px-2 py-0.5 rounded-full text-[10px] font-bold border shrink-0 font-['Cairo',sans-serif]"
                               >
-                                {civ.era}
+                                {civ.era || t('common.undated')}
                               </span>
                             </div>
                             {civ.legacy && (
@@ -807,26 +819,26 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
                           }}
                           onMouseEnter={() => !isTourActive && setSelectedTimelineCiv(civ)}
                           style={{
-                            right: `${rightPct}%`,
+                            [dir === 'rtl' ? 'right' : 'left']: `${rightPct}%`,
                             width: `${widthPct}%`,
                             backgroundColor: barBg,
                             borderColor: isSelected || isDwelling ? tokens.deepAccent : barBorder,
                             color: '#0E5C4D',
                           }}
-                          className={`absolute h-10 px-2.5 rounded-2xl border-2 flex flex-col justify-center text-right cursor-pointer shadow-xs transition-all duration-150 hover:scale-[1.02] hover:shadow-md active:scale-95 group ${
+                          className={`absolute h-10 px-2.5 rounded-2xl border-2 flex flex-col justify-center text-start cursor-pointer shadow-xs transition-all duration-150 hover:scale-[1.02] hover:shadow-md active:scale-95 group ${
                             isSelected || isDwelling ? 'ring-2 ring-offset-1 ring-[#0E5C4D]' : ''
                           }`}
-                          title={`اضغط لفتح صفحة ${civ.name}`}
-                          aria-label={`حضارة ${civ.name}: ${civ.era}`}
+                          title={civ.name}
+                          aria-label={`${civ.name}: ${civ.era}`}
                         >
                           <div className="flex items-center justify-between gap-1 w-full overflow-hidden">
                             <span
                               style={{ color: isDark ? '#E2F7ED' : '#0B483B' }}
                               className="font-['Aref_Ruqaa',serif] text-xs sm:text-sm font-bold truncate leading-tight group-hover:underline"
                             >
-                              {civ.name}
+                              {civ.name ?? ''}
                             </span>
-                            <ChevronLeft size={13} style={{ color: tokens.deepAccent }} className="shrink-0 opacity-70 group-hover:opacity-100 group-hover:-translate-x-0.5 transition-transform" />
+                            <ChevronLeft size={13} style={{ color: tokens.deepAccent }} className={`shrink-0 opacity-70 group-hover:opacity-100 transition-transform ${dir === 'ltr' ? 'rotate-180' : ''}`} />
                           </div>
 
                           {/* Era text under name inside the bar */}
@@ -834,7 +846,7 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
                             style={{ color: isDark ? '#A3E2C4' : '#146353' }}
                             className="text-[10px] font-['Cairo',sans-serif] truncate block leading-none opacity-90"
                           >
-                            {civ.era}
+                            {civ.era || t('common.undated')}
                           </span>
                         </button>
                       </div>
@@ -854,16 +866,16 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
             >
               <div className="flex items-center gap-1.5 font-medium">
                 <ArrowRight size={14} style={{ color: tokens.deepAccent }} />
-                <span>مرّر لتسافر عبر الزمن</span>
+                <span>{t('timeline.journey')}</span>
                 <ArrowLeft size={14} style={{ color: tokens.deepAccent }} />
               </div>
               <span className="text-[11px] opacity-75">
-                اضغط على أي شريط لفتح تفاصيل الحضارة
+                {t('home.exploreCiv')}
               </span>
             </div>
           </div>
 
-          {/* STEP 3 (cont): When a bar is selected/focused, show "أساطير من العالم نفسه" related myths chips */}
+          {/* Related myths chips for selected civilization */}
           {selectedTimelineCiv && selectedTimelineCiv.relatedMyths && selectedTimelineCiv.relatedMyths.length > 0 && (
             <div
               style={{
@@ -876,7 +888,7 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
                 <div className="flex items-center gap-1.5">
                   <Sparkles size={15} style={{ color: tokens.primaryMint }} />
                   <h4 style={{ color: tokens.deepAccent }} className="font-['Aref_Ruqaa',serif] text-sm font-bold">
-                    أساطير من العالم نفسه ({selectedTimelineCiv.name})
+                    {t('civ.relatedMyths')} ({selectedTimelineCiv.name})
                   </h4>
                 </div>
                 <button
@@ -885,13 +897,14 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
                   style={{ color: tokens.deepAccent }}
                   className="text-xs font-bold hover:underline cursor-pointer"
                 >
-                  فتح صفحة الحضارة ←
+                  {t('map.readCiv')}
                 </button>
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
                 {selectedTimelineCiv.relatedMyths.map((mythId) => {
-                  const matchedEntry = getEntryById(mythId);
+                  const rawMatched = getEntryById(mythId);
+                  const matchedEntry = rawMatched ? getLocalizedEntry(rawMatched, lang) : undefined;
                   const label = matchedEntry ? matchedEntry.name : mythId;
                   return (
                     <button
@@ -912,7 +925,7 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
                           ({matchedEntry.typeLabel})
                         </span>
                       )}
-                      <ChevronLeft size={13} className="opacity-60" />
+                      <ChevronLeft size={13} className={`opacity-60 ${dir === 'ltr' ? 'rotate-180' : ''}`} />
                     </button>
                   );
                 })}
@@ -939,7 +952,7 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
                 className="shrink-0 px-3.5 py-1.5 rounded-2xl text-xs font-bold border transition-all cursor-pointer hover:opacity-90 active:scale-95"
               >
                 <span>{t('map.all')}</span>
-                <span className="text-[10px] mr-1 opacity-80">({allCivilizations.length})</span>
+                <span className="text-[10px] ms-1 opacity-80">({allCivilizations.length})</span>
               </button>
 
               {uniqueEras.map((era) => {
@@ -960,7 +973,7 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
                     className="shrink-0 px-3.5 py-1.5 rounded-2xl text-xs font-bold border transition-all cursor-pointer hover:opacity-90 active:scale-95 flex items-center gap-1"
                   >
                     <span>{era}</span>
-                    <span className="text-[10px] mr-0.5 opacity-80">({count})</span>
+                    <span className="text-[10px] ms-0.5 opacity-80">({count})</span>
                   </button>
                 );
               })}
@@ -976,24 +989,25 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
               }}
               className="relative flex items-center border rounded-2xl shadow-xs transition-all duration-200"
             >
-              <div style={{ color: tokens.deepAccent }} className="pr-3.5 pl-2">
+              <div style={{ color: tokens.deepAccent }} className="ps-3.5 pe-2">
                 <Search size={18} strokeWidth={2.2} />
               </div>
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="ابحث بالاسم، الحاضرة، أو الإقليم..."
+                placeholder={t('civ.searchPlaceholder')}
                 style={{ color: tokens.textPrimary }}
-                className="w-full py-2.5 pl-10 pr-1 text-xs sm:text-sm bg-transparent outline-none font-['Cairo',sans-serif]"
+                className="w-full py-2.5 pe-10 ps-1 text-xs sm:text-sm bg-transparent outline-none font-['Cairo',sans-serif]"
+                dir={dir}
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery('')}
                   style={{ color: tokens.textSecondary }}
-                  className="absolute left-3 p-1 rounded-full hover:opacity-80 cursor-pointer"
-                  aria-label="مسح البحث"
+                  className="absolute end-3 p-1 rounded-full hover:opacity-80 cursor-pointer"
+                  aria-label={t('civ.clearSearch')}
                 >
                   <X size={16} />
                 </button>
@@ -1029,7 +1043,7 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
 
-                      <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5 flex-wrap">
+                      <div className="absolute top-2.5 start-2.5 flex items-center gap-1.5 flex-wrap">
                         <span
                           style={{
                             backgroundColor: isDark ? 'rgba(74, 144, 217, 0.4)' : 'rgba(232, 241, 251, 0.95)',
@@ -1039,7 +1053,7 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
                           className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold border shadow-xs backdrop-blur-xs"
                         >
                           <Calendar size={11} />
-                          <span>{civ.era}</span>
+                          <span>{civ.era || t('common.undated')}</span>
                         </span>
 
                         {civ.prophet && (
@@ -1052,7 +1066,7 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
                             className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold border shadow-xs backdrop-blur-xs"
                           >
                             <Sparkles size={10} />
-                            <span>نبي الله {civ.prophet}</span>
+                            <span>{civ.prophet}</span>
                           </span>
                         )}
                       </div>
@@ -1060,17 +1074,17 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
                       <div className="absolute bottom-2.5 right-3 left-3 flex items-end justify-between text-white">
                         <div>
                           <h3 className="font-['Aref_Ruqaa',serif] text-2xl font-bold text-white drop-shadow-md">
-                            {civ.name}
+                            {civ.name ?? ''}
                           </h3>
                           <div className="flex items-center gap-1 text-xs text-white/90">
                             <MapPin size={12} className="shrink-0 text-[#7FD1AE]" />
-                            <span>{civ.region}</span>
+                            <span>{civ.region ?? ''}</span>
                           </div>
                         </div>
 
                         <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-black/50 backdrop-blur-md border border-white/20 text-white">
                           <Building2 size={12} style={{ color: tokens.primaryMint }} />
-                          <span>{(civ.cities || []).length} حواضر</span>
+                          <span>{t('home.citiesCount', { count: (Array.isArray(civ.cities) ? civ.cities : []).length })}</span>
                         </div>
                       </div>
                     </div>
@@ -1091,7 +1105,7 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
                               className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold border"
                             >
                               <Calendar size={11} />
-                              <span>{civ.era}</span>
+                              <span>{civ.era || t('common.undated')}</span>
                             </span>
 
                             {civ.prophet && (
@@ -1104,7 +1118,7 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
                                 className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold border"
                               >
                                 <Sparkles size={10} />
-                                <span>نبي الله {civ.prophet}</span>
+                                <span>{civ.prophet}</span>
                               </span>
                             )}
                           </div>
@@ -1113,7 +1127,7 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
                             style={{ color: tokens.deepAccent }}
                             className="font-['Aref_Ruqaa',serif] text-xl sm:text-2xl font-bold group-hover:text-[#0E5C4D] transition-colors"
                           >
-                            {civ.name}
+                            {civ.name ?? ''}
                           </h3>
 
                           <div
@@ -1121,7 +1135,7 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
                             className="flex items-center gap-1.5 text-xs font-['Cairo',sans-serif]"
                           >
                             <MapPin size={13} className="shrink-0 opacity-70" />
-                            <span>{civ.region}</span>
+                            <span>{civ.region ?? ''}</span>
                           </div>
                         </div>
 
@@ -1135,14 +1149,14 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
                             className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium border"
                           >
                             <Building2 size={12} style={{ color: tokens.deepAccent }} />
-                            <span>{(civ.cities || []).length} حواضر</span>
+                            <span>{t('home.citiesCount', { count: (Array.isArray(civ.cities) ? civ.cities : []).length })}</span>
                           </div>
                         </div>
                       </div>
                     )}
 
                     {/* Quick teaser if chapters available */}
-                    {civ.chapters && civ.chapters[0] && (
+                    {Array.isArray(civ.chapters) && civ.chapters[0]?.text && (
                       <p
                         style={{ color: tokens.textPrimary }}
                         className="text-xs font-['Cairo',sans-serif] opacity-80 line-clamp-2 leading-relaxed"
@@ -1155,8 +1169,8 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
                       style={{ color: tokens.deepAccent }}
                       className="pt-2 flex items-center justify-between text-xs font-bold group-hover:opacity-100"
                     >
-                      <span>استكشف تاريخ وحضارة {civ.name}</span>
-                      <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+                      <span>{t('home.exploreCiv')} · {civ.name ?? ''}</span>
+                      <ChevronLeft size={16} className={`transition-transform ${dir === 'ltr' ? 'rotate-180' : ''}`} />
                     </div>
                   </div>
                 </Card>
@@ -1164,7 +1178,7 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
             })}
           </div>
         ) : (
-          /* Empty state when no civilizations exist yet */
+          /* Empty state */
           <Card
             variant="white"
             elevation="subtle"
@@ -1185,15 +1199,13 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
                 style={{ color: tokens.deepAccent }}
                 className="font-['Aref_Ruqaa',serif] text-xl font-bold"
               >
-                موسوعة الحضارات والأقوام
+                {t('civ.title')}
               </h3>
               <p
                 style={{ color: tokens.textSecondary }}
                 className="text-xs sm:text-sm font-['Cairo',sans-serif] max-w-sm mx-auto leading-relaxed"
               >
-                {searchQuery
-                  ? 'لم يتم العثور على حضارات تطابق بحثك. جرّب كلمات أخرى.'
-                  : 'يتم حالياً تجهيز الدفعة التوثيقية الشاملة لحضارات وأقوام الجزيرة العربية (عاد، ثمود، سبأ، مدين، والأنباط).'}
+                {t('civ.noResults')}
               </p>
             </div>
           </Card>
@@ -1213,9 +1225,9 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
             height: '52px',
             boxShadow: '0 8px 24px -4px rgba(14, 92, 77, 0.45), 0 0 12px rgba(127, 209, 174, 0.25)',
           }}
-          className="fixed bottom-20 left-4 sm:left-6 z-40 rounded-full flex items-center justify-center text-white hover:scale-110 active:scale-95 transition-all cursor-pointer shadow-xl group border-2 border-white/20"
+          className="fixed bottom-20 end-4 sm:end-6 z-40 rounded-full flex items-center justify-center text-white hover:scale-110 active:scale-95 transition-all cursor-pointer shadow-xl group border-2 border-white/20"
         >
-          <Play size={22} className="fill-white text-white ml-0.5" />
+          <Play size={22} className="fill-white text-white ms-0.5" />
         </button>
       )}
 

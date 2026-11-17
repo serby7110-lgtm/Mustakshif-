@@ -22,6 +22,8 @@ export interface AutoDarkDecision {
   isDark: boolean;
   reason: 'sensor' | 'sunset';
   description: string;
+  descriptionKey: 'theme.sensorDark' | 'theme.sensorLight' | 'theme.sunsetNight' | 'theme.sunriseDay';
+  descriptionParams?: Record<string, string | number>;
   lux?: number | null;
   sunsetStr?: string;
   sunriseStr?: string;
@@ -99,14 +101,17 @@ export function evaluateAutoDarkMode(
   lat: number = DEFAULT_REGION_COORDS.lat
 ): AutoDarkDecision {
   if (lux !== null && typeof lux === 'number' && !isNaN(lux)) {
+    const roundedLux = Math.round(lux);
     const isDark = lux < AMBIENT_LIGHT_DARK_THRESHOLD_LUX;
     return {
       isDark,
       reason: 'sensor',
       description: isDark
-        ? `مستشعر الضوء (${Math.round(lux)} لوكس - إضاءة منخفضة)`
-        : `مستشعر الضوء (${Math.round(lux)} لوكس - إضاءة كافية)`,
-      lux: Math.round(lux),
+        ? `مستشعر الضوء (${roundedLux} لوكس - إضاءة منخفضة)`
+        : `مستشعر الضوء (${roundedLux} لوكس - إضاءة كافية)`,
+      descriptionKey: isDark ? 'theme.sensorDark' : 'theme.sensorLight',
+      descriptionParams: { lux: roundedLux },
+      lux: roundedLux,
     };
   }
 
@@ -117,6 +122,8 @@ export function evaluateAutoDarkMode(
     description: sun.isNight
       ? `توقيت الغروب (${sun.sunsetStr} - ليلي)`
       : `توقيت الشروق (${sun.sunriseStr} - نهاري)`,
+    descriptionKey: sun.isNight ? 'theme.sunsetNight' : 'theme.sunriseDay',
+    descriptionParams: { time: sun.isNight ? sun.sunsetStr : sun.sunriseStr },
     sunsetStr: sun.sunsetStr,
     sunriseStr: sun.sunriseStr,
   };
@@ -157,10 +164,14 @@ export function subscribeAmbientLight(
       return () => {
         try {
           sensor.stop();
-        } catch {}
+        } catch (err) {
+          console.warn('[AutoDarkMode] Failed to stop AmbientLightSensor:', err);
+        }
       };
     }
-  } catch {}
+  } catch (err) {
+    console.warn('[AutoDarkMode] AmbientLightSensor unavailable:', err);
+  }
 
   // 2. Fallback to older devicelight event
   if ('ondevicelight' in window) {
