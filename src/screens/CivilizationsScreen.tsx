@@ -22,10 +22,13 @@ import {
   List,
   Play,
   Pause,
+  Orbit,
 } from 'lucide-react';
 import { Civilization, getAllCivilizations } from '../data/civTypes';
 import { getEntryById, getAllEntries } from '../data/seed';
 import { CivilizationPage } from './CivilizationPage';
+import { AzamaScreen } from './AzamaScreen';
+import { AzamaEntry } from '../data/azamaTypes';
 import { Card } from '../components/primitives/Card';
 import { useTheme } from '../theme/ThemeContext';
 import { normalizeArabic } from '../utils/arabicSearch';
@@ -39,6 +42,9 @@ export interface CivilizationsScreenProps {
   selectedCivId?: string | null;
   onClearSelectedCiv?: () => void;
   onOpenMethodology?: () => void;
+  initialSegment?: 'list' | 'timeline' | 'azama';
+  segmentTriggerNonce?: number;
+  onSelectAzamaEntry?: (entry: AzamaEntry) => void;
 }
 
 export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
@@ -46,6 +52,9 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
   selectedCivId,
   onClearSelectedCiv,
   onOpenMethodology,
+  initialSegment,
+  segmentTriggerNonce,
+  onSelectAzamaEntry,
 }) => {
   const { t, lang, dir } = useI18n();
   const { tokens, isDark } = useTheme();
@@ -60,8 +69,8 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
     [t]
   );
 
-  // Selected civilization for detail view
-  const [activeCiv, setActiveCiv] = useState<Civilization | null>(null);
+  // Selected civilization ID for detail view (derived dynamically so language switches apply)
+  const [activeCivId, setActiveCivId] = useState<string | null>(null);
 
   // Cinematic auto-tour state
   const [isTourActive, setIsTourActive] = useState<boolean>(false);
@@ -106,12 +115,23 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
     pausedAt: 0,
   });
 
-  // Segment toggle: "القائمة | خط الزمن" (persisted choice)
-  const [viewMode, setViewModeState] = useState<'list' | 'timeline'>(() => storage.getCivSegment());
+  // Segment toggle: "القائمة | خط الزمن | الطبقات والأكوان"
+  const [viewMode, setViewModeState] = useState<'list' | 'timeline' | 'azama'>(
+    () => initialSegment ?? storage.getCivSegment()
+  );
 
-  const handleSetViewMode = (mode: 'list' | 'timeline') => {
+  useEffect(() => {
+    if (initialSegment && segmentTriggerNonce) {
+      setActiveCivId(null);
+      setViewModeState(initialSegment);
+    }
+  }, [initialSegment, segmentTriggerNonce]);
+
+  const handleSetViewMode = (mode: 'list' | 'timeline' | 'azama') => {
     setViewModeState(mode);
-    storage.setCivSegment(mode);
+    if (mode === 'list' || mode === 'timeline') {
+      storage.setCivSegment(mode);
+    }
   };
 
   // Selected civilization in Timeline view (for "أساطير من العالم نفسه" related myths chips)
@@ -139,6 +159,10 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
     () => rawAllCivilizations.map((c) => getLocalizedCivilization(c, lang)),
     [rawAllCivilizations, lang]
   );
+  const activeCiv = useMemo(
+    () => (activeCivId ? allCivilizations.find((c) => c.id === activeCivId) ?? null : null),
+    [activeCivId, allCivilizations]
+  );
 
   // Sorted civilizations for tour in chronological order (oldest to newest)
   const sortedTourCivs = useMemo(() => {
@@ -153,8 +177,8 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
   // Auto-dismiss toast
   useEffect(() => {
     if (!toastMessage) return;
-    const t = setTimeout(() => setToastMessage(null), 3500);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setToastMessage(null), 3500);
+    return () => clearTimeout(timer);
   }, [toastMessage]);
 
   // Cleanup RAF on unmount or tab switch
@@ -326,11 +350,8 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
 
   // Sync external selectedCivId if provided
   useEffect(() => {
-    if (selectedCivId) {
-      const found = allCivilizations.find((c) => c.id === selectedCivId);
-      if (found) {
-        setActiveCiv(found);
-      }
+    if (selectedCivId && allCivilizations.some((c) => c.id === selectedCivId)) {
+      setActiveCivId(selectedCivId);
     }
   }, [selectedCivId, allCivilizations]);
 
@@ -383,7 +404,7 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
       <CivilizationPage
         civilization={activeCiv}
         onBack={() => {
-          setActiveCiv(null);
+          setActiveCivId(null);
           if (onClearSelectedCiv) onClearSelectedCiv();
         }}
         onSelectMythId={onSelectMythId}
@@ -422,19 +443,20 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
         </div>
       </div>
 
-      {/* STEP 1: Segment toggle: "القائمة | خط الزمن" (persisted choice) */}
+      {/* STEP 1: Segment toggle: "القائمة | خط الزمن | الطبقات والأكوان" */}
       <div
         style={{
           backgroundColor: tokens.surface,
           borderColor: tokens.border,
         }}
-        className="flex items-center rounded-2xl p-1 border shadow-xs"
+        className="flex items-center rounded-2xl p-1 border shadow-xs gap-1"
         role="tablist"
         aria-label={t('civ.title')}
       >
         <button
           type="button"
           role="tab"
+          data-testid="civ-tab-list"
           aria-selected={viewMode === 'list'}
           onClick={() => handleSetViewMode('list')}
           style={{
@@ -442,15 +464,16 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
             color: viewMode === 'list' ? tokens.deepAccent : tokens.textSecondary,
             borderColor: viewMode === 'list' ? tokens.border : 'transparent',
           }}
-          className="flex-1 py-2 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs"
+          className="flex-1 py-2 px-2.5 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs min-h-[44px]"
         >
-          <List size={15} />
-          <span>{t('timeline.list')}</span>
+          <List size={15} className="shrink-0" />
+          <span className="truncate">{t('timeline.list')}</span>
         </button>
 
         <button
           type="button"
           role="tab"
+          data-testid="civ-tab-timeline"
           aria-selected={viewMode === 'timeline'}
           onClick={() => handleSetViewMode('timeline')}
           style={{
@@ -458,15 +481,37 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
             color: viewMode === 'timeline' ? tokens.deepAccent : tokens.textSecondary,
             borderColor: viewMode === 'timeline' ? tokens.border : 'transparent',
           }}
-          className="flex-1 py-2 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs"
+          className="flex-1 py-2 px-2.5 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs min-h-[44px]"
         >
-          <Clock size={15} />
-          <span>{t('timeline.timeline')}</span>
+          <Clock size={15} className="shrink-0" />
+          <span className="truncate">{t('timeline.timeline')}</span>
+        </button>
+
+        <button
+          type="button"
+          role="tab"
+          data-testid="civ-tab-azama"
+          aria-selected={viewMode === 'azama'}
+          onClick={() => handleSetViewMode('azama')}
+          style={{
+            backgroundColor: viewMode === 'azama' ? tokens.card : 'transparent',
+            color: viewMode === 'azama' ? tokens.deepAccent : tokens.textSecondary,
+            borderColor: viewMode === 'azama' ? tokens.border : 'transparent',
+          }}
+          className="flex-1 py-2 px-2.5 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs min-h-[44px]"
+        >
+          <Orbit size={15} className="shrink-0" style={{ color: viewMode === 'azama' ? '#4A90D9' : undefined }} />
+          <span className="truncate">{t('azama.tileTitle')}</span>
         </button>
       </div>
 
-      {/* VIEW MODE 1: TIMELINE VIEW */}
-      {viewMode === 'timeline' ? (
+      {/* VIEW MODE 0: AZAMA COSMOLOGY SECTION */}
+      {viewMode === 'azama' ? (
+        <AzamaScreen
+          showSectionHeading={false}
+          onSelectEntry={(entry) => onSelectAzamaEntry?.(entry)}
+        />
+      ) : viewMode === 'timeline' ? (
         <div className="space-y-4 pt-1 animate-in fade-in duration-200">
           {/* Tour Controls HUD during active tour */}
           {isTourActive && (
@@ -815,7 +860,7 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
                               return;
                             }
                             setSelectedTimelineCiv(civ);
-                            setActiveCiv(civ);
+                            setActiveCivId(civ.id);
                           }}
                           onMouseEnter={() => !isTourActive && setSelectedTimelineCiv(civ)}
                           style={{
@@ -893,7 +938,7 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
                 </div>
                 <button
                   type="button"
-                  onClick={() => setActiveCiv(selectedTimelineCiv)}
+                  onClick={() => setActiveCivId(selectedTimelineCiv.id)}
                   style={{ color: tokens.deepAccent }}
                   className="text-xs font-bold hover:underline cursor-pointer"
                 >
@@ -1029,7 +1074,7 @@ export const CivilizationsScreen: React.FC<CivilizationsScreenProps> = ({
                   variant="white"
                   elevation="subtle"
                   interactive
-                  onClick={() => setActiveCiv(civ)}
+                  onClick={() => setActiveCivId(civ.id)}
                   className="overflow-hidden rounded-2xl cursor-pointer hover:border-[#7FD1AE] transition-all group border"
                 >
                   {/* Visual Header / Thumbnail if available */}

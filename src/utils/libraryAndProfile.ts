@@ -41,8 +41,9 @@ export function getReadingStatus(
   entryId: string,
   progressMap: Record<string, number> = {}
 ): 'unread' | 'reading' | 'completed' {
-  if (!entryId || !progressMap) return 'unread';
-  const raw = progressMap[entryId] ?? progressMap[`al-${entryId}`] ?? progressMap[entryId.replace('al-', '')] ?? 0;
+  if (typeof entryId !== 'string' || !entryId || !progressMap) return 'unread';
+  const bareId = entryId.startsWith('al-') ? entryId.slice(3) : entryId;
+  const raw = progressMap[entryId] ?? progressMap[`al-${bareId}`] ?? progressMap[bareId] ?? 0;
   const p = Number.isFinite(raw) ? raw : 0;
   if (p >= 100) return 'completed';
   if (p > 0) return 'reading';

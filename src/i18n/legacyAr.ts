@@ -168,8 +168,7 @@ export const legacyAr = {
   },
   studio: {
     title: 'الاستوديو',
-    subtitle: 'بذور سردية وأفكار تفاعلية لصنّاع الألعاب وكتّاب الروايات',
-    gameHooks: 'أفكار للألعاب',
+    subtitle: 'بذور سردية وأفكار إبداعية لكتّاب القصص والروايات',
     writingHooks: 'بذور للقصص',
     exportSelected: 'تصدير المختار',
     exportToast: 'تم تصدير أفكارك',

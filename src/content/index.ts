@@ -3,6 +3,7 @@ import type { MythChapter, MythEntry, MythSource, MythTimelinePoint } from '../d
 import type { Civilization, CivilizationChapter } from '../data/civTypes';
 import type { DeepStory, DeepQuote, DeepChapter } from '../data/storyTypes';
 import type { LongFormEntryData } from '../data/longForm';
+import { PUBLIC_DOMAIN_STORIES } from './publicDomainStories';
 
 import arContent from './ar.json';
 import enContent from './en.json';
@@ -80,6 +81,13 @@ const TAG_MAP: Record<string, Record<AppLang, string>> = {
   'رعب': { ar: 'رعب', en: 'Horror', id: 'Horor', th: 'สยองขวัญ' },
   'تاريخ': { ar: 'تاريخ', en: 'History', id: 'Sejarah', th: 'ประวัติศาสตร์' },
   'خرافي': { ar: 'خرافي', en: 'Mythical', id: 'Mitologis', th: 'ตำนาน' },
+  sacred_forest: { ar: 'الغابة والحصاد', en: 'Sacred Nature', id: 'Alam & Kesuburan', th: 'ป่าศักดิ์สิทธิ์และผืนดิน' },
+  hero_quest: { ar: 'رحلة البطل', en: 'Hero’s Quest', id: 'Perjalanan Pahlawan', th: 'การเดินทางของวีรบุรุษ' },
+  sky_water: { ar: 'السماء والماء', en: 'Sky & Water', id: 'Langit & Air', th: 'ฟากฟ้าและสายน้ำ' },
+  cosmos_order: { ar: 'نظام الكون', en: 'Cosmic Order', id: 'Tatanan Kosmos', th: 'ระเบียบแห่งจักรวาล' },
+  sacred_light: { ar: 'النور والبروج', en: 'Celestial Light', id: 'Cahaya Langit', th: 'แสงแห่งดวงดาว' },
+  wisdom_wit: { ar: 'الحكمة والطرافة', en: 'Wisdom & Wit', id: 'Hikmah & Kecerdikan', th: 'ปัญญาและคติสอนใจ' },
+  night_journey: { ar: 'مسرى الليل', en: 'Night Journey', id: 'Pengembaraan Malam', th: 'การเดินทางยามราตรี' },
 };
 
 const ERA_MAP: Record<string, Record<AppLang, string>> = {
@@ -198,7 +206,37 @@ export type LocalizedCivilization = Civilization & { hasMissingTranslation?: boo
 export type LocalizedDeepStory = DeepStory & { hasMissingTranslation?: boolean };
 
 export function getLocalizedEntry(entry: MythEntry, lang: AppLang): LocalizedMythEntry {
-  if (!entry || lang === 'ar') return entry;
+  if (!entry) return entry;
+
+  const pdItem = PUBLIC_DOMAIN_STORIES.find((item) => item.id === entry.id);
+  if (pdItem) {
+    const typeLabels: Record<string, Record<AppLang, string>> = {
+      story: { ar: 'قصة', en: 'Story', id: 'Kisah', th: 'นิทาน' },
+      myth: { ar: 'أسطورة', en: 'Myth', id: 'Mitologi', th: 'ตำนาน' },
+      cosmology: { ar: 'كوسمولوجيا', en: 'Cosmology', id: 'Kosmologi', th: 'จักรวาลวิทยา' },
+      folklore: { ar: 'فلكلور', en: 'Folklore', id: 'Cerita Rakyat', th: 'คติชน' },
+    };
+    const localizedType = typeLabels[pdItem.type]?.[lang] ?? entry.typeLabel;
+    return {
+      ...entry,
+      name: pdItem.title[lang] || entry.name,
+      typeLabel: localizedType,
+      entryType: localizedType,
+      region: pdItem.region.label[lang] || entry.region,
+      summary: pdItem.summary[lang] || entry.summary,
+      body: pdItem.text[lang]?.length ? pdItem.text[lang] : entry.body,
+      sources: [
+        {
+          title: pdItem.source.title[lang] || pdItem.source.title.ar,
+          author: pdItem.source.author[lang] || pdItem.source.author.ar,
+          year: pdItem.source.year || '',
+        },
+      ],
+      hasMissingTranslation: false,
+    };
+  }
+
+  if (lang === 'ar') return entry;
 
   const bundle = CONTENT_BY_LANG[lang] ?? CONTENT_BY_LANG.ar;
   const tr = bundle.myths?.[entry.id];
@@ -258,7 +296,9 @@ export function getLocalizedEntry(entry: MythEntry, lang: AppLang): LocalizedMyt
 
   const mergedChapters: MythChapter[] | undefined = Array.isArray(entry.chapters)
     ? entry.chapters.map((ch, idx) => {
-        const trCh = tr.chapters?.find((c) => c?.id === ch?.id) ?? tr.chapters?.[idx];
+        const trCh =
+          (ch?.id ? tr.chapters?.find((c) => c?.id === ch.id) : undefined) ??
+          tr.chapters?.[idx];
         const fbCh = arFallback.chapters?.[idx];
         return {
           ...ch,
@@ -434,10 +474,11 @@ export function getLocalizedDeepStory(
       }))
     : undefined;
 
-  const quotes: DeepQuote[] | undefined = baseStory.quotes
+  const baseQuotes = Array.isArray(baseStory.quotes) ? baseStory.quotes : undefined;
+  const quotes: DeepQuote[] | undefined = baseQuotes
     ? Array.isArray(tr.quotes) && tr.quotes.length > 0
       ? tr.quotes.map((trQ, idx) => {
-          const fbQ = baseStory.quotes![idx] ?? baseStory.quotes![0];
+          const fbQ = baseQuotes[idx] ?? baseQuotes[0];
           return {
             text: nonEmptyStr(trQ?.text, fbQ?.text ?? '', markMissing),
             source: nonEmptyStr(trQ?.source, fbQ?.source ?? '', markMissing),
@@ -445,8 +486,8 @@ export function getLocalizedDeepStory(
           };
         })
       : (() => {
-          if (baseStory.quotes!.length > 0) markMissing();
-          return baseStory.quotes!.map((q) => ({
+          if (baseQuotes.length > 0) markMissing();
+          return baseQuotes.map((q) => ({
             ...q,
             type: localizeEvidenceLabel(q.type, lang),
           }));

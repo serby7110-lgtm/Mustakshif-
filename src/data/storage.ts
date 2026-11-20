@@ -8,16 +8,32 @@
  * and runtime type guards against corrupted or malformed stored values.
  */
 
+import {
+  FontSize,
+  ArabicFontId,
+  EnglishFontId,
+  FONT_SETTINGS_EVENT,
+  normalizeFontSize,
+  normalizeArabicFont,
+  normalizeEnglishFont,
+  applyTypographyToDocument,
+} from '../utils/typography';
+
+export type { FontSize, ArabicFontId, EnglishFontId };
+
 const STORAGE_KEYS = {
   BOOKMARKS: 'mustakshif_saved_ids_v1',
   HISTORY: 'mustakshif_history_ids_v1',
   THEME_MODE: 'mustakshif_theme_mode_v1',
   FONT_SIZE: 'mustakshif_font_size_v1',
+  ARABIC_FONT: 'mustakshif_ar_font_v1',
+  ENGLISH_FONT: 'mustakshif_en_font_v1',
   ONBOARDING: 'mustakshif_onboarding_v1',
   LAST_READ: 'mustakshif_last_read_v1',
   STUDIO_FAVORITES: 'mustakshif_studio_favorites_v1',
   MYTH_PROGRESS: 'mustakshif_myth_progress_v2',
   LIBRARY_VIEW_MODE: 'mustakshif_library_view_v2',
+  AZAMA_VIEW_MODE: 'mustakshif_azama_view_v1',
   MAP_SHEETS_COUNT: 'mustakshif_map_sheets_v2',
   DARK_READING_MINUTES: 'mustakshif_dark_minutes_v2',
   READ_CHAPTERS: 'mustakshif_read_chapters_v2',
@@ -30,7 +46,6 @@ const STORAGE_KEYS = {
 } as const;
 
 export type ThemeMode = 'light' | 'dark' | 'darkTeal';
-export type FontSize = 'sm' | 'md' | 'lg';
 
 export interface LastReadChapter {
   mythId: string;
@@ -229,7 +244,7 @@ export const storage = {
   getFontSize: (): FontSize => {
     try {
       const size = safeStorage.getItem(STORAGE_KEYS.FONT_SIZE);
-      return size === 'sm' || size === 'lg' ? size : 'md';
+      return normalizeFontSize(size);
     } catch (err) {
       warnStorage('getFontSize failed', err);
       return 'md';
@@ -238,9 +253,58 @@ export const storage = {
 
   setFontSize: (size: FontSize) => {
     try {
-      safeStorage.setItem(STORAGE_KEYS.FONT_SIZE, size);
+      const normalized = normalizeFontSize(size);
+      safeStorage.setItem(STORAGE_KEYS.FONT_SIZE, normalized);
+      applyTypographyToDocument({ fontSize: normalized });
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent(FONT_SETTINGS_EVENT, { detail: { fontSize: normalized } }));
+      }
     } catch (err) {
       warnStorage('setFontSize failed', err);
+    }
+  },
+
+  getArabicFont: (): ArabicFontId => {
+    try {
+      return normalizeArabicFont(safeStorage.getItem(STORAGE_KEYS.ARABIC_FONT));
+    } catch (err) {
+      warnStorage('getArabicFont failed', err);
+      return 'cairo';
+    }
+  },
+
+  setArabicFont: (font: ArabicFontId) => {
+    try {
+      const normalized = normalizeArabicFont(font);
+      safeStorage.setItem(STORAGE_KEYS.ARABIC_FONT, normalized);
+      applyTypographyToDocument({ arabicFont: normalized });
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent(FONT_SETTINGS_EVENT, { detail: { arabicFont: normalized } }));
+      }
+    } catch (err) {
+      warnStorage('setArabicFont failed', err);
+    }
+  },
+
+  getEnglishFont: (): EnglishFontId => {
+    try {
+      return normalizeEnglishFont(safeStorage.getItem(STORAGE_KEYS.ENGLISH_FONT));
+    } catch (err) {
+      warnStorage('getEnglishFont failed', err);
+      return 'jakarta';
+    }
+  },
+
+  setEnglishFont: (font: EnglishFontId) => {
+    try {
+      const normalized = normalizeEnglishFont(font);
+      safeStorage.setItem(STORAGE_KEYS.ENGLISH_FONT, normalized);
+      applyTypographyToDocument({ englishFont: normalized });
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent(FONT_SETTINGS_EVENT, { detail: { englishFont: normalized } }));
+      }
+    } catch (err) {
+      warnStorage('setEnglishFont failed', err);
     }
   },
 
@@ -374,6 +438,24 @@ export const storage = {
       safeStorage.setItem(STORAGE_KEYS.LIBRARY_VIEW_MODE, mode);
     } catch (err) {
       warnStorage('setLibraryViewMode failed', err);
+    }
+  },
+
+  getAzamaViewMode: (): 'grid' | 'list' => {
+    try {
+      const mode = safeStorage.getItem(STORAGE_KEYS.AZAMA_VIEW_MODE);
+      return mode === 'list' ? 'list' : 'grid';
+    } catch (err) {
+      warnStorage('getAzamaViewMode failed', err);
+      return 'grid';
+    }
+  },
+
+  setAzamaViewMode: (mode: 'grid' | 'list') => {
+    try {
+      safeStorage.setItem(STORAGE_KEYS.AZAMA_VIEW_MODE, mode);
+    } catch (err) {
+      warnStorage('setAzamaViewMode failed', err);
     }
   },
 

@@ -1,162 +1,159 @@
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
- * 
- * Mustakshif 2D Flat Vector Map Screen (خريطة الأساطير والحضارات)
- * Clean 2D flat SVG map of the Arab world (Arabian Peninsula, Levant, Mesopotamia, North Africa, Yemen).
- * Features:
- * - Land fill #F2FBF7 with thin teal outline #7FD1AE (1px)
- * - Sea fill #E8F1FB with subtle wave pattern (thin lines, no gradient)
- * - Faint dashed country hint borders #C9E8D9 (0.5px)
- * - 3% opacity Arabic geometric pattern watermark in corners
- * - SVG-only markers (8px circles, 10x10 rounded squares for civilizations) with 1.5px white stroke
- * - 60fps pan/zoom with requestAnimationFrame, pinch-to-zoom (1x - 3x), and inertia
- * - Bottom-left legend box (120x180px) and bottom-right 32px 4-point compass rose
- * - Top search input with Arabic normalization and scrollable filter chips
- * - RTL bottom sheet (max 40% height) with thumbnail (48x48), display font name, 2-line summary, tags, and "اقرأ القصة"
- * - Themed for light (#FFFFFF / #E8F1FB / #F2FBF7) and dark (#0B2420 / #12332D)
+ *
+ * Interactive Geographic Atlas powered by Leaflet (صفحة الخريطة)
+ * Plots every story, myth, cosmology, folklore entry, and Arab civilization
+ * by real latitude/longitude. Clicking any marker opens the story preview
+ * sheet and launches the full reader.
+ * Strictly adheres to Teal / Mint / Cool Blue palette.
  */
 
-import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import {
   Search,
   X,
-  Compass,
   MapPin,
   ChevronLeft,
   ZoomIn,
   ZoomOut,
   RotateCcw,
 } from 'lucide-react';
-
 import { Tag, TagVariant } from '../components/primitives/Tag';
-import { MythEntry, MythCategory, myths as unifiedMyths } from '../data/types';
-import { Civilization, getAllCivilizations } from '../data/civTypes';
 import { useTheme } from '../theme/ThemeContext';
-import { storage } from '../data/storage';
-import { normalizeArabic } from '../utils/arabicSearch';
-import { getCivImageUrl, resolveHeroImageUrl } from '../utils/assets';
-import { useDebounce } from '../hooks/useDebounce';
-
 import { useI18n } from '../i18n/i18n';
+import { storage } from '../data/storage';
+import { useDebounce } from '../hooks/useDebounce';
+import { normalizeArabic } from '../utils/arabicSearch';
+import { resolveHeroImageUrl, getCivImageUrl } from '../utils/assets';
+import { MythEntry } from '../data/types';
+import { Civilization, getAllCivilizations } from '../data/civTypes';
 import {
-  getLocalizedEntry,
-  getLocalizedCivilization,
-  localizeTag,
-} from '../content';
+  CONTENT_CATALOG,
+  getCultureLabel,
+  getTagLabel,
+  getTypeLabel,
+} from '../content/catalog';
+import { ContentItem, ContentType } from '../content/catalogTypes';
+import { getEntryById } from '../data/seed';
+import { getLocalizedCivilization } from '../content';
+
 export interface MapScreenProps {
   onSelectEntry: (entry: MythEntry) => void;
   onSelectCivilization?: (civId: string) => void;
 }
 
-export type MapFilterCategory =
-  | 'all'
-  | 'gods'
-  | 'creatures'
-  | 'places'
-  | 'heroes'
-  | 'personalities'
-  | 'rituals'
-  | 'civilizations';
+export type MapFilterCategory = 'all' | ContentType | 'civilizations';
 
-export interface MapPosition {
-  x: number; // percentage (0 - 100)
-  y: number; // percentage (0 - 100)
-  arabicRegionShort: string;
-}
-
-// Complete geographic coordinate mapping for all myth entries
-export const MYTH_MAP_POSITIONS: Record<string, MapPosition> = {
-  ghul: { x: 64, y: 46, arabicRegionShort: 'بوادي نجد' },
-  anqa: { x: 84, y: 22, arabicRegionShort: 'جبال القفار' },
-  irm: { x: 74, y: 76, arabicRegionShort: 'الأحقاف' },
-  allat: { x: 58, y: 56, arabicRegionShort: 'الطائف' },
-  jinn: { x: 60, y: 39, arabicRegionShort: 'الخرائب والأودية' },
-  aluzza: { x: 57, y: 52, arabicRegionShort: 'وادي نخلة' },
-  manat: { x: 55, y: 50, arabicRegionShort: 'ساحل قديد' },
-  hubal: { x: 56, y: 59, arabicRegionShort: 'مكة المكرمة' },
-  wadd: { x: 58, y: 31, arabicRegionShort: 'دومة الجندل' },
-  suwa: { x: 55, y: 64, arabicRegionShort: 'رهاط' },
-  yaghuth: { x: 63, y: 77, arabicRegionShort: 'اليمن' },
-  yauq: { x: 60, y: 73, arabicRegionShort: 'خيوان' },
-  nasr: { x: 66, y: 81, arabicRegionShort: 'بلخع' },
-  saqlaba: { x: 68, y: 50, arabicRegionShort: 'مفاوز البادية' },
-  qutrub: { x: 44, y: 36, arabicRegionShort: 'مقابر الفلوات' },
-  umm_duwais: { x: 77, y: 44, arabicRegionShort: 'سواحل الخليج' },
-  nasanis: { x: 87, y: 68, arabicRegionShort: 'جزر البحر البعيد' },
-  hama: { x: 67, y: 41, arabicRegionShort: 'أطلال البادية' },
-  ifrit: { x: 49, y: 46, arabicRegionShort: 'الكهوف العميقة' },
-  marid: { x: 52, y: 61, arabicRegionShort: 'بحر القلزم' },
-  wad_abqar: { x: 63, y: 49, arabicRegionShort: 'وادي عبقر' },
-  qaf: { x: 91, y: 17, arabicRegionShort: 'جبل قاف' },
-  city_copper: { x: 24, y: 48, arabicRegionShort: 'الصحراء الكبرى' },
-  bahr_rih: { x: 83, y: 83, arabicRegionShort: 'بحر الريح' },
-  val_waqwaq: { x: 92, y: 77, arabicRegionShort: 'جزيرة الواقواق' },
-  balqis: { x: 64, y: 72, arabicRegionShort: 'عرش مأرب' },
-  suleiman: { x: 52, y: 26, arabicRegionShort: 'بيت المقدس' },
-  sayf: { x: 61, y: 79, arabicRegionShort: 'صنعاء' },
-  antarah: { x: 62, y: 43, arabicRegionShort: 'ديار عبس' },
-  zir_salem: { x: 65, y: 35, arabicRegionShort: 'ديار تغلب' },
-  juha: { x: 48, y: 21, arabicRegionShort: 'حواضر الشرق' },
-  abuzayd: { x: 35, y: 38, arabicRegionShort: 'مسار التغريبة' },
-  harut_marut: { x: 65, y: 25, arabicRegionShort: 'أرض بابل' },
-  khidr: { x: 45, y: 23, arabicRegionShort: 'مجمع البحرين' },
-  malik: { x: 78, y: 17, arabicRegionShort: 'عوالم الغيب' },
-  tatayyur: { x: 53, y: 44, arabicRegionShort: 'بوادي الحجاز' },
-  iyafa: { x: 59, y: 47, arabicRegionShort: 'طرق القوافل' },
-  kahana: { x: 62, y: 28, arabicRegionShort: 'سواد العراق' },
-  istisqa: { x: 57, y: 69, arabicRegionShort: 'جبال السروات' },
-  anwaa: { x: 70, y: 45, arabicRegionShort: 'مرصد البادية' },
-  zuhal: { x: 31, y: 16, arabicRegionShort: 'فلك زحل' },
-  suhayl: { x: 69, y: 84, arabicRegionShort: 'أفق الجنوب' },
-  thurayya: { x: 71, y: 16, arabicRegionShort: 'عنقود الثريا' },
-  qamar_saba: { x: 67, y: 75, arabicRegionShort: 'معبد المقه' },
-  ain_zumurrud: { x: 73, y: 62, arabicRegionShort: 'الربع الخالي' },
-  samud: { x: 53, y: 37, arabicRegionShort: 'مدائن صالح' },
-  sad: { x: 71, y: 71, arabicRegionShort: 'رمال الأحقاف' },
-  tuba: { x: 58, y: 83, arabicRegionShort: 'ظفار يريم' },
-  sihr: { x: 68, y: 22, arabicRegionShort: 'بابل القديمة' },
-  bahr_zulumat: { x: 10, y: 34, arabicRegionShort: 'بحر الظلمات' },
-  'zarqa-al-yamama': { x: 67, y: 46, arabicRegionShort: 'اليمامة / نجد' },
-  'dhul-qarnayn': { x: 75, y: 20, arabicRegionShort: 'موضع السد غير محدد (؟)' },
-  sinbad: { x: 76, y: 31, arabicRegionShort: 'البصرة وبحار الهند' },
-  'ibn-battuta': { x: 14, y: 25, arabicRegionShort: 'طنجة والمشرق' },
-};
-
-// Complete geographic coordinate mapping for civilizations
-export const CIV_MAP_POSITIONS: Record<string, MapPosition> = {
-  'civ-aad': { x: 74, y: 74, arabicRegionShort: 'الأحقاف' },
-  'civ-thamud': { x: 54, y: 38, arabicRegionShort: 'الحِجر' },
-  'civ-madyan': { x: 50, y: 31, arabicRegionShort: 'مدين' },
-  'civ-saba': { x: 64, y: 72, arabicRegionShort: 'مأرب' },
-  'civ-himyar': { x: 61, y: 80, arabicRegionShort: 'ظفار' },
-  'civ-nabataean': { x: 51, y: 27, arabicRegionShort: 'البتراء' },
-  'civ-tasm-jadis': { x: 67, y: 47, arabicRegionShort: 'اليمامة' },
-  'civ-lakhm': { x: 68, y: 24, arabicRegionShort: 'الحيرة' },
-  'civ-ghassan': { x: 54, y: 22, arabicRegionShort: 'الجابية' },
-  'civ-mecca': { x: 56, y: 58, arabicRegionShort: 'مكة' },
-};
-
-// Generic map item unifying myths and civilizations for map plotting
-export interface MapItem {
+interface GeoMapItem {
   id: string;
-  name: string;
-  type: 'myth' | 'civilization';
-  categoryKey: 'gods' | 'creatures' | 'places' | 'heroes' | 'personalities' | 'rituals' | 'civilizations';
-  cx: number;
-  cy: number;
+  title: string;
+  kind: ContentType | 'civilization';
+  cultureLabel: string;
+  regionLabel: string;
+  lat: number;
+  lng: number;
   color: string;
   isSquare: boolean;
-  rawMyth?: MythEntry;
-  rawCiv?: Civilization;
-  heroImage?: string;
+  isPublicDomain?: boolean;
   summary: string;
+  image?: string;
   tags: string[];
-  rawTags?: string[];
-  region: string;
-  regionShort?: string;
-  searchIndexExtra?: string;
+  rawItem?: ContentItem;
+  rawCiv?: Civilization;
+  searchIndex: string;
 }
+
+const CIV_GEO_COORDS: Record<string, { lat: number; lng: number }> = {
+  'civ-aad': { lat: 18.2, lng: 53.5 },
+  'civ-thamud': { lat: 26.79, lng: 37.95 },
+  'civ-madyan': { lat: 28.5, lng: 35.0 },
+  'civ-saba': { lat: 15.42, lng: 45.32 },
+  'civ-himyar': { lat: 14.21, lng: 44.4 },
+  'civ-nabataean': { lat: 30.33, lng: 35.44 },
+  'civ-tasm-jadis': { lat: 24.15, lng: 47.3 },
+  'civ-lakhm': { lat: 31.88, lng: 44.49 },
+  'civ-ghassan': { lat: 32.88, lng: 36.02 },
+  'civ-mecca': { lat: 21.42, lng: 39.83 },
+};
+
+const TYPE_PIN_COLORS: Record<ContentType | 'civilization', string> = {
+  story: '#0E5C4D',
+  myth: '#4A90D9',
+  cosmology: '#8E7BE8',
+  folklore: '#17877B',
+  civilization: '#3DDC97',
+};
+
+// Lightweight offline-safe continental land polygons so Leaflet stays clear even without tiles
+const WORLD_LANDMASS_GEOJSON: GeoJSON.FeatureCollection = {
+  type: 'FeatureCollection',
+  features: [
+    // North Africa & Nile Valley
+    {
+      type: 'Feature',
+      properties: { name: 'North Africa' },
+      geometry: {
+        type: 'Polygon',
+        coordinates: [[[-13, 35], [-5, 36], [10, 37], [25, 32], [32.5, 31.5], [34, 27], [38, 20], [43, 12], [51, 11.5], [40, 2], [-17, 14], [-13, 35]]],
+      },
+    },
+    // Arabian Peninsula, Levant, Mesopotamia & Persia
+    {
+      type: 'Feature',
+      properties: { name: 'Arabia & Fertile Crescent' },
+      geometry: {
+        type: 'Polygon',
+        coordinates: [[[32.5, 31.5], [35.5, 36], [36, 40], [45, 38], [52, 37], [61, 35], [64, 25], [56, 26], [59.8, 22.5], [54, 17], [45, 12.7], [43.3, 12.7], [39, 21.5], [34.8, 29.5], [32.5, 31.5]]],
+      },
+    },
+    // South Asia & Southeast Asia Mainland
+    {
+      type: 'Feature',
+      properties: { name: 'South & Southeast Asia' },
+      geometry: {
+        type: 'Polygon',
+        coordinates: [[[64, 25], [75, 34], [90, 28], [102, 22], [109, 12], [104, 1.5], [100, 5.5], [98.5, 12], [96, 16.5], [91, 22], [85, 19], [77.5, 8], [72, 20], [67, 24.8], [64, 25]]],
+      },
+    },
+    // Nusantara / Indonesian Archipelago (Sumatra, Java, Kalimantan, Sulawesi)
+    {
+      type: 'Feature',
+      properties: { name: 'Sumatra' },
+      geometry: {
+        type: 'Polygon',
+        coordinates: [[[95.3, 5.5], [99.5, 3.2], [104.5, -1.5], [105.8, -5.8], [103.5, -5.9], [98, 0.8], [95.3, 5.5]]],
+      },
+    },
+    {
+      type: 'Feature',
+      properties: { name: 'Java' },
+      geometry: {
+        type: 'Polygon',
+        coordinates: [[[105.5, -6.1], [114.5, -7.8], [114.2, -8.7], [106, -7.3], [105.5, -6.1]]],
+      },
+    },
+    {
+      type: 'Feature',
+      properties: { name: 'Borneo' },
+      geometry: {
+        type: 'Polygon',
+        coordinates: [[[109, 1.5], [117.5, 6.8], [118.9, 1], [116, -3.5], [110.2, -3.2], [109, 1.5]]],
+      },
+    },
+    // Southern Europe / Mediterranean North rim
+    {
+      type: 'Feature',
+      properties: { name: 'Mediterranean Rim' },
+      geometry: {
+        type: 'Polygon',
+        coordinates: [[[-9, 37], [3, 42], [16, 40], [27, 41], [40, 41], [40, 47], [-9, 46], [-9, 37]]],
+      },
+    },
+  ],
+};
 
 export const MapScreen: React.FC<MapScreenProps> = ({
   onSelectEntry,
@@ -165,451 +162,192 @@ export const MapScreen: React.FC<MapScreenProps> = ({
   const { t, lang, dir } = useI18n();
   const { tokens, isDark } = useTheme();
 
-  // Top Bar Search & Filter states (with 300ms debounce)
-  const [searchQuery, setSearchQuery] = useState<string>('');
-  const debouncedSearchQuery = useDebounce(searchQuery, 300);
+  const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearch = useDebounce(searchQuery, 250);
   const [activeFilter, setActiveFilter] = useState<MapFilterCategory>('all');
+  const [selectedItem, setSelectedItem] = useState<GeoMapItem | null>(null);
 
-  // Frustum culling visible bounding box (in SVG coordinates)
-  const [visibleBounds, setVisibleBounds] = useState<{
-    minX: number;
-    maxX: number;
-    minY: number;
-    maxY: number;
-  }>({ minX: -50, maxX: 1050, minY: -50, maxY: 700 });
+  const mapContainerRef = useRef<HTMLDivElement | null>(null);
+  const mapInstanceRef = useRef<L.Map | null>(null);
+  const markerLayerRef = useRef<L.LayerGroup | null>(null);
+  const geoLayerRef = useRef<L.GeoJSON | null>(null);
 
-  // Bottom Sheet and Hovered tooltip states
-  const [selectedItem, setSelectedItem] = useState<MapItem | null>(null);
-  const [hoveredItem, setHoveredItem] = useState<MapItem | null>(null);
-
-  // Bottom sheet swipe down gesture state
-  const touchStartY = useRef<number | null>(null);
-
-  // All myth entries (merged with long-form personalities)
-  const allMyths = useMemo(() => unifiedMyths ?? [], []);
-
-  // All civilizations
   const allCivilizations = useMemo(() => getAllCivilizations() ?? [], []);
 
-  // Convert myths and civilizations to flat unified map items
-  const allMapItems = useMemo<MapItem[]>(() => {
-    const items: MapItem[] = [];
+  const allGeoItems = useMemo<GeoMapItem[]>(() => {
+    const items: GeoMapItem[] = [];
 
-    // 1. Myth markers (8px diameter circle -> radius 4)
-    allMyths.forEach((rawMyth) => {
-      if (!rawMyth) return;
-      const myth = getLocalizedEntry(rawMyth, lang);
-      const customPos = MYTH_MAP_POSITIONS[rawMyth.id];
-      const pos = customPos || {
-        x: 50,
-        y: 50,
-        arabicRegionShort: rawMyth.region ?? '',
-      };
-
-      let categoryKey: MapItem['categoryKey'] = 'places';
-      let color = '#0E5C4D';
-
-      if (rawMyth.category === 'gods') {
-        categoryKey = 'gods';
-        color = '#7FD1AE';
-      } else if (rawMyth.category === 'creatures') {
-        categoryKey = 'creatures';
-        color = '#4A90D9';
-      } else if (rawMyth.category === 'places') {
-        categoryKey = 'places';
-        color = '#0E5C4D';
-      } else if (rawMyth.category === 'heroes') {
-        categoryKey = 'heroes';
-        color = '#E8602C';
-      } else if (
-        rawMyth.category === 'personalities' ||
-        rawMyth.category === ('seers' as MythCategory) ||
-        rawMyth.category === ('sa3aleek' as MythCategory) ||
-        rawMyth.category === ('kings' as MythCategory)
-      ) {
-        categoryKey = 'personalities';
-        color = '#9B7EDE';
-      } else if (rawMyth.category === 'rituals') {
-        categoryKey = 'rituals';
-        color = '#D4A24C';
-      }
-
-      const safeRawTags = Array.isArray(rawMyth.tags) ? rawMyth.tags : [];
-
-      const localizedPinRegion = customPos
-        ? t(`map.pinRegions.${rawMyth.id}`, { defaultValue: customPos.arabicRegionShort })
-        : (myth?.region ?? rawMyth.region ?? '');
-
+    for (const item of CONTENT_CATALOG) {
       items.push({
-        id: rawMyth.id,
-        name: myth?.name ?? '',
-        type: 'myth',
-        categoryKey,
-        cx: (pos.x / 100) * 1000,
-        cy: (pos.y / 100) * 650,
-        color,
+        id: item.id,
+        title: item.title[lang] || item.title.ar,
+        kind: item.type,
+        cultureLabel: getCultureLabel(item.culture, lang),
+        regionLabel: item.region.label[lang] || item.region.label.ar,
+        lat: item.region.lat,
+        lng: item.region.lng,
+        color: TYPE_PIN_COLORS[item.type],
         isSquare: false,
-        rawMyth,
-        heroImage: resolveHeroImageUrl(myth?.heroImage),
-        summary: myth?.summary ?? '',
-        tags: safeRawTags.map((tg) => localizeTag(tg, lang)),
-        rawTags: safeRawTags,
-        region: myth?.region ?? localizedPinRegion,
-        regionShort: localizedPinRegion,
-        searchIndexExtra: `${rawMyth.name ?? ''} ${rawMyth.region ?? ''} ${pos.arabicRegionShort ?? ''} ${localizedPinRegion} ${rawMyth.summary ?? ''} ${rawMyth.latinName ?? ''}`,
+        isPublicDomain: item.isPublicDomain,
+        summary: item.summary[lang] || item.summary.ar,
+        image: resolveHeroImageUrl(item.image),
+        tags: item.tags,
+        rawItem: item,
+        searchIndex: [
+          ...Object.values(item.title),
+          ...Object.values(item.summary),
+          ...Object.values(item.region.label),
+          ...item.tags,
+          item.culture,
+        ].join(' '),
       });
-    });
-
-    // 2. Civilization markers (10x10px square with rounded corners in deep teal #0E5C4D)
-    allCivilizations.forEach((rawCiv) => {
-      if (!rawCiv) return;
-      const civ = getLocalizedCivilization(rawCiv, lang);
-      const customPos = CIV_MAP_POSITIONS[rawCiv.id];
-      const pos = customPos || {
-        x: 60,
-        y: 50,
-        arabicRegionShort: rawCiv.region ?? '',
-      };
-
-      const localizedPinRegion = customPos
-        ? t(`map.pinRegions.${rawCiv.id}`, { defaultValue: customPos.arabicRegionShort })
-        : (civ?.region ?? rawCiv.region ?? '');
-
-      items.push({
-        id: rawCiv.id,
-        name: civ?.name ?? '',
-        type: 'civilization',
-        categoryKey: 'civilizations',
-        cx: (pos.x / 100) * 1000,
-        cy: (pos.y / 100) * 650,
-        color: '#0E5C4D',
-        isSquare: true,
-        rawCiv,
-        heroImage: resolveHeroImageUrl(getCivImageUrl(rawCiv.id)),
-        summary: civ?.chapters?.[0]?.text?.slice(0, 160) || civ?.legacy || civ?.economy || '',
-        tags: [civ?.era || t('common.undated'), (civ?.region ?? localizedPinRegion).split(' ')[0]].filter((tag): tag is string => Boolean(tag)),
-        region: civ?.region ?? localizedPinRegion,
-        regionShort: localizedPinRegion,
-        searchIndexExtra: `${rawCiv.name ?? ''} ${rawCiv.region ?? ''} ${pos.arabicRegionShort ?? ''} ${localizedPinRegion} ${rawCiv.era ?? ''}`,
-      });
-    });
-
-    return items;
-  }, [allMyths, allCivilizations, lang, t]);
-
-  // Filter and search markers with Arabic normalization
-  const filteredItems = useMemo<MapItem[]>(() => {
-    let result = allMapItems;
-
-    // Filter chip filtering
-    if (activeFilter !== 'all') {
-      result = result.filter((item) => item.categoryKey === activeFilter);
     }
 
-    // Search query filtering (300ms debounced)
-    const q = debouncedSearchQuery.trim();
+    for (const rawCiv of allCivilizations) {
+      const civ = getLocalizedCivilization(rawCiv, lang);
+      const coords = CIV_GEO_COORDS[rawCiv.id] ?? { lat: 24.0, lng: 45.0 };
+      items.push({
+        id: rawCiv.id,
+        title: civ.name,
+        kind: 'civilization',
+        cultureLabel: civ.era || t('map.civilizations'),
+        regionLabel: civ.region || t(`map.pinRegions.${rawCiv.id}`, { defaultValue: rawCiv.region }),
+        lat: coords.lat,
+        lng: coords.lng,
+        color: TYPE_PIN_COLORS.civilization,
+        isSquare: true,
+        summary: civ.chapters?.[0]?.text?.slice(0, 160) || civ.legacy || civ.economy || '',
+        image: resolveHeroImageUrl(getCivImageUrl(rawCiv.id)),
+        tags: [civ.era || t('map.civilizations')].filter(Boolean),
+        rawCiv,
+        searchIndex: `${rawCiv.name} ${civ.name} ${rawCiv.region} ${civ.region} ${civ.era}`,
+      });
+    }
+
+    return items;
+  }, [allCivilizations, lang, t]);
+
+  const filteredItems = useMemo(() => {
+    let result = allGeoItems;
+    if (activeFilter !== 'all') {
+      if (activeFilter === 'civilizations') {
+        result = result.filter((item) => item.kind === 'civilization');
+      } else {
+        result = result.filter((item) => item.kind === activeFilter);
+      }
+    }
+    const q = debouncedSearch.trim();
     if (q) {
       const normQ = normalizeArabic(q);
       const lowerQ = q.toLowerCase();
-      result = result.filter((item) => {
-        const normName = normalizeArabic(item?.name ?? '');
-        const normSummary = normalizeArabic(item?.summary ?? '');
-        const normRegion = normalizeArabic(item?.region ?? '');
-        const normTags = (item?.tags ?? []).map((tg) => normalizeArabic(tg)).join(' ');
-        const extra = (item?.searchIndexExtra || '').toLowerCase();
-
-        return (
-          normName.includes(normQ) ||
-          normSummary.includes(normQ) ||
-          normRegion.includes(normQ) ||
-          normTags.includes(normQ) ||
-          extra.includes(lowerQ) ||
-          normalizeArabic(extra).includes(normQ)
-        );
-      });
+      result = result.filter(
+        (item) =>
+          normalizeArabic(item.searchIndex).includes(normQ) ||
+          item.searchIndex.toLowerCase().includes(lowerQ)
+      );
     }
-
     return result;
-  }, [allMapItems, activeFilter, debouncedSearchQuery]);
+  }, [allGeoItems, activeFilter, debouncedSearch]);
 
-  // Frustum culling: render only visible markers within current viewport bounds
-  const visibleMarkers = useMemo(() => {
-    return filteredItems.filter((item) => {
-      return (
-        item.cx >= visibleBounds.minX &&
-        item.cx <= visibleBounds.maxX &&
-        item.cy >= visibleBounds.minY &&
-        item.cy <= visibleBounds.maxY
-      );
-    });
-  }, [filteredItems, visibleBounds]);
-
-  // Pan, Zoom and RAF inertia engine
-  const mapViewportRef = useRef<HTMLDivElement>(null);
-  const svgGroupRef = useRef<SVGGElement>(null);
-
-  const stateRef = useRef<{
-    scale: number;
-    targetScale: number;
-    panX: number;
-    panY: number;
-    targetPanX: number;
-    targetPanY: number;
-    vx: number;
-    vy: number;
-    isDragging: boolean;
-    dragStartX: number;
-    dragStartY: number;
-    lastMouseX: number;
-    lastMouseY: number;
-    lastTime: number;
-    touchStartDist: number;
-    touchStartScale: number;
-    touchMidX: number;
-    touchMidY: number;
-    rafId: number | null;
-  }>({
-    scale: 1,
-    targetScale: 1,
-    panX: 0,
-    panY: 0,
-    targetPanX: 0,
-    targetPanY: 0,
-    vx: 0,
-    vy: 0,
-    isDragging: false,
-    dragStartX: 0,
-    dragStartY: 0,
-    lastMouseX: 0,
-    lastMouseY: 0,
-    lastTime: 0,
-    touchStartDist: 0,
-    touchStartScale: 1,
-    touchMidX: 0,
-    touchMidY: 0,
-    rafId: null,
-  });
-
-  // Apply transform directly to SVGGElement for 60fps performance without React re-renders
-  const applyTransform = useCallback((x: number, y: number, s: number) => {
-    if (svgGroupRef.current) {
-      svgGroupRef.current.setAttribute(
-        'transform',
-        `translate(${x}, ${y}) scale(${s})`
-      );
-    }
-  }, []);
-
-  // RAF Pan/Zoom engine loop
-  const animateEngine = useCallback(() => {
-    const s = stateRef.current;
-
-    // Smooth inertia when not dragging
-    if (!s.isDragging) {
-      s.targetPanX += s.vx;
-      s.targetPanY += s.vy;
-      s.vx *= 0.92;
-      s.vy *= 0.92;
-      if (Math.abs(s.vx) < 0.05) s.vx = 0;
-      if (Math.abs(s.vy) < 0.05) s.vy = 0;
-    }
-
-    // Clamp pan bounds according to current targetScale
-    const maxPanX = Math.max(0, (s.targetScale - 1) * 450);
-    const maxPanY = Math.max(0, (s.targetScale - 1) * 300);
-    s.targetPanX = Math.max(-maxPanX, Math.min(maxPanX, s.targetPanX));
-    s.targetPanY = Math.max(-maxPanY, Math.min(maxPanY, s.targetPanY));
-
-    // Smooth interpolation towards targets
-    const dScale = (s.targetScale - s.scale) * 0.22;
-    const dPanX = (s.targetPanX - s.panX) * 0.22;
-    const dPanY = (s.targetPanY - s.panY) * 0.22;
-
-    s.scale += dScale;
-    s.panX += dPanX;
-    s.panY += dPanY;
-
-    applyTransform(s.panX, s.panY, s.scale);
-
-    // Keep running RAF while animating or moving
-    const isMoving =
-      Math.abs(dScale) > 0.001 ||
-      Math.abs(dPanX) > 0.1 ||
-      Math.abs(dPanY) > 0.1 ||
-      Math.abs(s.vx) > 0.1 ||
-      Math.abs(s.vy) > 0.1 ||
-      s.isDragging;
-
-    if (isMoving) {
-      s.rafId = requestAnimationFrame(animateEngine);
-    } else {
-      s.rafId = null;
-      // Frustum culling: update visible bounds box when motion stops
-      const sVal = s.scale;
-      if (sVal > 1.05) {
-        const margin = 80;
-        const minX = 500 + (-500 - s.panX - margin) / sVal;
-        const maxX = 500 + (500 - s.panX + margin) / sVal;
-        const minY = 325 + (-325 - s.panY - margin) / sVal;
-        const maxY = 325 + (325 - s.panY + margin) / sVal;
-        setVisibleBounds({ minX, maxX, minY, maxY });
-      } else {
-        setVisibleBounds({ minX: -50, maxX: 1050, minY: -50, maxY: 700 });
-      }
-    }
-  }, [applyTransform]);
-
-  const scheduleUpdate = useCallback(() => {
-    if (!stateRef.current.rafId) {
-      stateRef.current.rafId = requestAnimationFrame(animateEngine);
-    }
-  }, [animateEngine]);
-
-  // Clean up RAF on unmount
+  // Initialize Leaflet instance once
   useEffect(() => {
+    const container = mapContainerRef.current;
+    if (!container || mapInstanceRef.current) return;
+
+    const map = L.map(container, {
+      center: [21, 56],
+      zoom: 3,
+      minZoom: 2,
+      maxZoom: 12,
+      zoomControl: false,
+      attributionControl: true,
+    });
+
+    // Stylistic vector landmass underlay so map never looks blank offline
+    const geoLayer = L.geoJSON(WORLD_LANDMASS_GEOJSON, {
+      style: {
+        fillColor: isDark ? '#12332D' : '#F2FBF7',
+        fillOpacity: 0.92,
+        color: '#7FD1AE',
+        weight: 1.2,
+      },
+    }).addTo(map);
+    geoLayerRef.current = geoLayer;
+
+    // Live OpenStreetMap raster tiles overlaid softly when network is reachable
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap',
+      maxZoom: 12,
+      opacity: isDark ? 0.25 : 0.45,
+    }).addTo(map);
+
+    const markersGroup = L.layerGroup().addTo(map);
+    markerLayerRef.current = markersGroup;
+    mapInstanceRef.current = map;
+
     return () => {
-      if (stateRef.current.rafId) {
-        cancelAnimationFrame(stateRef.current.rafId);
-      }
+      map.remove();
+      mapInstanceRef.current = null;
+      markerLayerRef.current = null;
+      geoLayerRef.current = null;
     };
   }, []);
 
-  // Zoom buttons handlers
-  const handleZoomIn = () => {
-    stateRef.current.targetScale = Math.min(3, stateRef.current.targetScale + 0.4);
-    scheduleUpdate();
-  };
-
-  const handleZoomOut = () => {
-    stateRef.current.targetScale = Math.max(1, stateRef.current.targetScale - 0.4);
-    scheduleUpdate();
-  };
-
-  const handleResetZoom = () => {
-    stateRef.current.targetScale = 1;
-    stateRef.current.targetPanX = 0;
-    stateRef.current.targetPanY = 0;
-    stateRef.current.vx = 0;
-    stateRef.current.vy = 0;
-    scheduleUpdate();
-  };
-
-  // Mouse pan handlers
-  const handleMouseDown = (e: React.MouseEvent) => {
-    // Left button only
-    if (e.button !== 0) return;
-    const s = stateRef.current;
-    s.isDragging = true;
-    s.dragStartX = e.clientX - s.targetPanX;
-    s.dragStartY = e.clientY - s.targetPanY;
-    s.lastMouseX = e.clientX;
-    s.lastMouseY = e.clientY;
-    s.lastTime = performance.now();
-    s.vx = 0;
-    s.vy = 0;
-    scheduleUpdate();
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    const s = stateRef.current;
-    if (!s.isDragging) return;
-
-    const now = performance.now();
-    const dt = Math.max(1, now - s.lastTime);
-    const dx = e.clientX - s.lastMouseX;
-    const dy = e.clientY - s.lastMouseY;
-
-    s.vx = (dx / dt) * 14;
-    s.vy = (dy / dt) * 14;
-
-    s.targetPanX = e.clientX - s.dragStartX;
-    s.targetPanY = e.clientY - s.dragStartY;
-    s.lastMouseX = e.clientX;
-    s.lastMouseY = e.clientY;
-    s.lastTime = now;
-
-    scheduleUpdate();
-  };
-
-  const handleMouseUpOrLeave = () => {
-    const s = stateRef.current;
-    if (s.isDragging) {
-      s.isDragging = false;
-      scheduleUpdate();
+  // Sync dark/light styling on landmass polygons without recreating map
+  useEffect(() => {
+    if (geoLayerRef.current) {
+      geoLayerRef.current.setStyle({
+        fillColor: isDark ? '#12332D' : '#F2FBF7',
+        fillOpacity: 0.92,
+        color: '#7FD1AE',
+        weight: 1.2,
+      });
     }
-  };
+  }, [isDark]);
 
-  // Wheel zoom handler
-  const handleWheel = (e: React.WheelEvent) => {
-    e.preventDefault();
-    const zoomFactor = e.deltaY < 0 ? 1.15 : 0.87;
-    const nextScale = Math.max(1, Math.min(3, stateRef.current.targetScale * zoomFactor));
-    stateRef.current.targetScale = nextScale;
-    scheduleUpdate();
-  };
+  // Update markers whenever filteredItems or selectedItem changes
+  useEffect(() => {
+    const group = markerLayerRef.current;
+    if (!group) return;
+    group.clearLayers();
 
-  // Touch pan & pinch zoom handlers
-  const handleTouchStart = (e: React.TouchEvent) => {
-    const s = stateRef.current;
+    for (const item of filteredItems) {
+      const isSelected = selectedItem?.id === item.id;
+      const size = item.isPublicDomain ? (isSelected ? 22 : 18) : isSelected ? 17 : 13;
+      const borderRadius = item.isSquare ? '4px' : '9999px';
+      const ringShadow = item.isPublicDomain
+        ? '0 0 0 3px rgba(127, 209, 174, 0.55), 0 2px 6px rgba(0,0,0,0.28)'
+        : '0 2px 5px rgba(0,0,0,0.25)';
 
-    if (e.touches.length === 1) {
-      const t = e.touches[0];
-      s.isDragging = true;
-      s.dragStartX = t.clientX - s.targetPanX;
-      s.dragStartY = t.clientY - s.targetPanY;
-      s.lastMouseX = t.clientX;
-      s.lastMouseY = t.clientY;
-      s.lastTime = performance.now();
-      s.vx = 0;
-      s.vy = 0;
-      scheduleUpdate();
-    } else if (e.touches.length === 2) {
-      s.isDragging = false;
-      const t1 = e.touches[0];
-      const t2 = e.touches[1];
-      s.touchStartDist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
-      s.touchStartScale = s.targetScale;
-      s.touchMidX = (t1.clientX + t2.clientX) / 2;
-      s.touchMidY = (t1.clientY + t2.clientY) / 2;
-      scheduleUpdate();
+      const icon = L.divIcon({
+        className: 'mustakshif-leaflet-pin',
+        iconSize: [size, size],
+        iconAnchor: [size / 2, size / 2],
+        html: `<button type="button" data-marker-id="${item.id}" aria-label="${item.title.replace(/"/g, '&quot;')}" style="width:${size}px;height:${size}px;border-radius:${borderRadius};background-color:${item.color};border:2px solid #FFFFFF;box-shadow:${ringShadow};cursor:pointer;display:block;padding:0;"></button>`,
+      });
+
+      const marker = L.marker([item.lat, item.lng], { icon });
+      marker.bindTooltip(item.title, {
+        direction: 'top',
+        offset: [0, -size / 2],
+      });
+      marker.on('click', () => {
+        setSelectedItem(item);
+        storage.incrementMapSheetsCount();
+      });
+      marker.addTo(group);
     }
-  };
+  }, [filteredItems, selectedItem?.id]);
 
-  const handleTouchMove = (e: React.TouchEvent) => {
-    const s = stateRef.current;
-
-    if (e.touches.length === 1 && s.isDragging) {
-      const t = e.touches[0];
-      const now = performance.now();
-      const dt = Math.max(1, now - s.lastTime);
-      const dx = t.clientX - s.lastMouseX;
-      const dy = t.clientY - s.lastMouseY;
-
-      s.vx = (dx / dt) * 14;
-      s.vy = (dy / dt) * 14;
-
-      s.targetPanX = t.clientX - s.dragStartX;
-      s.targetPanY = t.clientY - s.dragStartY;
-      s.lastMouseX = t.clientX;
-      s.lastMouseY = t.clientY;
-      s.lastTime = now;
-
-      scheduleUpdate();
-    } else if (e.touches.length === 2 && s.touchStartDist > 0) {
-      const t1 = e.touches[0];
-      const t2 = e.touches[1];
-      const currentDist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
-      const ratio = currentDist / s.touchStartDist;
-      s.targetScale = Math.max(1, Math.min(3, s.touchStartScale * ratio));
-      scheduleUpdate();
+  const handleOpenSelected = (item: GeoMapItem) => {
+    if (item.kind === 'civilization' && item.rawCiv) {
+      onSelectCivilization?.(item.rawCiv.id);
+      return;
     }
-  };
-
-  const handleTouchEnd = () => {
-    const s = stateRef.current;
-    s.isDragging = false;
-    s.touchStartDist = 0;
-    scheduleUpdate();
+    const myth = getEntryById(item.id);
+    if (myth) {
+      onSelectEntry(myth);
+    }
   };
 
   const getTagVariant = (tag: string): TagVariant => {
@@ -619,15 +357,23 @@ export const MapScreen: React.FC<MapScreenProps> = ({
     return 'neutral';
   };
 
-  // Helper colors
-  const seaColor = isDark ? '#0B2420' : '#E8F1FB';
-  const landColor = isDark ? '#12332D' : '#F2FBF7';
-  const landOutline = '#7FD1AE';
-  const borderDashed = isDark ? 'rgba(127, 209, 174, 0.28)' : '#C9E8D9';
+  const filterChips: Array<{ id: MapFilterCategory; label: string }> = [
+    { id: 'all', label: t('map.all') },
+    { id: 'story', label: t('map.story') },
+    { id: 'myth', label: t('map.myth') },
+    { id: 'cosmology', label: t('map.cosmology') },
+    { id: 'folklore', label: t('map.folklore') },
+    { id: 'civilizations', label: t('map.civilizations') },
+  ];
+
+  const featuredOriginItems = useMemo(
+    () => allGeoItems.filter((item) => item.isPublicDomain),
+    [allGeoItems]
+  );
 
   return (
-    <div className="space-y-4 pb-8 animate-in fade-in duration-200" dir={dir}>
-      {/* 1. Header with Title & Stats Pill */}
+    <div data-testid="map-screen" className="space-y-4 pb-8 animate-in fade-in duration-200" dir={dir}>
+      {/* Header */}
       <div className="flex items-center justify-between gap-3 pt-1">
         <div>
           <h2
@@ -636,10 +382,7 @@ export const MapScreen: React.FC<MapScreenProps> = ({
           >
             {t('map.title')}
           </h2>
-          <p
-            style={{ color: tokens.textSecondary }}
-            className="text-xs font-['Cairo',sans-serif] mt-0.5"
-          >
+          <p style={{ color: tokens.textSecondary }} className="text-xs font-['Cairo',sans-serif] mt-0.5">
             {t('map.subtitle')}
           </p>
         </div>
@@ -651,33 +394,27 @@ export const MapScreen: React.FC<MapScreenProps> = ({
           }}
           className="flex items-center gap-1.5 border px-3 py-1.5 rounded-2xl shadow-xs shrink-0"
         >
-          <span
-            style={{ backgroundColor: '#7FD1AE' }}
-            className="w-2 h-2 rounded-full"
-          />
-          <span
-            style={{ color: tokens.deepAccent }}
-            className="text-[11px] font-bold font-mono"
-          >
+          <span style={{ backgroundColor: '#7FD1AE' }} className="w-2 h-2 rounded-full" />
+          <span style={{ color: tokens.deepAccent }} className="text-[11px] font-bold font-mono">
             {t('map.placesCount', { count: filteredItems.length })}
           </span>
         </div>
       </div>
 
-      {/* Top Bar Search Input + Filter Chips Row */}
+      {/* Search & Filter Chips */}
       <div className="space-y-2.5">
         <div className="relative">
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={t('map.search')} /* ابحث في الخريطة */
+            placeholder={t('map.search')}
             style={{
               backgroundColor: tokens.card,
               borderColor: tokens.border,
               color: tokens.textPrimary,
             }}
-            className="w-full ps-10 pe-9 py-2.5 rounded-2xl border text-xs sm:text-sm font-['Cairo',sans-serif] shadow-xs focus:outline-none focus:ring-2 focus:ring-[#7FD1AE] transition-all"
+            className="w-full ps-10 pe-9 py-2.5 rounded-2xl border text-xs sm:text-sm font-['Cairo',sans-serif] shadow-xs focus:outline-none focus:ring-2 focus:ring-[#7FD1AE] min-h-[44px]"
           />
           <Search
             size={16}
@@ -689,7 +426,7 @@ export const MapScreen: React.FC<MapScreenProps> = ({
               type="button"
               onClick={() => setSearchQuery('')}
               style={{ color: tokens.textSecondary }}
-              className="absolute end-3 top-1/2 -translate-y-1/2 p-1 hover:opacity-80 cursor-pointer"
+              className="absolute end-2 top-1/2 -translate-y-1/2 p-2 cursor-pointer"
               aria-label={t('home.clearSearch')}
             >
               <X size={14} />
@@ -697,61 +434,50 @@ export const MapScreen: React.FC<MapScreenProps> = ({
           )}
         </div>
 
-        {/* Filter Chips: الكل، آلهة، كائنات، أماكن، أبطال، شخصيات، طقوس، حضارات */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar -mx-1 px-1">
-          {[
-            { id: 'all' as MapFilterCategory, label: t('map.all') },
-            { id: 'gods' as MapFilterCategory, label: t('map.gods') },
-            { id: 'creatures' as MapFilterCategory, label: t('map.creatures') },
-            { id: 'places' as MapFilterCategory, label: t('map.places') },
-            { id: 'heroes' as MapFilterCategory, label: t('map.heroes') },
-            { id: 'personalities' as MapFilterCategory, label: t('map.personalities') },
-            { id: 'rituals' as MapFilterCategory, label: t('map.rituals') },
-            { id: 'civilizations' as MapFilterCategory, label: t('map.civilizations') },
-          ].map((chip) => {
+        <div className="flex flex-wrap items-center gap-1.5 pb-0.5">
+          {filterChips.map((chip) => {
             const isActive = activeFilter === chip.id;
             return (
               <button
                 key={chip.id}
                 type="button"
+                data-testid={`map-filter-${chip.id}`}
                 onClick={() => setActiveFilter(chip.id)}
                 style={{
-                  backgroundColor: isActive ? '#7FD1AE' : (isDark ? '#12332D' : '#FFFFFF'),
-                  color: isActive ? '#0E5C4D' : (isDark ? '#7FD1AE' : '#0E5C4D'),
-                  borderColor: isActive ? '#7FD1AE' : '#7FD1AE',
+                  backgroundColor: isActive ? '#7FD1AE' : isDark ? '#12332D' : '#FFFFFF',
+                  color: isActive ? '#0E5C4D' : isDark ? '#7FD1AE' : '#0E5C4D',
+                  borderColor: '#7FD1AE',
                 }}
-                className="px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer shrink-0 min-h-[36px] flex items-center justify-center gap-1 shadow-2xs hover:opacity-90 active:scale-95 select-none"
+                className="px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer shrink-0 min-h-[38px] flex items-center justify-center shadow-2xs"
               >
-                <span>{chip.label}</span>
+                {chip.label}
               </button>
             );
           })}
         </div>
       </div>
 
-      {/* STEP 1: Pure SVG 2D Flat Map Container */}
+      {/* Interactive Leaflet Map Viewport */}
       <div
-        ref={mapViewportRef}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUpOrLeave}
-        onMouseLeave={handleMouseUpOrLeave}
-        onWheel={handleWheel}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
         style={{
-          backgroundColor: seaColor,
+          backgroundColor: isDark ? '#0B2420' : '#E8F1FB',
           borderColor: isDark ? 'rgba(127, 209, 174, 0.4)' : '#7FD1AE',
         }}
-        className="relative w-full aspect-[4/3] sm:aspect-[16/10] rounded-[24px] border-2 shadow-sm overflow-hidden select-none cursor-grab active:cursor-grabbing touch-none"
+        className="relative w-full h-[360px] sm:h-[420px] rounded-[24px] border-2 shadow-sm overflow-hidden"
       >
-        {/* Top-right Zoom Controls (clear of bottom-left Legend box on narrow viewports) */}
-        <div className="absolute top-3 right-3 z-30 flex items-center gap-0.5 bg-white/95 dark:bg-[#12332D]/95 backdrop-blur-md p-1 rounded-2xl border border-[#7FD1AE] shadow-xs pointer-events-auto">
+        <div
+          ref={mapContainerRef}
+          data-testid="leaflet-map-container"
+          style={{ backgroundColor: isDark ? '#0B2420' : '#E8F1FB' }}
+          className="w-full h-full"
+        />
+
+        {/* Zoom Controls Overlay */}
+        <div className="absolute top-3 right-3 z-20 flex items-center gap-0.5 bg-white/95 dark:bg-[#12332D]/95 backdrop-blur-md p-1 rounded-2xl border border-[#7FD1AE] shadow-xs">
           <button
             type="button"
-            onClick={handleZoomIn}
-            className="p-2 text-[#0E5C4D] dark:text-[#7FD1AE] hover:bg-[#F2FBF7] dark:hover:bg-[#0B2420] rounded-xl cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center transition-colors"
+            onClick={() => mapInstanceRef.current?.zoomIn()}
+            className="p-2 text-[#0E5C4D] dark:text-[#7FD1AE] rounded-xl cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
             title={t('map.zoomIn')}
             aria-label={t('map.zoomIn')}
           >
@@ -759,8 +485,8 @@ export const MapScreen: React.FC<MapScreenProps> = ({
           </button>
           <button
             type="button"
-            onClick={handleZoomOut}
-            className="p-2 text-[#0E5C4D] dark:text-[#7FD1AE] hover:bg-[#F2FBF7] dark:hover:bg-[#0B2420] rounded-xl cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center transition-colors"
+            onClick={() => mapInstanceRef.current?.zoomOut()}
+            className="p-2 text-[#0E5C4D] dark:text-[#7FD1AE] rounded-xl cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
             title={t('map.zoomOut')}
             aria-label={t('map.zoomOut')}
           >
@@ -768,8 +494,8 @@ export const MapScreen: React.FC<MapScreenProps> = ({
           </button>
           <button
             type="button"
-            onClick={handleResetZoom}
-            className="p-2 text-[#0E5C4D] dark:text-[#7FD1AE] hover:bg-[#F2FBF7] dark:hover:bg-[#0B2420] rounded-xl cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center transition-colors"
+            onClick={() => mapInstanceRef.current?.setView([21, 56], 3)}
+            className="p-2 text-[#0E5C4D] dark:text-[#7FD1AE] rounded-xl cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
             title={t('map.zoomReset')}
             aria-label={t('map.zoomReset')}
           >
@@ -777,565 +503,181 @@ export const MapScreen: React.FC<MapScreenProps> = ({
           </button>
         </div>
 
-        {/* Bottom-Left Legend Box */}
+        {/* Cool-Palette Legend */}
         <div
           style={{
-            width: '125px',
-            backgroundColor: isDark ? '#12332D' : '#FFFFFF',
+            backgroundColor: isDark ? 'rgba(18, 51, 45, 0.94)' : 'rgba(255, 255, 255, 0.94)',
             borderColor: '#7FD1AE',
           }}
-          className="absolute bottom-3 left-3 z-20 p-2.5 rounded-2xl border shadow-sm pointer-events-auto select-none space-y-1.5"
+          className="hidden sm:block absolute bottom-3 left-3 z-20 p-2.5 rounded-2xl border shadow-sm space-y-1 text-[10px] font-['Cairo',sans-serif]"
         >
-          <h4
-            style={{ color: isDark ? '#7FD1AE' : '#0E5C4D' }}
-            className="font-['Aref_Ruqaa',serif] text-xs font-bold border-b border-[#7FD1AE]/30 pb-1"
-          >
+          <h4 style={{ color: isDark ? '#7FD1AE' : '#0E5C4D' }} className="font-bold border-b border-[#7FD1AE]/30 pb-1">
             {t('map.legend')}
           </h4>
-
-          {/* Legend categories: آلهة / كائنات / أماكن / أبطال / شخصيات / طقوس / حضارات */}
-          <div className="space-y-1 text-[10px] font-['Cairo',sans-serif] font-medium leading-tight text-[#14312B] dark:text-[#E2F7ED]">
-            <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#7FD1AE] border border-white shrink-0" />
-              <span>{t('map.gods')}</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#4A90D9] border border-white shrink-0" />
-              <span>{t('map.creatures')}</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#0E5C4D] border border-white shrink-0" />
-              <span>{t('map.places')}</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#E8602C] border border-white shrink-0" />
-              <span>{t('map.heroes')}</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#9B7EDE] border border-white shrink-0" />
-              <span>{t('map.personalities')}</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#D4A24C] border border-white shrink-0" />
-              <span>{t('map.rituals')}</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-[2px] bg-[#0E5C4D] border border-white shrink-0" />
-              <span>{t('map.civilizations')}</span>
-            </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#0E5C4D] border border-white shrink-0" />
+            <span>{t('map.story')}</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#4A90D9] border border-white shrink-0" />
+            <span>{t('map.myth')}</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#8E7BE8] border border-white shrink-0" />
+            <span>{t('map.cosmology')}</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#17877B] border border-white shrink-0" />
+            <span>{t('map.folklore')}</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-[2px] bg-[#3DDC97] border border-white shrink-0" />
+            <span>{t('map.civilizations')}</span>
           </div>
         </div>
 
-        {/* Bottom-Right Compass Rose (simple 4-point star, teal, 32px) */}
-        <div
-          className="absolute bottom-3 right-3 z-20 pointer-events-none select-none flex flex-col items-center justify-center p-1"
-          title={t('map.legend')}
-        >
-          <span className="text-[10px] font-bold text-[#0E5C4D] dark:text-[#7FD1AE] font-['Aref_Ruqaa',serif] leading-none mb-0.5">
-            {t('map.compassNorth')}
-          </span>
-          <svg
-            width="32"
-            height="32"
-            viewBox="0 0 32 32"
-            className="w-8 h-8 drop-shadow-2xs"
-          >
-            {/* 4-point star in deep teal #0E5C4D */}
-            <polygon
-              points="16,1 19,13 31,16 19,19 16,31 13,19 1,16 13,13"
-              fill="#0E5C4D"
-              stroke="#7FD1AE"
-              strokeWidth="0.8"
-            />
-            {/* Inner center ring */}
-            <circle cx="16" cy="16" r="2.5" fill="#7FD1AE" />
-          </svg>
-        </div>
-
-        {/* Empty State when no results found */}
+        {/* Empty State */}
         {filteredItems.length === 0 && (
-          <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-2.5 bg-white/80 dark:bg-[#0B2420]/85 backdrop-blur-xs p-6 text-center pointer-events-auto">
-            <div
-              style={{
-                backgroundColor: isDark ? '#12332D' : '#F2FBF7',
-                borderColor: '#7FD1AE',
-              }}
-              className="w-12 h-12 rounded-2xl border flex items-center justify-center text-[#0E5C4D] dark:text-[#7FD1AE] shadow-xs"
-            >
-              <MapPin size={24} />
-            </div>
-            <h3
-              style={{ color: isDark ? '#7FD1AE' : '#0E5C4D' }}
-              className="font-['Aref_Ruqaa',serif] text-base font-bold"
-            >
-              {t('map.emptyTitle') || 'لا نتائج — جرّب فلتر آخر'}
-            </h3>
+          <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-2 bg-white/85 dark:bg-[#0B2420]/90 p-5 text-center">
+            <MapPin size={24} style={{ color: tokens.deepAccent }} />
+            <p style={{ color: tokens.deepAccent }} className="text-sm font-bold">
+              {t('map.emptyTitle')}
+            </p>
             <button
               type="button"
               onClick={() => {
                 setSearchQuery('');
                 setActiveFilter('all');
               }}
-              style={{
-                backgroundColor: tokens.deepAccent,
-                color: isDark ? '#0B2420' : '#FFFFFF',
-              }}
-              className="px-4 py-1.5 rounded-full text-xs font-bold shadow-xs cursor-pointer"
+              style={{ backgroundColor: tokens.deepAccent, color: isDark ? '#0B2420' : '#FFFFFF' }}
+              className="px-4 py-2 rounded-full text-xs font-bold cursor-pointer min-h-[40px]"
             >
               {t('map.emptyReset')}
             </button>
           </div>
         )}
-
-        {/* Master Scalable SVG Map Canvas (never horizontally mirrored across RTL/LTR) */}
-        <svg
-          viewBox="0 0 1000 650"
-          className="w-full h-full block map-canvas-svg"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <defs>
-            {/* Sea subtle wave pattern: thin lines, no gradient */}
-            <pattern
-              id="seaWavePattern"
-              width="48"
-              height="24"
-              patternUnits="userSpaceOnUse"
-            >
-              <path
-                d="M 0,12 Q 12,7 24,12 T 48,12"
-                fill="none"
-                stroke={isDark ? 'rgba(127, 209, 174, 0.12)' : 'rgba(127, 209, 174, 0.35)'}
-                strokeWidth="0.8"
-              />
-            </pattern>
-
-            {/* Subtle Arabic geometric pattern watermark (very faint, 3% opacity in corners) */}
-            <g id="arabicGeometricWatermarkCorner" opacity="0.03">
-              <circle cx="50" cy="50" r="45" fill="none" stroke="#7FD1AE" strokeWidth="1.2" />
-              <polygon
-                points="50,5 63,22 85,22 72,40 85,58 63,58 50,75 37,58 15,58 28,40 15,22 37,22"
-                fill="none"
-                stroke="#7FD1AE"
-                strokeWidth="1"
-              />
-              <polygon
-                points="50,15 75,50 50,85 25,50"
-                fill="none"
-                stroke="#7FD1AE"
-                strokeWidth="1"
-              />
-              <circle cx="50" cy="50" r="18" fill="none" stroke="#7FD1AE" strokeWidth="0.8" />
-            </g>
-          </defs>
-
-          {/* Sea background: flat pale blue with subtle thin wave lines */}
-          <rect width="1000" height="650" fill={seaColor} />
-          <rect width="1000" height="650" fill="url(#seaWavePattern)" pointerEvents="none" />
-
-          {/* Corner Watermarks (3% opacity) */}
-          <use href="#arabicGeometricWatermarkCorner" x="10" y="10" pointerEvents="none" />
-          <use href="#arabicGeometricWatermarkCorner" x="890" y="10" pointerEvents="none" />
-          <use href="#arabicGeometricWatermarkCorner" x="10" y="540" pointerEvents="none" />
-          <use href="#arabicGeometricWatermarkCorner" x="890" y="540" pointerEvents="none" />
-
-          {/* SVG Transform Container controlled smoothly via requestAnimationFrame */}
-          <g ref={svgGroupRef}>
-            {/* 1. LANDMASS: North Africa (Morocco to Egypt & Sudan) */}
-            <path
-              d="M 60,490
-                 C 70,440 75,360 85,290
-                 C 90,250 100,215 115,200
-                 C 140,195 180,210 225,215
-                 C 270,218 300,190 320,180
-                 C 335,175 350,215 365,235
-                 C 390,255 425,270 450,245
-                 C 470,225 490,210 515,215
-                 C 530,220 545,235 550,255
-                 C 555,270 560,310 575,360
-                 C 590,410 615,480 635,550
-                 C 640,570 655,585 670,590
-                 L 640,650 L 60,650 Z"
-              fill={landColor}
-              stroke={landOutline}
-              strokeWidth="1"
-              strokeLinejoin="round"
-            />
-
-            {/* 2. LANDMASS: Arabian Peninsula, Levant & Mesopotamia */}
-            <path
-              d="M 550,255
-                 C 555,235 560,195 565,160
-                 C 570,135 600,120 645,120
-                 C 690,120 730,135 765,160
-                 C 785,180 770,230 755,270
-                 C 745,285 755,315 770,340
-                 C 785,360 805,340 820,325
-                 C 835,320 845,345 835,370
-                 C 825,395 845,430 870,445
-                 C 885,460 875,490 855,515
-                 C 825,550 780,570 730,580
-                 C 685,590 655,595 640,585
-                 C 630,575 625,540 615,480
-                 C 605,430 580,360 565,300
-                 C 555,275 550,265 550,255 Z"
-              fill={landColor}
-              stroke={landOutline}
-              strokeWidth="1"
-              strokeLinejoin="round"
-            />
-
-            {/* 3. LANDMASS: Zagros & Gulf North Coast */}
-            <path
-              d="M 765,160
-                 C 800,170 850,185 900,210
-                 C 940,230 980,260 1000,290
-                 L 1000,380
-                 C 960,370 915,350 880,345
-                 C 850,340 835,320 820,325
-                 C 785,340 785,360 770,340
-                 C 755,315 745,285 755,270
-                 C 770,230 785,180 765,160 Z"
-              fill={landColor}
-              stroke={landOutline}
-              strokeWidth="1"
-              strokeLinejoin="round"
-              opacity="0.9"
-            />
-
-            {/* Mythical Islands */}
-            <ellipse
-              cx="925"
-              cy="500"
-              rx="18"
-              ry="10"
-              fill={landColor}
-              stroke={landOutline}
-              strokeWidth="1"
-            />
-            <ellipse
-              cx="940"
-              cy="520"
-              rx="12"
-              ry="7"
-              fill={landColor}
-              stroke={landOutline}
-              strokeWidth="1"
-            />
-
-            {/* Country Hint Borders: very faint dashed lines #C9E8D9 (0.5px) */}
-            <g
-              stroke={borderDashed}
-              strokeWidth="0.5"
-              strokeDasharray="3,3"
-              fill="none"
-              pointerEvents="none"
-            >
-              {/* Egypt / Levant frontier */}
-              <path d="M 535,235 L 530,350" />
-              {/* Levant / Mesopotamia frontier */}
-              <path d="M 610,135 L 615,260" />
-              {/* Hejaz / Najd frontier */}
-              <path d="M 590,320 L 610,480" />
-              {/* Najd / Eastern Arabia */}
-              <path d="M 720,290 L 730,470" />
-              {/* Yemen frontier */}
-              <path d="M 610,545 L 750,530" />
-              {/* Oman / Empty quarter */}
-              <path d="M 790,440 L 800,530" />
-              {/* North African hints */}
-              <path d="M 220,215 L 220,400" />
-              <path d="M 320,185 L 320,380" />
-              <path d="M 440,230 L 440,420" />
-            </g>
-
-            {/* Rivers: Tigris, Euphrates & Nile (clean 2D lines) */}
-            <g
-              fill="none"
-              stroke="#7FD1AE"
-              strokeWidth="0.8"
-              opacity={isDark ? '0.4' : '0.6'}
-              pointerEvents="none"
-            >
-              {/* Tigris & Euphrates */}
-              <path d="M 630,125 Q 660,180 710,240" />
-              <path d="M 655,125 Q 685,180 725,245" />
-              {/* Nile */}
-              <path d="M 535,235 Q 530,320 545,410" />
-            </g>
-
-            {/* Localized Region Labels */}
-            <g
-              fontFamily="'Aref Ruqaa', serif"
-              opacity={isDark ? '0.5' : '0.45'}
-              pointerEvents="none"
-            >
-              <text x="640" y="420" fill={isDark ? '#7FD1AE' : '#0E5C4D'} fontSize="16" fontWeight="bold" textAnchor="middle">
-                {t('map.regions.najd')}
-              </text>
-              <text x="575" y="420" fill={isDark ? '#7FD1AE' : '#0E5C4D'} fontSize="14" fontWeight="bold" textAnchor="middle">
-                {t('map.regions.hijaz')}
-              </text>
-              <text x="645" y="550" fill={isDark ? '#7FD1AE' : '#0E5C4D'} fontSize="15" fontWeight="bold" textAnchor="middle">
-                {t('map.regions.yemen')}
-              </text>
-              <text x="735" y="530" fill={isDark ? '#7FD1AE' : '#0E5C4D'} fontSize="14" fontWeight="bold" textAnchor="middle">
-                {t('map.regions.ahqaf')}
-              </text>
-              <text x="595" y="190" fill={isDark ? '#7FD1AE' : '#0E5C4D'} fontSize="14" fontWeight="bold" textAnchor="middle">
-                {t('map.regions.sham')}
-              </text>
-              <text x="695" y="190" fill={isDark ? '#7FD1AE' : '#0E5C4D'} fontSize="14" fontWeight="bold" textAnchor="middle">
-                {t('map.regions.iraq')}
-              </text>
-              <text x="475" y="320" fill={isDark ? '#7FD1AE' : '#0E5C4D'} fontSize="15" fontWeight="bold" textAnchor="middle">
-                {t('map.regions.egypt')}
-              </text>
-            </g>
-
-            {/* STEP 2 & 7: Render Markers as SVG elements ONLY with Frustum Culling */}
-            {visibleMarkers.map((item) => {
-              const isHovered = hoveredItem?.id === item.id;
-              const isSelected = selectedItem?.id === item.id;
-
-              if (item.isSquare) {
-                // Civilizations: square with rounded corners (10x10px, rx=2, ry=2) in deep teal #0E5C4D
-                const baseSize = 10;
-                const size = isHovered || isSelected ? baseSize * 1.3 : baseSize;
-                const half = size / 2;
-
-                return (
-                  <rect
-                    key={item.id}
-                    x={item.cx - half}
-                    y={item.cy - half}
-                    width={size}
-                    height={size}
-                    rx="2"
-                    ry="2"
-                    fill={item.color}
-                    stroke="#FFFFFF"
-                    strokeWidth="1.5"
-                    className="cursor-pointer transition-all duration-150"
-                    onMouseEnter={() => setHoveredItem(item)}
-                    onMouseLeave={() => setHoveredItem(null)}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedItem(item);
-                      setHoveredItem(null);
-                      storage.incrementMapSheetsCount();
-                    }}
-                  >
-                    <title>{item.name}</title>
-                  </rect>
-                );
-              }
-
-              // Myths: small elegant circle (8px diameter -> radius 4px)
-              const baseR = 4;
-              const r = isHovered || isSelected ? baseR * 1.3 : baseR;
-
-              return (
-                <circle
-                  key={item.id}
-                  cx={item.cx}
-                  cy={item.cy}
-                  r={r}
-                  fill={item.color}
-                  stroke="#FFFFFF"
-                  strokeWidth="1.5"
-                  className="cursor-pointer transition-all duration-150"
-                  onMouseEnter={() => setHoveredItem(item)}
-                  onMouseLeave={() => setHoveredItem(null)}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedItem(item);
-                    setHoveredItem(null);
-                    storage.incrementMapSheetsCount();
-                  }}
-                >
-                  <title>{item.name}</title>
-                </circle>
-              );
-            })}
-
-            {/* STEP 3: Hover Tooltip inside SVG */}
-            {hoveredItem && (
-              <g
-                transform={`translate(${hoveredItem.cx}, ${hoveredItem.cy - 12})`}
-                className="pointer-events-none"
-              >
-                {/* Tooltip Card (white card with teal border) */}
-                <rect
-                  x="-65"
-                  y="-28"
-                  width="130"
-                  height="26"
-                  rx="6"
-                  ry="6"
-                  fill={isDark ? '#12332D' : '#FFFFFF'}
-                  stroke="#7FD1AE"
-                  strokeWidth="1.2"
-                  filter="drop-shadow(0 2px 5px rgba(0,0,0,0.15))"
-                />
-                <text
-                  x="0"
-                  y="-11"
-                  textAnchor="middle"
-                  fill={isDark ? '#7FD1AE' : '#0E5C4D'}
-                  fontSize="11"
-                  fontWeight="bold"
-                  fontFamily="'Aref Ruqaa', serif"
-                >
-                  {(hoveredItem.name ?? '').length > 20
-                    ? (hoveredItem.name ?? '').slice(0, 19) + '…'
-                    : (hoveredItem.name ?? '')}
-                </text>
-              </g>
-            )}
-          </g>
-        </svg>
       </div>
 
-      {/* Bottom Sheet (max height 40%, slides from bottom) */}
-      {selectedItem && (
-        <div
-          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-end justify-center p-0 sm:p-4 animate-in fade-in duration-200"
-          onClick={() => setSelectedItem(null)}
-          dir={dir}
-        >
-          <div
+      {/* Public-Domain Cultural Origins Quick Focus Pills */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar -mx-1 px-1">
+        {featuredOriginItems.map((origin) => (
+          <button
+            key={origin.id}
+            type="button"
+            data-testid={`map-origin-${origin.id}`}
+            onClick={() => {
+              if (activeFilter !== 'all' && activeFilter !== origin.kind) {
+                setActiveFilter('all');
+              }
+              setSelectedItem(origin);
+              mapInstanceRef.current?.flyTo([origin.lat, origin.lng], 5, { duration: 0.6 });
+            }}
             style={{
-              backgroundColor: tokens.card,
+              backgroundColor: selectedItem?.id === origin.id ? tokens.primaryMint : tokens.card,
+              color: selectedItem?.id === origin.id ? '#0E5C4D' : tokens.textPrimary,
               borderColor: tokens.border,
             }}
-            className="w-full max-w-md max-h-[40vh] overflow-y-auto rounded-t-[28px] sm:rounded-[28px] p-4 sm:p-5 shadow-2xl border-t sm:border animate-in slide-in-from-bottom-6 space-y-3 text-start"
-            onClick={(e) => e.stopPropagation()}
-            onTouchStart={(e) => {
-              touchStartY.current = e.touches[0].clientY;
-            }}
-            onTouchMove={(e) => {
-              if (touchStartY.current !== null) {
-                const deltaY = e.touches[0].clientY - touchStartY.current;
-                if (deltaY > 50) {
-                  setSelectedItem(null);
-                  touchStartY.current = null;
-                }
-              }
-            }}
-            onTouchEnd={() => {
-              touchStartY.current = null;
-            }}
+            className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold cursor-pointer min-h-[38px]"
           >
-            {/* Sheet Handle for swipe down */}
-            <div className="w-10 h-1 bg-black/15 dark:bg-white/20 rounded-full mx-auto -mt-1 mb-2" />
+            <MapPin size={13} style={{ color: origin.color }} />
+            <span>{origin.regionLabel}</span>
+          </button>
+        ))}
+      </div>
 
-            {/* Header: Thumbnail 48x48 + Name (display font) + Region */}
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex items-start gap-3">
-                {/* Thumbnail 48x48 */}
+      {/* Selected Marker Preview Card -> Opens Story */}
+      {selectedItem && (
+        <div
+          data-testid="map-selected-card"
+          style={{
+            backgroundColor: tokens.card,
+            borderColor: tokens.border,
+          }}
+          className="rounded-[24px] p-4 shadow-md border space-y-3 text-start animate-in fade-in duration-150"
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-start gap-3 min-w-0">
+              {selectedItem.image ? (
+                <img
+                  src={selectedItem.image}
+                  alt={selectedItem.title}
+                  className="w-14 h-14 rounded-xl object-cover shrink-0 border"
+                  style={{ borderColor: tokens.borderSubtle }}
+                />
+              ) : (
                 <div
-                  style={{
-                    backgroundColor: tokens.surface,
-                    borderColor: '#7FD1AE',
-                  }}
-                  className="w-12 h-12 rounded-xl overflow-hidden shrink-0 border border-[#7FD1AE]/50 shadow-xs"
+                  style={{ backgroundColor: tokens.surface, color: tokens.deepAccent }}
+                  className="w-14 h-14 rounded-xl flex items-center justify-center shrink-0"
                 >
-                  {selectedItem.heroImage ? (
-                    <img
-                      src={selectedItem.heroImage}
-                      alt={selectedItem.name ?? ''}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-[#0E5C4D]">
-                      <MapPin size={20} />
-                    </div>
-                  )}
+                  <MapPin size={22} />
                 </div>
+              )}
 
-                <div>
-                  <h3
-                    style={{ color: tokens.deepAccent }}
-                    className="font-['Aref_Ruqaa',serif] text-base sm:text-lg font-bold leading-tight"
-                  >
-                    {selectedItem.name ?? ''}
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <h3 style={{ color: tokens.deepAccent }} className="font-['Aref_Ruqaa',serif] text-lg font-bold truncate">
+                    {selectedItem.title}
                   </h3>
-                  <p
-                    style={{ color: tokens.textSecondary }}
-                    className="text-[11px] font-medium mt-0.5 flex items-center gap-1 font-['Cairo',sans-serif]"
+                  <span
+                    style={{
+                      backgroundColor: tokens.coolBlueTint,
+                      color: tokens.coolBlueAccent,
+                    }}
+                    className="text-[10px] font-bold px-2 py-0.5 rounded-full"
                   >
-                    <MapPin size={12} className="text-[#7FD1AE] shrink-0" />
-                    <span>{selectedItem.region || selectedItem.regionShort || ''}</span>
-                  </p>
+                    {selectedItem.kind === 'civilization' ? t('map.civilizations') : getTypeLabel(selectedItem.kind, lang)}
+                  </span>
                 </div>
-              </div>
 
-              {/* Close Button */}
-              <button
-                type="button"
-                onClick={() => setSelectedItem(null)}
-                aria-label={t('common.close')}
-                style={{
-                  backgroundColor: tokens.surface,
-                  color: tokens.textSecondary,
-                }}
-                className="w-11 h-11 min-h-[44px] min-w-[44px] rounded-full hover:opacity-80 flex items-center justify-center transition-colors cursor-pointer shrink-0"
-              >
-                <X size={16} />
-              </button>
+                <p style={{ color: tokens.textSecondary }} className="text-[11px] flex items-center gap-1 mt-0.5">
+                  <MapPin size={12} style={{ color: tokens.primaryMint }} />
+                  <span>
+                    {selectedItem.regionLabel} • {selectedItem.cultureLabel}
+                  </span>
+                </p>
+              </div>
             </div>
 
-            {/* Summary: 2 lines max */}
-            <p
-              style={{ color: tokens.textPrimary }}
-              className="text-xs font-['Cairo',sans-serif] leading-relaxed line-clamp-2"
+            <button
+              type="button"
+              onClick={() => setSelectedItem(null)}
+              aria-label={t('common.close')}
+              style={{ backgroundColor: tokens.surface, color: tokens.textSecondary }}
+              className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full flex items-center justify-center cursor-pointer shrink-0"
             >
-              {selectedItem.summary ?? ''}
-            </p>
-
-            {/* Tag Pills */}
-            {Array.isArray(selectedItem.tags) && selectedItem.tags.length > 0 && (
-              <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
-                {selectedItem.tags.slice(0, 3).map((tag, idx) => (
-                  <Tag key={`${tag}-${idx}`} variant={getTagVariant(selectedItem.rawTags?.[idx] || tag)} size="sm">
-                    {tag}
-                  </Tag>
-                ))}
-              </div>
-            )}
-
-            {/* Read CTA Button ("اقرأ القصة") */}
-            <div className="pt-1">
-              <button
-                type="button"
-                onClick={() => {
-                  const item = selectedItem;
-                  setSelectedItem(null);
-
-                  if (item.type === 'myth' && item.rawMyth) {
-                    onSelectEntry(item.rawMyth);
-                  } else if (item.type === 'civilization' && item.rawCiv) {
-                    if (onSelectCivilization) {
-                      onSelectCivilization(item.rawCiv.id);
-                    }
-                  }
-                }}
-                style={{
-                  backgroundColor: '#0E5C4D',
-                  color: '#FFFFFF',
-                }}
-                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold shadow-md hover:opacity-90 active:scale-98 transition-all cursor-pointer font-['Cairo',sans-serif]"
-              >
-                <span>
-                  {selectedItem.type === 'civilization'
-                    ? t('map.readCiv')
-                    : (t('article.readStory') || 'اقرأ القصة')}
-                </span>
-                <ChevronLeft size={16} className={dir === 'ltr' ? 'rotate-180' : ''} />
-              </button>
-            </div>
+              <X size={16} />
+            </button>
           </div>
+
+          <p style={{ color: tokens.textPrimary }} className="text-xs font-['Cairo',sans-serif] leading-relaxed line-clamp-2">
+            {selectedItem.summary}
+          </p>
+
+          {selectedItem.tags.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {selectedItem.tags.slice(0, 3).map((tag, idx) => (
+                <Tag key={`${tag}-${idx}`} variant={getTagVariant(tag)} size="sm">
+                  {getTagLabel(tag, lang)}
+                </Tag>
+              ))}
+            </div>
+          )}
+
+          <button
+            type="button"
+            data-testid="map-open-story-btn"
+            onClick={() => handleOpenSelected(selectedItem)}
+            style={{
+              backgroundColor: '#0E5C4D',
+              color: '#FFFFFF',
+            }}
+            className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold shadow-sm hover:opacity-90 cursor-pointer min-h-[44px]"
+          >
+            <span>
+              {selectedItem.kind === 'civilization' ? t('map.readCiv') : t('map.openLeafletStory')}
+            </span>
+            <ChevronLeft size={16} className={dir === 'ltr' ? 'rotate-180' : ''} />
+          </button>
         </div>
       )}
     </div>

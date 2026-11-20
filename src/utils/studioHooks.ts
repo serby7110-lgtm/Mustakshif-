@@ -3,13 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  * 
  * Studio Hooks Extraction, Filter, and Export Utilities
- * For game developers and story writers exploring Arab mythology.
+ * For story writers and researchers exploring Arab mythology.
  */
 
 import { DeepStoriesMap } from '../data/storyTypes';
 import { MythEntry } from '../data/types';
 
-export type HookType = 'game' | 'writing';
+export type HookType = 'writing';
 
 export interface AggregatedHook {
   id: string;
@@ -82,7 +82,7 @@ export function resolveMythForStoryKey(
 }
 
 /**
- * Extracts and aggregates all gameHooks and writingHooks from stories
+ * Extracts and aggregates all writingHooks from stories
  */
 export function getAggregatedHooks(
   stories: DeepStoriesMap = {},
@@ -100,22 +100,6 @@ export function getAggregatedHooks(
     const mythName = matchedMyth?.name ?? storyKey;
     const mythCategory = matchedMyth?.category ?? 'other';
     const themes = Array.isArray(story.themes) ? story.themes : [];
-
-    // Game hooks
-    if (Array.isArray(story.gameHooks)) {
-      story.gameHooks.forEach((hookText, index) => {
-        if (!hookText || typeof hookText !== 'string') return;
-        result.push({
-          id: `${storyKey}_game_${index}`,
-          text: hookText.trim(),
-          type: 'game',
-          mythId,
-          mythName,
-          mythCategory,
-          themes,
-        });
-      });
-    }
 
     // Writing hooks
     if (Array.isArray(story.writingHooks)) {

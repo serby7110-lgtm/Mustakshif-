@@ -8,7 +8,7 @@
  */
 
 import React, { useState, useRef } from 'react';
-import { ChevronLeft, ChevronRight, Sparkles, BookOpen, Compass } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Sparkles, BookOpen, Compass, Info } from 'lucide-react';
 import { Logo } from '../components/primitives/Logo';
 import { useTheme } from '../theme/ThemeContext';
 import { useI18n } from '../i18n/i18n';
@@ -73,12 +73,15 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
 
   // Touch handlers for swipe
   const onTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.targetTouches[0].clientX;
+    touchStartX.current = e.targetTouches?.[0]?.clientX ?? null;
     touchEndX.current = null;
   };
 
   const onTouchMove = (e: React.TouchEvent) => {
-    touchEndX.current = e.targetTouches[0].clientX;
+    const clientX = e.targetTouches?.[0]?.clientX;
+    if (typeof clientX === 'number') {
+      touchEndX.current = clientX;
+    }
   };
 
   const onTouchEnd = () => {
@@ -99,7 +102,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
     touchEndX.current = null;
   };
 
-  const current = slides[currentSlide];
+  const current = slides[currentSlide] ?? slides[0];
 
   return (
     <div
@@ -147,8 +150,30 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
         </button>
       </header>
 
+      {/* Cultural Heritage First-Launch Notice Banner */}
+      <div
+        role="note"
+        data-testid="onboarding-cultural-notice"
+        style={{
+          backgroundColor: isDark ? 'rgba(74, 144, 217, 0.16)' : '#E8F1FB',
+          borderColor: '#4A90D9',
+          color: isDark ? '#9FE8CC' : '#0E5C4D',
+        }}
+        className="mt-3 px-4 py-3 rounded-2xl border flex items-center gap-2.5 shadow-2xs text-start"
+      >
+        <Info size={18} style={{ color: '#4A90D9' }} className="shrink-0" />
+        <div className="min-w-0">
+          <span className="text-[11px] font-bold block opacity-85">
+            {t('onboarding.culturalNoticeTitle')}
+          </span>
+          <p className="text-xs sm:text-sm font-bold leading-snug">
+            {t('onboarding.culturalNotice')}
+          </p>
+        </div>
+      </div>
+
       {/* Main Slide Carousel Area */}
-      <main className="my-auto py-6 text-center space-y-6">
+      <main className="my-auto py-5 text-center space-y-6">
         {/* Pastel illustration placeholder using Logo star motif in mint/blue tints */}
         <div className="relative w-48 h-48 mx-auto flex items-center justify-center">
           {/* Concentric Soft Pastel Background Rings */}

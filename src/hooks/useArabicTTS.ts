@@ -172,12 +172,14 @@ export function useArabicTTS(): UseArabicTTSResult {
 
   // Start speaking text or array of strings sequentially
   const speak = useCallback((text: string | string[]) => {
-    if (!isSupported) return;
+    if (!isSupported || text == null) return;
 
     // Normalize input to array of non-empty strings
-    const items = Array.isArray(text)
-      ? text.map((t) => t.trim()).filter((t) => t.length > 0)
-      : [text.trim()].filter((t) => t.length > 0);
+    const rawItems = Array.isArray(text) ? text : [text];
+    const items = rawItems
+      .filter((item): item is string => typeof item === 'string')
+      .map((item) => item.trim())
+      .filter((item) => item.length > 0);
 
     if (items.length === 0) {
       setState('idle');

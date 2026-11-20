@@ -145,7 +145,11 @@ export const AppShell: React.FC<AppShellProps> = ({
                     className="min-h-[44px] px-2.5 py-1.5 rounded-full border flex items-center gap-1 text-[11px] font-bold shadow-xs hover:opacity-90 transition-all cursor-pointer"
                   >
                     <Globe size={13} className="shrink-0 opacity-80" />
-                    <span className="text-sm leading-none" aria-hidden="true">
+                    <span
+                      style={{ borderColor: tokens.borderSubtle }}
+                      className="px-1.5 py-0.5 rounded-md border text-[10px] font-mono font-bold leading-none"
+                      aria-hidden="true"
+                    >
                       {flag}
                     </span>
                     <span className="max-w-[120px] truncate">{currentMeta.nativeName}</span>
@@ -189,7 +193,11 @@ export const AppShell: React.FC<AppShellProps> = ({
                             className="w-full px-3 py-2 rounded-xl flex items-center justify-between gap-2 text-xs font-bold hover:opacity-90 transition-colors cursor-pointer text-start"
                           >
                             <span className="flex items-center gap-2 min-w-0">
-                              <span className="text-base leading-none shrink-0" aria-hidden="true">
+                              <span
+                                style={{ borderColor: tokens.borderSubtle }}
+                                className="px-1.5 py-0.5 rounded-md border text-[10px] font-mono font-bold leading-none shrink-0"
+                                aria-hidden="true"
+                              >
                                 {item.flag}
                               </span>
                               <span className="truncate">{item.nativeName}</span>

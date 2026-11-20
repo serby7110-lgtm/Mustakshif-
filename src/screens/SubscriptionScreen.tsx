@@ -177,7 +177,7 @@ export const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
                 {t('subscription.statusTitle')}
               </h2>
               <p style={{ color: tokens.textSecondary }} className="text-xs">
-                {subDetails?.productId ?? 'mustakshif_premium_monthly'}
+                {subDetails?.productId ?? 'premium_monthly'}
               </p>
             </div>
           </div>

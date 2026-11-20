@@ -7,7 +7,7 @@
  * system synchronization, and immediate DOM class application on app startup.
  */
 
-import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import i18n from '../i18n';
 import { ThemeColors, lightPalette, darkPalette } from './tokens';
 import { storage, ThemeMode } from '../data/storage';
@@ -58,6 +58,8 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   });
 
   const [currentLux, setCurrentLux] = useState<number | null>(null);
+  const currentLuxRef = useRef<number | null>(null);
+  currentLuxRef.current = currentLux;
   const [autoDecision, setAutoDecision] = useState<AutoDarkDecision>(() =>
     evaluateAutoDarkMode(null)
   );
@@ -101,31 +103,32 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   useEffect(() => {
     if (!isAutoDark) return;
 
+    const applyDecision = (lux: number | null) => {
+      const dec = evaluateAutoDarkMode(lux);
+      setAutoDecision(dec);
+      setThemeState(dec.isDark ? 'dark' : 'light');
+    };
+
     // Immediate calculation
-    const dec = evaluateAutoDarkMode(currentLux);
-    setAutoDecision(dec);
-    setThemeState(dec.isDark ? 'dark' : 'light');
+    applyDecision(currentLuxRef.current);
 
     // Subscribe to ambient light sensor if available
     const unsubSensor = subscribeAmbientLight((lux) => {
+      currentLuxRef.current = lux;
       setCurrentLux(lux);
-      const sensorDec = evaluateAutoDarkMode(lux);
-      setAutoDecision(sensorDec);
-      setThemeState(sensorDec.isDark ? 'dark' : 'light');
+      applyDecision(lux);
     });
 
     // Periodic check every 30s for sunset / sunrise transition
-    const interval = setInterval(() => {
-      const timerDec = evaluateAutoDarkMode(currentLux);
-      setAutoDecision(timerDec);
-      setThemeState(timerDec.isDark ? 'dark' : 'light');
+    const interval = window.setInterval(() => {
+      applyDecision(currentLuxRef.current);
     }, 30000);
 
     return () => {
-      clearInterval(interval);
+      window.clearInterval(interval);
       if (unsubSensor) unsubSensor();
     };
-  }, [isAutoDark, currentLux]);
+  }, [isAutoDark]);
 
   // Listen to system preference changes when not explicitly set and auto mode is off
   useEffect(() => {

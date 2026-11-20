@@ -84,8 +84,8 @@ export const LongFormReaderSection: React.FC<LongFormReaderSectionProps> = ({
 
   useEffect(() => {
     if (!toastMessage) return;
-    const t = setTimeout(() => setToastMessage(null), 3000);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setToastMessage(null), 3000);
+    return () => clearTimeout(timer);
   }, [toastMessage]);
 
   const overallProgress = useMemo(() => {
@@ -285,7 +285,7 @@ export const LongFormReaderSection: React.FC<LongFormReaderSectionProps> = ({
         ) : chapters.map((chapter, mapIdx) => {
           const chIndex = chapter?.index ?? mapIdx;
           const chId = chapter?.id ?? `ch-${mapIdx}`;
-          const unlocked = isChapterUnlocked(entry, chIndex, hasPremiumMonthly);
+          const unlocked = isChapterUnlocked(entry, mapIdx, hasPremiumMonthly);
           const chProgress = chapterProgressMap[`${entryId}:${chId}`] || 0;
           const chEvidence = chapter?.evidenceLabel || 'خيال أدبي';
           const evColors = getEvidenceColors(chEvidence);
@@ -318,7 +318,7 @@ export const LongFormReaderSection: React.FC<LongFormReaderSectionProps> = ({
                 </span>
 
                 <div className="flex items-center gap-2">
-                  {chapter.isAppendix && (
+                  {chapter?.isAppendix && (
                     <span
                       style={{ color: tokens.textSecondary }}
                       className="text-[11px] font-bold"
@@ -329,17 +329,17 @@ export const LongFormReaderSection: React.FC<LongFormReaderSectionProps> = ({
                   <span
                     style={{
                       backgroundColor:
-                        chapter.index === 0 || chapter.isFree
+                        chIndex === 0 || Boolean(chapter?.isFree)
                           ? 'rgba(127, 209, 174, 0.25)'
                           : '#4A90D9',
                       color:
-                        chapter.index === 0 || chapter.isFree
+                        chIndex === 0 || Boolean(chapter?.isFree)
                           ? tokens.deepAccent
                           : '#FFFFFF',
                     }}
                     className="px-2.5 py-0.5 rounded-full text-[11px] font-bold inline-flex items-center gap-1"
                   >
-                    {chapter.index === 0 || chapter.isFree ? (
+                    {chIndex === 0 || Boolean(chapter?.isFree) ? (
                       <>
                         <Sparkles size={11} />
                         <span>{t('longForm.freeChapterBadge')}</span>
@@ -395,7 +395,7 @@ export const LongFormReaderSection: React.FC<LongFormReaderSectionProps> = ({
                   {paragraphs.length > 0 ? (
                     <div
                       style={{ color: tokens.textPrimary }}
-                      className={`space-y-3 font-['Cairo',sans-serif] text-start ${bodyTextSizeClass}`}
+                      className={`space-y-3 reader-body-text font-['Cairo',sans-serif] text-start ${bodyTextSizeClass}`}
                     >
                       {paragraphs.map((p, pIdx) => (
                         <p key={pIdx}>{p ?? ''}</p>
@@ -458,7 +458,7 @@ export const LongFormReaderSection: React.FC<LongFormReaderSectionProps> = ({
 
                   {/* Localized Play price */}
                   <div className="text-xs font-bold font-mono" style={{ color: '#4A90D9' }}>
-                    {subDetails?.price || '$2.99'} / {t('subscription.monthly')} ({subDetails?.productId ?? 'mustakshif_premium_monthly'})
+                    {subDetails?.price || '$2.99'} / {t('subscription.monthly')} ({subDetails?.productId ?? 'premium_monthly'})
                   </div>
 
                   {/* Action Buttons: اشترك الآن + استعادة المشتريات */}

@@ -8,7 +8,7 @@
  * and most-read entries list. Colors read strictly from theme tokens.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import {
   Search,
   Mic,
@@ -25,6 +25,10 @@ import {
   MapPin,
   Settings,
   Check,
+  Orbit,
+  Shuffle,
+  Globe2,
+  Filter,
 } from 'lucide-react';
 
 import { Card } from '../components/primitives/Card';
@@ -35,6 +39,7 @@ import { LockedHeroImage, PremiumPill } from '../components/primitives/LockedMed
 import { MythEntry, MythCategory } from '../data/types';
 import { MYTH_ENTRIES, getAllEntries, getEntriesByCategory, getEntryById } from '../data/seed';
 import { getAllCivilizations } from '../data/civTypes';
+import { getAzamaEntriesCount } from '../utils/azama';
 import { storage, LastReadChapter } from '../data/storage';
 import { searchEntries, searchCivilizations } from '../utils/arabicSearch';
 import { getCivImageUrl, resolveHeroImageUrl } from '../utils/assets';
@@ -45,6 +50,20 @@ import { SurpriseMeButton } from '../components/primitives/SurpriseMeButton';
 import { logAnalyticsEvent } from '../lib/firebase';
 import { useI18n } from '../i18n/i18n';
 import { getLocalizedEntry, getLocalizedCivilization, localizeTag } from '../content';
+import {
+  CONTENT_CATALOG,
+  getCultureLabel,
+  getTagLabel,
+  getTypeLabel,
+} from '../content/catalog';
+import type { ContentType } from '../content/catalogTypes';
+import {
+  filterContentItems,
+  getStoryOfTheDay,
+  getUniqueCultures,
+  getUniqueTags,
+  pickRandomStory,
+} from '../utils/catalogFilters';
 const RunnerIcon = ({ size = 20, className = '' }: { size?: number; className?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <circle cx="15" cy="4" r="2" />
@@ -72,6 +91,9 @@ export interface HomeScreenProps {
   onToggleSave: (id: string, e?: React.MouseEvent) => void;
   onSelectCivilization?: (civId: string) => void;
   onExploreCivilizations?: () => void;
+  onOpenAzama?: () => void;
+  onOpenTag?: (tagKey: string) => void;
+  onOpenCreatures?: (creatureId?: string) => void;
   isPremiumActive?: boolean;
   onOpenSubscription?: () => void;
 }
@@ -84,12 +106,16 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   onToggleSave,
   onSelectCivilization,
   onExploreCivilizations,
+  onOpenAzama,
+  onOpenTag,
+  onOpenCreatures,
   isPremiumActive,
   onOpenSubscription,
 }) => {
   const { t, lang, dir } = useI18n();
   const { tokens, isDark } = useTheme();
   const effectivePremium = isPremiumActive ?? storage.hasPremiumMonthly();
+  const azamaCount = useMemo(() => getAzamaEntriesCount(), []);
 
   React.useEffect(() => {
     if (!effectivePremium) {
@@ -106,7 +132,50 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [searchScope, setSearchScope] = useState<'all' | 'myths' | 'civs'>('all');
   const [isMicActive, setIsMicActive] = useState(false);
+  const micTimerRef = useRef<number | null>(null);
   const [showAllMostRead, setShowAllMostRead] = useState(false);
+
+  // Cross-cultural catalog filters
+  const [explorerType, setExplorerType] = useState<ContentType | 'all'>('all');
+  const [explorerCulture, setExplorerCulture] = useState<string>('all');
+  const [explorerTag, setExplorerTag] = useState<string>('all');
+
+  const storyOfDayItem = useMemo(() => getStoryOfTheDay(CONTENT_CATALOG), []);
+  const availableCultures = useMemo(() => getUniqueCultures(CONTENT_CATALOG), []);
+  const availableTags = useMemo(() => getUniqueTags(CONTENT_CATALOG), []);
+  const filteredCatalog = useMemo(
+    () =>
+      filterContentItems(CONTENT_CATALOG, {
+        type: explorerType,
+        culture: explorerCulture,
+        tag: explorerTag,
+        query: searchQuery,
+      }),
+    [explorerType, explorerCulture, explorerTag, searchQuery]
+  );
+
+  const handleOpenCatalogStory = (storyId: string) => {
+    const entry = getEntryById(storyId);
+    if (entry) {
+      onSelectEntry(entry);
+    }
+  };
+
+  const handleOpenRandomStory = () => {
+    const pool = filteredCatalog.length > 0 ? filteredCatalog : CONTENT_CATALOG;
+    const picked = pickRandomStory(pool, storyOfDayItem?.id);
+    if (picked) {
+      handleOpenCatalogStory(picked.id);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (micTimerRef.current !== null) {
+        clearTimeout(micTimerRef.current);
+      }
+    };
+  }, []);
 
   // Check for last-read chapter (STEP 1: Home v2)
   const [lastRead] = useState<LastReadChapter | null>(() => storage.getLastReadChapter());
@@ -169,10 +238,14 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   }, [allCivilizations, rawAllCivilizations, searchQuery, searchScope, lang]);
 
   const handleMicClick = () => {
+    if (micTimerRef.current !== null) {
+      clearTimeout(micTimerRef.current);
+    }
     setIsMicActive(true);
-    setTimeout(() => {
+    micTimerRef.current = window.setTimeout(() => {
       setSearchQuery(lang === 'ar' ? 'غول' : lang === 'th' ? 'กูล' : 'Ghoul');
       setIsMicActive(false);
+      micTimerRef.current = null;
     }, 1000);
   };
 
@@ -198,14 +271,16 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     }
   };
 
-  const renderHighlighted = (text: string, query: string) => {
-    if (!query.trim()) return text;
+  const renderHighlighted = (text: string | null | undefined, query: string) => {
+    const safeText = text ?? '';
+    if (!query.trim()) return safeText;
     const cleanQ = query.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const regex = new RegExp(`(${cleanQ}|ال${cleanQ})`, 'gi');
-    const parts = text.split(regex);
+    const splitRegex = new RegExp(`(${cleanQ}|ال${cleanQ})`, 'gi');
+    const matchRegex = new RegExp(`^(${cleanQ}|ال${cleanQ})$`, 'i');
+    const parts = safeText.split(splitRegex);
 
     return parts.map((part, i) =>
-      regex.test(part) ? (
+      matchRegex.test(part) ? (
         <mark
           key={i}
           style={{
@@ -591,7 +666,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                           style={{ color: tokens.deepAccent }}
                           className="font-bold text-base font-['Aref_Ruqaa',serif] group-hover:underline"
                         >
-                          {renderHighlighted(civ.name, searchQuery)}
+                          {renderHighlighted(civ?.name ?? '', searchQuery)}
                         </span>
                         <span
                           style={{
@@ -676,7 +751,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                             style={{ color: tokens.textPrimary }}
                             className="font-bold text-sm font-['Aref_Ruqaa',serif]"
                           >
-                            {renderHighlighted(entry.name, searchQuery)}
+                            {renderHighlighted(entry?.name ?? '', searchQuery)}
                           </span>
                           {entry.isPremium && <PremiumPill />}
                           <span
@@ -1075,7 +1150,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               backgroundColor: isDark ? 'rgba(236, 231, 248, 0.14)' : '#ECE7F8',
               borderColor: isDark ? 'rgba(236, 231, 248, 0.35)' : 'rgba(150, 120, 220, 0.28)',
             }}
-            className="p-3.5 rounded-[18px] border text-start flex flex-col justify-between gap-2.5 min-h-[124px] hover:-translate-y-0.5 shadow-sm transition-all duration-200 cursor-pointer group col-span-2 sm:col-span-1"
+            className="p-3.5 rounded-[18px] border text-start flex flex-col justify-between gap-2.5 min-h-[124px] hover:-translate-y-0.5 shadow-sm transition-all duration-200 cursor-pointer group col-span-1"
           >
             <div className="flex items-center justify-between">
               <div
@@ -1110,6 +1185,54 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 className="text-[11px] font-['Cairo',sans-serif] font-medium"
               >
                 {t('cat.seersSub')}
+              </span>
+            </div>
+          </button>
+
+          {/* Tile 9: الطبقات والأكوان (Kitab al-Azama) */}
+          <button
+            type="button"
+            data-testid="home-azama-tile"
+            onClick={() => onOpenAzama?.()}
+            style={{
+              backgroundColor: isDark ? tokens.coolBlueTint : '#E8F1FB',
+              borderColor: isDark ? 'rgba(127, 178, 232, 0.35)' : 'rgba(74, 144, 217, 0.35)',
+            }}
+            className="p-3.5 rounded-[18px] border text-start flex flex-col justify-between gap-2.5 min-h-[124px] hover:-translate-y-0.5 shadow-sm transition-all duration-200 cursor-pointer group col-span-2"
+          >
+            <div className="flex items-center justify-between">
+              <div
+                style={{
+                  backgroundColor: '#4A90D9',
+                  color: '#FFFFFF',
+                }}
+                className="w-9 h-9 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-xs"
+              >
+                <Orbit size={20} strokeWidth={1.8} />
+              </div>
+              <span
+                data-testid="home-azama-count"
+                style={{
+                  backgroundColor: '#4A90D9',
+                  color: '#FFFFFF',
+                }}
+                className="text-[11px] font-bold px-2.5 py-0.5 rounded-full font-mono shadow-2xs"
+              >
+                {t('azama.tileCount', { count: azamaCount })}
+              </span>
+            </div>
+            <div>
+              <span
+                style={{ color: isDark ? tokens.textPrimary : '#0E5C4D' }}
+                className="font-['Aref_Ruqaa',serif] text-lg font-bold block leading-tight"
+              >
+                {t('azama.tileTitle')}
+              </span>
+              <span
+                style={{ color: tokens.textSecondary }}
+                className="text-[11px] font-['Cairo',sans-serif] font-medium"
+              >
+                {t('azama.tileSubtitle')}
               </span>
             </div>
           </button>
@@ -1192,6 +1315,293 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         </div>
       </div>
       )}
+
+      {/* 4.25. Story of the Day ("قصة اليوم"), Random Story ("قصة عشوائية"), Beings Directory, and Type/Culture/Tag Explorer */}
+      <section data-testid="cross-cultural-explorer" className="space-y-3.5 pt-1">
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <div>
+            <h2
+              style={{ color: tokens.deepAccent }}
+              className="font-['Aref_Ruqaa',serif] text-xl sm:text-2xl font-bold leading-tight"
+            >
+              {t('discover.sectionTitle')}
+            </h2>
+            <p style={{ color: tokens.textSecondary }} className="text-xs font-['Cairo',sans-serif] mt-0.5">
+              {t('discover.sectionSub')}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0 flex-wrap">
+            <button
+              type="button"
+              data-testid="home-random-story-btn"
+              onClick={handleOpenRandomStory}
+              style={{
+                backgroundColor: tokens.primaryMint,
+                color: '#0E5C4D',
+              }}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold shadow-xs hover:opacity-90 active:scale-95 transition-all cursor-pointer min-h-[44px]"
+            >
+              <Shuffle size={15} />
+              <span>{t('discover.randomStory')}</span>
+            </button>
+
+            <button
+              type="button"
+              data-testid="home-creatures-btn"
+              onClick={() => onOpenCreatures?.()}
+              style={{
+                backgroundColor: tokens.coolBlueTint,
+                borderColor: tokens.border,
+                color: tokens.coolBlueAccent,
+              }}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full border text-xs font-bold shadow-xs hover:opacity-90 active:scale-95 transition-all cursor-pointer min-h-[44px]"
+            >
+              <Sparkles size={15} />
+              <span>{t('discover.openCreaturesShort')}</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Story of the Day Card ("قصة اليوم") */}
+        {storyOfDayItem && (
+          <div
+            data-testid="story-of-the-day-card"
+            onClick={() => handleOpenCatalogStory(storyOfDayItem.id)}
+            style={{
+              backgroundColor: tokens.card,
+              borderColor: tokens.border,
+            }}
+            className="rounded-[22px] border shadow-sm overflow-hidden cursor-pointer hover:border-[#7FD1AE] transition-all flex flex-col sm:flex-row"
+          >
+            <div className="relative h-40 sm:h-auto sm:w-40 shrink-0 overflow-hidden" style={{ backgroundColor: tokens.surface }}>
+              <img
+                src={resolveHeroImageUrl(storyOfDayItem.image)}
+                alt={storyOfDayItem.title[lang] || storyOfDayItem.title.ar}
+                className="w-full h-full object-cover"
+                loading="lazy"
+              />
+              <span
+                style={{
+                  backgroundColor: '#4A90D9',
+                  color: '#FFFFFF',
+                }}
+                className="absolute top-2.5 start-2.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold shadow-xs"
+              >
+                {t('discover.storyOfDay')}
+              </span>
+            </div>
+
+            <div className="p-3.5 sm:p-4 flex-1 min-w-0 flex flex-col justify-between gap-2 text-start">
+              <div className="space-y-1">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span
+                    style={{ backgroundColor: tokens.surface, color: tokens.deepAccent }}
+                    className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                  >
+                    {getTypeLabel(storyOfDayItem.type, lang)}
+                  </span>
+                  <span
+                    style={{ backgroundColor: tokens.coolBlueTint, color: tokens.coolBlueAccent }}
+                    className="text-[10px] font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-1"
+                  >
+                    <Globe2 size={10} />
+                    <span>{getCultureLabel(storyOfDayItem.culture, lang)}</span>
+                  </span>
+                </div>
+                <h3 style={{ color: tokens.deepAccent }} className="font-['Aref_Ruqaa',serif] text-lg sm:text-xl font-bold leading-snug">
+                  {storyOfDayItem.title[lang] || storyOfDayItem.title.ar}
+                </h3>
+                <p style={{ color: tokens.textSecondary }} className="text-xs font-['Cairo',sans-serif] line-clamp-2 leading-relaxed">
+                  {storyOfDayItem.summary[lang] || storyOfDayItem.summary.ar}
+                </p>
+              </div>
+
+              <div className="flex items-center justify-between gap-2 pt-1 flex-wrap">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {storyOfDayItem.tags.slice(0, 3).map((tag) => (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onOpenTag?.(tag);
+                      }}
+                      style={{
+                        backgroundColor: tokens.surface,
+                        borderColor: tokens.border,
+                        color: tokens.deepAccent,
+                      }}
+                      className="px-2.5 py-0.5 rounded-full border text-[10px] font-bold cursor-pointer hover:opacity-80"
+                    >
+                      #{getTagLabel(tag, lang)}
+                    </button>
+                  ))}
+                </div>
+                <span style={{ color: tokens.coolBlueAccent }} className="text-xs font-bold inline-flex items-center gap-1">
+                  <span>{t('article.readStory')}</span>
+                  <ChevronLeft size={14} className={dir === 'ltr' ? 'rotate-180' : ''} />
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Filter Controls: Type Chips + Culture/Tag Selectors */}
+        <div
+          style={{
+            backgroundColor: tokens.card,
+            borderColor: tokens.border,
+          }}
+          className="p-3.5 rounded-[20px] border shadow-2xs space-y-2.5"
+        >
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+            {(['all', 'story', 'myth', 'cosmology', 'folklore'] as const).map((tp) => {
+              const active = explorerType === tp;
+              return (
+                <button
+                  key={tp}
+                  type="button"
+                  data-testid={`home-filter-type-${tp}`}
+                  onClick={() => setExplorerType(tp)}
+                  style={{
+                    backgroundColor: active ? tokens.deepAccent : tokens.surface,
+                    color: active ? (isDark ? '#0B2420' : '#FFFFFF') : tokens.textPrimary,
+                    borderColor: active ? tokens.deepAccent : tokens.borderSubtle,
+                  }}
+                  className="shrink-0 px-3 py-1.5 rounded-full border text-xs font-bold cursor-pointer min-h-[36px] transition-all"
+                >
+                  {t(`contentTypes.${tp}`)}
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {/* Culture Filter */}
+            <label className="flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs" style={{ borderColor: tokens.borderSubtle, backgroundColor: tokens.surface }}>
+              <Globe2 size={14} style={{ color: tokens.coolBlueAccent }} className="shrink-0" />
+              <span style={{ color: tokens.textSecondary }} className="font-bold shrink-0">
+                {t('discover.filterCulture')}:
+              </span>
+              <select
+                data-testid="home-filter-culture"
+                value={explorerCulture}
+                onChange={(e) => setExplorerCulture(e.target.value)}
+                style={{ color: tokens.textPrimary }}
+                className="flex-1 bg-transparent font-bold outline-none cursor-pointer min-w-0"
+                aria-label={t('discover.filterCulture')}
+              >
+                <option value="all">{t('discover.allCultures')}</option>
+                {availableCultures.map((c) => (
+                  <option key={c} value={c}>
+                    {getCultureLabel(c, lang)}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            {/* Tag Filter */}
+            <label className="flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs" style={{ borderColor: tokens.borderSubtle, backgroundColor: tokens.surface }}>
+              <Filter size={14} style={{ color: tokens.deepAccent }} className="shrink-0" />
+              <span style={{ color: tokens.textSecondary }} className="font-bold shrink-0">
+                {t('discover.filterTag')}:
+              </span>
+              <select
+                data-testid="home-filter-tag"
+                value={explorerTag}
+                onChange={(e) => setExplorerTag(e.target.value)}
+                style={{ color: tokens.textPrimary }}
+                className="flex-1 bg-transparent font-bold outline-none cursor-pointer min-w-0"
+                aria-label={t('discover.filterTag')}
+              >
+                <option value="all">{t('discover.allTags')}</option>
+                {availableTags.map((tg) => (
+                  <option key={tg} value={tg}>
+                    {getTagLabel(tg, lang)}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+        </div>
+
+        {/* Filtered Content Preview Cards (always shows matching public-domain + filtered catalog stories) */}
+        {filteredCatalog.length === 0 ? (
+          <Card variant="white" className="p-5 text-center rounded-2xl">
+            <p style={{ color: tokens.textSecondary }} className="text-xs font-bold">
+              {t('discover.empty')}
+            </p>
+          </Card>
+        ) : (
+          <div className="space-y-2.5">
+            {filteredCatalog.slice(0, 6).map((item) => (
+              <div
+                key={item.id}
+                data-testid={`explorer-card-${item.id}`}
+                onClick={() => handleOpenCatalogStory(item.id)}
+                style={{
+                  backgroundColor: tokens.card,
+                  borderColor: tokens.border,
+                }}
+                className="p-3 rounded-[18px] border shadow-2xs flex items-center gap-3 cursor-pointer hover:border-[#7FD1AE] transition-all text-start"
+              >
+                <img
+                  src={resolveHeroImageUrl(item.image)}
+                  alt={item.title[lang] || item.title.ar}
+                  className="w-14 h-14 rounded-xl object-cover shrink-0 border"
+                  style={{ borderColor: tokens.borderSubtle }}
+                  loading="lazy"
+                />
+                <div className="flex-1 min-w-0 space-y-1">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span style={{ color: tokens.textPrimary }} className="font-['Aref_Ruqaa',serif] text-base font-bold truncate">
+                      {item.title[lang] || item.title.ar}
+                    </span>
+                    <span
+                      style={{ backgroundColor: tokens.coolBlueTint, color: tokens.coolBlueAccent }}
+                      className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                    >
+                      {getTypeLabel(item.type, lang)}
+                    </span>
+                    <span
+                      style={{ backgroundColor: tokens.surface, color: tokens.deepAccent }}
+                      className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                    >
+                      {getCultureLabel(item.culture, lang)}
+                    </span>
+                  </div>
+                  <p style={{ color: tokens.textSecondary }} className="text-xs line-clamp-1">
+                    {item.summary[lang] || item.summary.ar}
+                  </p>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    {item.tags.slice(0, 2).map((tg) => (
+                      <button
+                        key={tg}
+                        type="button"
+                        data-testid={`explorer-tag-${item.id}-${tg}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onOpenTag?.(tg);
+                        }}
+                        style={{
+                          backgroundColor: tokens.surface,
+                          borderColor: tokens.borderSubtle,
+                          color: tokens.deepAccent,
+                        }}
+                        className="px-2 py-0.5 rounded-full border text-[10px] font-bold cursor-pointer hover:opacity-80"
+                      >
+                        #{getTagLabel(tg, lang)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <ChevronLeft size={16} style={{ color: tokens.deepAccent }} className={dir === 'ltr' ? 'rotate-180 shrink-0' : 'shrink-0'} />
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
 
       {/* 4.5. Section "أقوامٌ وحضارات" (Horizontal scroll of civilization cards) */}
       <section className="space-y-3 pt-1">

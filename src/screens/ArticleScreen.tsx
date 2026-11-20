@@ -17,7 +17,6 @@ import {
   Volume2,
   Play,
   Pause,
-  RotateCcw,
   BookOpen,
   Check,
   Sparkles,
@@ -25,7 +24,6 @@ import {
   Clock,
   Compass,
   Scroll,
-  Gamepad2,
   PenLine,
   User,
   Copy,
@@ -33,8 +31,9 @@ import {
   Landmark,
   ArrowLeft,
   Info,
-  Scale,
   Lock,
+  Type,
+  Languages,
 } from 'lucide-react';
 
 import { Card } from '../components/primitives/Card';
@@ -45,7 +44,18 @@ import { MYTH_ENTRIES, getEntryById } from '../data/seed';
 import { getLongFormEntryById } from '../data/longForm';
 import { LongFormReaderSection } from '../components/longform/LongFormReaderSection';
 import { getDeepStory } from '../data/storyTypes';
-import { storage, FontSize } from '../data/storage';
+import { storage, FontSize, ArabicFontId, EnglishFontId } from '../data/storage';
+import {
+  ARABIC_FONT_OPTIONS,
+  ENGLISH_FONT_OPTIONS,
+  FONT_SIZE_META,
+  FONT_SIZE_ORDER,
+  FONT_SETTINGS_EVENT,
+  canEnlargeFontSize,
+  canShrinkFontSize,
+  getBodyTextSizeClass,
+  stepFontSize,
+} from '../utils/typography';
 import { getEstimatedReadingTime, formatReadingTime } from '../utils/readingTime';
 import {
   resolveScrollMetrics,
@@ -53,7 +63,11 @@ import {
   computePersistableProgress,
 } from '../utils/readingProgress';
 import { useTheme } from '../theme/ThemeContext';
-import { useArabicTTS, TTSState } from '../hooks/useArabicTTS';
+import { useSpeechReader, SpeechReaderState } from '../hooks/useSpeechReader';
+import { SpeechReaderBar } from '../components/reader/SpeechReaderBar';
+import { CREATURES_CATALOG } from '../content/creaturesCatalog';
+import { getCreaturesForStory } from '../utils/catalogFilters';
+import { getContentItemById, getTagLabel } from '../content/catalog';
 import { getCivByRelatedMythId } from '../data/civTypes';
 import { MethodologyScreen } from './MethodologyScreen';
 import { useI18n } from '../i18n/i18n';
@@ -64,7 +78,6 @@ import {
   getLocalizedLongFormEntry,
   getLocalizedCivilization,
   getLocalizedDeepStory,
-  localizeTag,
   localizeEra,
   localizeEvidenceLabel,
 } from '../content';
@@ -80,9 +93,11 @@ export interface ArticleScreenProps {
   isPremiumActive?: boolean;
   onPremiumChange?: (active: boolean) => void;
   onOpenSubscription?: () => void;
+  onOpenTag?: (tagKey: string) => void;
+  onOpenCreature?: (creatureId: string) => void;
 }
 
-export type TtsState = TTSState;
+export type TtsState = SpeechReaderState;
 
 export const ArticleScreen: React.FC<ArticleScreenProps> = ({
   entryId,
@@ -96,6 +111,8 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
   isPremiumActive,
   onPremiumChange,
   onOpenSubscription,
+  onOpenTag,
+  onOpenCreature,
 }) => {
   const { t, lang, dir } = useI18n();
   const { tokens, isDark } = useTheme();
@@ -104,7 +121,7 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
 
   // Resolve raw and localized entry from seed.ts / content by route param id
   const rawEntry = useMemo(() => {
-    return getEntryById(entryId) ?? MYTH_ENTRIES[0];
+    return entryId ? getEntryById(entryId) : MYTH_ENTRIES[0];
   }, [entryId]);
 
   const entry = useMemo(() => {
@@ -134,6 +151,16 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
     return raw ? getLocalizedCivilization(raw, lang) : undefined;
   }, [resolvedEntryId, lang]);
 
+  // Catalog metadata & linked creatures (deities, spirits, creatures)
+  const catalogItem = useMemo(() => {
+    return resolvedEntryId ? getContentItemById(resolvedEntryId) : undefined;
+  }, [resolvedEntryId]);
+
+  const linkedCreatures = useMemo(() => {
+    if (!resolvedEntryId) return [];
+    return getCreaturesForStory(resolvedEntryId, CREATURES_CATALOG, catalogItem?.creatureIds);
+  }, [resolvedEntryId, catalogItem?.creatureIds]);
+
   // Reading progress state (bar pinned at top of ArticleScreen)
   const [readingProgress, setReadingProgress] = useState(0);
   const articleRef = useRef<HTMLElement | null>(null);
@@ -142,20 +169,34 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
   const [activeChapterIndex, setActiveChapterIndex] = useState(0);
   const chapterChipRefs = useRef<Record<number, HTMLButtonElement | null>>({});
 
-  // Font size state (A- / A+): persisted in storage, applied to body & chapters only
+  // Font size & typeface state (A- / A+ & Arabic/English fonts): persisted & synced across screens
   const [fontSize, setFontSizeState] = useState<FontSize>(() => storage.getFontSize());
+  const [arabicFont, setArabicFontState] = useState<ArabicFontId>(() => storage.getArabicFont());
+  const [englishFont, setEnglishFontState] = useState<EnglishFontId>(() => storage.getEnglishFont());
+  const [isFontPickerOpen, setIsFontPickerOpen] = useState(false);
+
+  useEffect(() => {
+    const syncFonts = () => {
+      setFontSizeState(storage.getFontSize());
+      setArabicFontState(storage.getArabicFont());
+      setEnglishFontState(storage.getEnglishFont());
+    };
+    window.addEventListener(FONT_SETTINGS_EVENT, syncFonts);
+    return () => window.removeEventListener(FONT_SETTINGS_EVENT, syncFonts);
+  }, []);
 
   // Quote copy state
   const [copiedQuoteIdx, setCopiedQuoteIdx] = useState<number | null>(null);
+  const quoteTimerRef = useRef<number | null>(null);
+  const shareTimerRef = useRef<number | null>(null);
+  const lastSavedScrollRef = useRef<{ entryId: string; progress: number; chapterIdx: number } | null>(null);
 
-  // Inspire dialog states ("ألهمني")
-  const [inspireModalOpen, setInspireModalOpen] = useState(false);
-  const [selectedHook, setSelectedHook] = useState<{
-    type: 'game' | 'writing';
-    label: string;
-    text: string;
-  } | null>(null);
-  const [copiedHook, setCopiedHook] = useState(false);
+  useEffect(() => {
+    return () => {
+      if (quoteTimerRef.current !== null) clearTimeout(quoteTimerRef.current);
+      if (shareTimerRef.current !== null) clearTimeout(shareTimerRef.current);
+    };
+  }, []);
 
   // Timeline era slider state: default to first era or 'جاهلية'
   const eras: readonly MythEra[] = ['جاهلية', 'صدر الإسلام', 'العصر العباسي'];
@@ -352,7 +393,7 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
 
           <p
             style={{ color: tokens.textPrimary }}
-            className="font-['Amiri',serif] text-[17px] sm:text-[18px] leading-[1.95] text-start pt-1"
+            className={`reader-body-text font-['Amiri',serif] ${bodyTextSizeClass} text-start pt-1`}
           >
             {currentMythNarrativeText}
           </p>
@@ -389,6 +430,7 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
 
   // Reset scroll position cleanly when navigating to a different article
   useEffect(() => {
+    lastSavedScrollRef.current = null;
     setReadingProgress(0);
     setActiveChapterIndex(0);
     const mainEl = document.querySelector('main');
@@ -418,14 +460,12 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
 
       if (!entry?.id) return;
       const roundedProgress = computePersistableProgress(progress);
-      if (roundedProgress > 0) {
-        storage.setMythProgress(entry.id, roundedProgress);
-      }
 
       // Check active chapter if deepStory exists
-      if (deepStory?.chapters && deepStory.chapters.length > 0) {
-        let currIdx = 0;
-        for (let i = 0; i < deepStory.chapters.length; i++) {
+      let currIdx = 0;
+      const chapters = deepStory?.chapters;
+      if (chapters && chapters.length > 0) {
+        for (let i = 0; i < chapters.length; i++) {
           const el = document.getElementById(`chapter-${i}`);
           if (el) {
             const rect = el.getBoundingClientRect();
@@ -435,17 +475,42 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
           }
         }
         setActiveChapterIndex(currIdx);
-        storage.markChapterRead(`${entry.id}_${currIdx}`);
+      }
 
-        // Persist last read chapter for Home v2
+      const prevSaved = lastSavedScrollRef.current;
+      const progressChanged =
+        !prevSaved || prevSaved.entryId !== entry.id || prevSaved.progress !== roundedProgress;
+      const chapterChanged =
+        !prevSaved || prevSaved.entryId !== entry.id || prevSaved.chapterIdx !== currIdx;
+
+      if (roundedProgress > 0 && progressChanged) {
+        storage.setMythProgress(entry.id, roundedProgress);
+      }
+
+      if (chapters && chapters.length > 0 && (progressChanged || chapterChanged)) {
+        storage.markChapterRead(`${entry.id}_${currIdx}`);
         storage.setLastReadChapter({
           mythId: entry.id,
           mythName: entry.name ?? '',
           chapterIndex: currIdx,
-          chapterTitle: deepStory.chapters[currIdx]?.title ?? '',
+          chapterTitle: chapters[currIdx]?.title ?? '',
+          progressPercent: roundedProgress,
+        });
+      } else if (progressChanged && roundedProgress > 0) {
+        storage.setLastReadChapter({
+          mythId: entry.id,
+          mythName: entry.name ?? '',
+          chapterIndex: 0,
+          chapterTitle: entry.typeLabel ?? '',
           progressPercent: roundedProgress,
         });
       }
+
+      lastSavedScrollRef.current = {
+        entryId: entry.id,
+        progress: roundedProgress,
+        chapterIdx: currIdx,
+      };
     };
 
     const mainEl = document.querySelector('main');
@@ -487,31 +552,16 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
     }
   }, [initialChapterIndex, deepStory?.chapters?.length]);
 
-  // Font size change handler
+  // Font size change handler (5 distinct steps: xs -> sm -> md -> lg -> xl)
   const handleFontSizeChange = (direction: 'up' | 'down') => {
-    let nextSize: FontSize = fontSize;
-    if (direction === 'down') {
-      if (fontSize === 'lg') nextSize = 'md';
-      else if (fontSize === 'md') nextSize = 'sm';
-    } else {
-      if (fontSize === 'sm') nextSize = 'md';
-      else if (fontSize === 'md') nextSize = 'lg';
-    }
+    const nextSize = stepFontSize(fontSize, direction);
     setFontSizeState(nextSize);
     storage.setFontSize(nextSize);
   };
 
-  // Font size typography classes applied exclusively to body paragraphs and chapters (base: 17px mobile / 18px tablet+, line-height 1.95)
+  // Font size typography classes applied to body paragraphs, chapters, dual narratives, and quotes
   const bodyTextSizeClass = useMemo(() => {
-    switch (fontSize) {
-      case 'sm':
-        return 'text-[15px] sm:text-[16px] leading-[1.95]';
-      case 'lg':
-        return 'text-[19px] sm:text-[20px] leading-[1.95]';
-      case 'md':
-      default:
-        return 'text-[17px] sm:text-[18px] leading-[1.95]';
-    }
+    return getBodyTextSizeClass(fontSize);
   }, [fontSize]);
 
   // Copy quote handler: copies text + " — " + source
@@ -519,85 +569,29 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
     const textToCopy = `${quoteText} — ${quoteSource}`;
     const copied = await copyTextSafely(textToCopy);
     if (copied) {
+      if (quoteTimerRef.current !== null) clearTimeout(quoteTimerRef.current);
       setCopiedQuoteIdx(idx);
-      setTimeout(() => setCopiedQuoteIdx(null), 2000);
+      quoteTimerRef.current = window.setTimeout(() => {
+        setCopiedQuoteIdx(null);
+        quoteTimerRef.current = null;
+      }, 2000);
     } else {
       showToast(t('common.copyError'));
     }
   };
 
-  // Gather hooks for Inspire modal
-  const availableHooks = useMemo(() => {
-    const list: Array<{ type: 'game' | 'writing'; label: string; text: string }> = [];
-    if (deepStory?.gameHooks) {
-      deepStory.gameHooks.forEach((h) => {
-        list.push({ type: 'game', label: t('article.gameIdea'), text: h });
-      });
-    }
-    if (deepStory?.writingHooks) {
-      deepStory.writingHooks.forEach((h) => {
-        list.push({ type: 'writing', label: t('article.storyIdea'), text: h });
-      });
-    }
-    if (list.length === 0) {
-      const firstEra = entry?.timeline?.[0]?.era;
-      const safeName = entry?.name ?? '';
-      const safeRegion = entry?.region ?? '';
-      const safeSummary = entry?.summary ?? '';
-      list.push({
-        type: 'game',
-        label: t('article.gameIdea'),
-        text: `${safeName}${safeRegion ? ` (${safeRegion})` : ''}: ${safeSummary}`,
-      });
-      list.push({
-        type: 'writing',
-        label: t('article.storyIdea'),
-        text: `${safeName} — ${firstEra ? localizeEra(firstEra, lang) : localizeEra('جاهلية', lang)}: ${safeSummary}`,
-      });
-    }
-    return list;
-  }, [deepStory, entry, lang, t]);
-
-  // Open Inspire Modal with a random hook
-  const handleOpenInspireModal = () => {
-    if (availableHooks.length === 0) return;
-    const randomHook = availableHooks[Math.floor(Math.random() * availableHooks.length)];
-    setSelectedHook(randomHook);
-    setCopiedHook(false);
-    setInspireModalOpen(true);
-  };
-
-  // Re-roll hook deterministically without risking an infinite loop
-  const handleReshuffleHook = () => {
-    const len = availableHooks.length;
-    if (len <= 1) return;
-    const currentIdx = selectedHook ? availableHooks.indexOf(selectedHook) : -1;
-    const offset = currentIdx >= 0 ? (currentIdx + 1 + Math.floor(Math.random() * (len - 1))) % len : 0;
-    setSelectedHook(availableHooks[offset]);
-    setCopiedHook(false);
-  };
-
-  // Copy selected inspire hook
-  const handleCopyHook = async () => {
-    if (!selectedHook) return;
-    const copied = await copyTextSafely(selectedHook.text);
-    if (copied) {
-      setCopiedHook(true);
-      setTimeout(() => setCopiedHook(false), 2000);
-    } else {
-      showToast(t('common.copyError'));
-    }
-  };
-
-  // Arabic Text-to-Speech hook: idle | playing | paused
+  // Multilingual Web Speech API hook: ar-SA | en-US | id-ID | th-TH
   const {
     speak,
     pause,
     resume,
     stop,
     state: ttsState,
+    speed: speechSpeed,
+    setSpeed: setSpeechSpeed,
     isSupported,
-  } = useArabicTTS();
+    speechLang,
+  } = useSpeechReader(lang);
 
   const [copiedShare, setCopiedShare] = useState(false);
 
@@ -620,17 +614,18 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
   const handleToggleSpeech = () => {
     if (!entry) return;
     if (ttsState === 'idle') {
-      // First tap: reads entry title then all body paragraphs in order
-      if (!Array.isArray(entry.body)) {
-        speak([entry.name ?? '']);
-        return;
-      }
-      speak([entry.name, ...entry.body]);
+      const paragraphs = Array.isArray(entry.body)
+        ? entry.body.filter((p): p is string => typeof p === 'string' && p.trim().length > 0)
+        : [];
+      const chapterParagraphs = Array.isArray(deepStory?.chapters)
+        ? deepStory.chapters
+            .filter((ch) => Boolean(ch?.text))
+            .map((ch) => `${ch.title ?? ''}. ${ch.text ?? ''}`)
+        : [];
+      speak([entry.name ?? '', entry.summary ?? '', ...paragraphs, ...chapterParagraphs]);
     } else if (ttsState === 'playing') {
-      // Second tap: pause
       pause();
     } else if (ttsState === 'paused') {
-      // Third tap: resume
       resume();
     }
   };
@@ -656,8 +651,12 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
 
     const copied = await copyTextSafely(shareUrl || (entry.name ?? ''));
     if (copied) {
+      if (shareTimerRef.current !== null) clearTimeout(shareTimerRef.current);
       setCopiedShare(true);
-      setTimeout(() => setCopiedShare(false), 2000);
+      shareTimerRef.current = window.setTimeout(() => {
+        setCopiedShare(false);
+        shareTimerRef.current = null;
+      }, 2000);
     } else {
       showToast(t('common.copyError'));
     }
@@ -673,44 +672,6 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
-  };
-
-  const handleCopyQuest = async () => {
-    if (!entry) return;
-    const bodyText = Array.isArray(entry.body) ? entry.body.join('\n\n') : '';
-    const chaptersText =
-      (Array.isArray(deepStory?.chapters) ? deepStory.chapters : [])
-        .map((c) => `${c?.title ?? ''}:\n${c?.text ?? ''}`)
-        .join('\n\n') || bodyText;
-
-    const questData = {
-      id: entry.id,
-      name: entry.name ?? '',
-      category: entry.category,
-      region: entry.region ?? '',
-      story: chaptersText,
-      scenes: Array.isArray(deepStory?.scenes) ? deepStory.scenes : [],
-      decision: deepStory?.decision ?? '',
-    };
-
-    const copied = await copyTextSafely(JSON.stringify(questData, null, 2));
-    showToast(copied ? t('common.copied') : t('common.copyError'));
-  };
-
-  const handleCopyGameCard = async () => {
-    if (!entry) return;
-    const fullCard = {
-      ...entry,
-      deepStory: deepStory || null,
-    };
-
-    const copied = await copyTextSafely(JSON.stringify(fullCard, null, 2));
-    showToast(copied ? t('common.copied') : t('common.copyError'));
-  };
-
-  const handleCopyDecision = async (decText: string) => {
-    const copied = await copyTextSafely(decText ?? '');
-    showToast(copied ? t('common.copied') : t('common.copyError'));
   };
 
   const activeTimelineNote = useMemo(() => {
@@ -803,7 +764,7 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
           className="p-2.5 px-4 rounded-xl border text-xs font-semibold flex items-center justify-between gap-2 shadow-2xs"
         >
           <span>{t('article.fallbackArabicNotice')}</span>
-          <span className="text-sm">🇹🇳</span>
+          <Languages size={16} className="shrink-0" style={{ color: tokens.deepAccent }} />
         </div>
       )}
 
@@ -861,103 +822,10 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
       {/* 1. Top Bar */}
       <nav
         aria-label={t('article.narrativeTitle')}
-        className="flex items-center justify-between gap-3 pt-1 flex-wrap"
+        className="flex flex-col gap-2.5 pt-1"
       >
-        {/* Actions row: share, bookmark, game card copy, speaker + Font-size control (A- / A+) */}
-        <div className="flex items-center gap-1.5 flex-wrap">
-          <IconButton
-            icon={copiedShare ? <Check size={18} style={{ color: tokens.deepAccent }} /> : <Share2 size={18} />}
-            label={copiedShare ? t('article.shareSuccess') : t('article.share')}
-            variant="surface"
-            size="md"
-            onClick={handleShare}
-          />
-
-          <IconButton
-            icon={<Bookmark size={18} className={isSaved ? 'fill-current' : ''} style={{ color: isSaved ? tokens.deepAccent : undefined }} />}
-            label={isSaved ? t('article.bookmarkRemove') : t('article.bookmarkAdd')}
-            variant="surface"
-            size="md"
-            onClick={() => onToggleSave?.(entry.id)}
-          />
-
-          <IconButton
-            icon={<Gamepad2 size={18} style={{ color: tokens.coolBlueAccent }} />}
-            label={t('article.copyGameCard')}
-            variant="surface"
-            size="md"
-            onClick={handleCopyGameCard}
-          />
-
-          {isSupported && (
-            <IconButton
-              icon={
-                ttsState === 'playing' ? (
-                  <Pause size={18} style={{ color: tokens.deepAccent }} className="animate-pulse" />
-                ) : ttsState === 'paused' ? (
-                  <Play size={18} style={{ color: tokens.deepAccent }} />
-                ) : (
-                  <Volume2 size={18} />
-                )
-              }
-              label={
-                ttsState === 'playing'
-                  ? t('article.audioPause')
-                  : ttsState === 'paused'
-                  ? t('article.audioResume')
-                  : t('article.audioPlay')
-              }
-              variant={ttsState !== 'idle' ? 'primary' : 'surface'}
-              size="md"
-              onClick={handleToggleSpeech}
-            />
-          )}
-
-          {/* Font-size control (A- / A+) persisted in local storage */}
-          <div
-            style={{
-              backgroundColor: tokens.card,
-              borderColor: tokens.border,
-            }}
-            className="flex items-center rounded-2xl border px-1 py-0.5 shadow-2xs"
-            role="group"
-            aria-label={t('article.fontSizeBadge')}
-          >
-            <button
-              type="button"
-              onClick={() => handleFontSizeChange('down')}
-              disabled={fontSize === 'sm'}
-              aria-label={t('article.fontShrinkAria')}
-              title={`${t('article.fontShrinkAria')} (A-)`}
-              style={{
-                color: fontSize === 'sm' ? tokens.borderSubtle : tokens.textPrimary,
-              }}
-              className="px-2.5 py-1 text-xs font-bold hover:opacity-80 transition-colors disabled:opacity-40 cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center font-serif"
-            >
-              A-
-            </button>
-            <span
-              style={{ backgroundColor: tokens.borderSubtle }}
-              className="w-px h-3.5 mx-0.5"
-            />
-            <button
-              type="button"
-              onClick={() => handleFontSizeChange('up')}
-              disabled={fontSize === 'lg'}
-              aria-label={t('article.fontEnlargeAria')}
-              title={`${t('article.fontEnlargeAria')} (A+)`}
-              style={{
-                color: fontSize === 'lg' ? tokens.borderSubtle : tokens.textPrimary,
-              }}
-              className="px-2.5 py-1 text-sm font-bold hover:opacity-80 transition-colors disabled:opacity-40 cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center font-serif"
-            >
-              A+
-            </button>
-          </div>
-        </div>
-
-        {/* Back arrow */}
-        <div className="flex items-center">
+        {/* Row 1: Back arrow at start + core article actions at end */}
+        <div className="flex items-center justify-between gap-2 w-full">
           <button
             type="button"
             onClick={onBack}
@@ -968,66 +836,134 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
               borderColor: tokens.border,
               color: tokens.deepAccent,
             }}
-            className="flex items-center justify-center w-11 h-11 rounded-2xl border shadow-sm transition-all duration-150 active:scale-95 cursor-pointer min-h-[44px] min-w-[44px]"
+            className="flex items-center justify-center w-11 h-11 rounded-2xl border shadow-sm transition-all duration-150 active:scale-95 cursor-pointer min-h-[44px] min-w-[44px] shrink-0"
           >
             <ChevronRight size={22} className={`stroke-[2.5] ${dir === 'ltr' ? 'rotate-180' : ''}`} />
+          </button>
+
+          <div className="flex items-center gap-1.5 shrink-0">
+            <IconButton
+              icon={copiedShare ? <Check size={18} style={{ color: tokens.deepAccent }} /> : <Share2 size={18} />}
+              label={copiedShare ? t('article.shareSuccess') : t('article.share')}
+              variant="surface"
+              size="md"
+              onClick={handleShare}
+            />
+
+            <IconButton
+              icon={<Bookmark size={18} className={isSaved ? 'fill-current' : ''} style={{ color: isSaved ? tokens.deepAccent : undefined }} />}
+              label={isSaved ? t('article.bookmarkRemove') : t('article.bookmarkAdd')}
+              variant="surface"
+              size="md"
+              onClick={() => onToggleSave?.(entry.id)}
+            />
+
+            {isSupported && (
+              <IconButton
+                icon={
+                  ttsState === 'playing' ? (
+                    <Pause size={18} style={{ color: tokens.deepAccent }} className="animate-pulse" />
+                  ) : ttsState === 'paused' ? (
+                    <Play size={18} style={{ color: tokens.deepAccent }} />
+                  ) : (
+                    <Volume2 size={18} />
+                  )
+                }
+                label={
+                  ttsState === 'playing'
+                    ? t('article.audioPause')
+                    : ttsState === 'paused'
+                    ? t('article.audioResume')
+                    : t('article.audioPlay')
+                }
+                variant={ttsState !== 'idle' ? 'primary' : 'surface'}
+                size="md"
+                onClick={handleToggleSpeech}
+              />
+            )}
+          </div>
+        </div>
+
+        {/* Row 2: Font-size control (A- / A+) & typeface picker */}
+        <div className="flex items-center justify-between gap-2 w-full flex-wrap">
+          <div
+            style={{
+              backgroundColor: tokens.card,
+              borderColor: tokens.border,
+            }}
+            className="flex items-center rounded-2xl border px-1 py-0.5 shadow-2xs shrink-0"
+            role="group"
+            aria-label={t('article.fontSizeBadge')}
+          >
+            <button
+              type="button"
+              data-testid="article-font-shrink"
+              onClick={() => handleFontSizeChange('down')}
+              disabled={!canShrinkFontSize(fontSize)}
+              aria-label={t('article.fontShrinkAria')}
+              title={`${t('article.fontShrinkAria')} (A-)`}
+              style={{
+                color: !canShrinkFontSize(fontSize) ? tokens.borderSubtle : tokens.textPrimary,
+              }}
+              className="px-2 py-1 text-xs font-bold hover:opacity-80 transition-colors disabled:opacity-40 cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center font-serif"
+            >
+              A-
+            </button>
+            <span
+              data-testid="article-font-size-value"
+              style={{
+                color: tokens.deepAccent,
+                borderColor: tokens.borderSubtle,
+              }}
+              className="px-2 text-[11px] font-mono font-bold border-x leading-none py-1 select-none"
+            >
+              {FONT_SIZE_META[fontSize]?.mobilePx ?? 17}px
+            </span>
+            <button
+              type="button"
+              data-testid="article-font-enlarge"
+              onClick={() => handleFontSizeChange('up')}
+              disabled={!canEnlargeFontSize(fontSize)}
+              aria-label={t('article.fontEnlargeAria')}
+              title={`${t('article.fontEnlargeAria')} (A+)`}
+              style={{
+                color: !canEnlargeFontSize(fontSize) ? tokens.borderSubtle : tokens.textPrimary,
+              }}
+              className="px-2 py-1 text-sm font-bold hover:opacity-80 transition-colors disabled:opacity-40 cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center font-serif"
+            >
+              A+
+            </button>
+          </div>
+
+          <button
+            type="button"
+            data-testid="article-font-picker-btn"
+            onClick={() => setIsFontPickerOpen(true)}
+            aria-label={t('profile.fontSize')}
+            title={t('profile.fontSize')}
+            style={{
+              backgroundColor: tokens.card,
+              borderColor: tokens.border,
+              color: tokens.deepAccent,
+            }}
+            className="flex items-center gap-1.5 px-3.5 h-11 min-w-[44px] min-h-[44px] rounded-2xl border shadow-2xs hover:opacity-90 active:scale-95 transition-all cursor-pointer text-xs font-bold whitespace-nowrap shrink-0"
+          >
+            <Type size={16} className="shrink-0" />
+            <span>{t('profile.fontSize')}</span>
           </button>
         </div>
       </nav>
 
-      {/* TTS Status Bar */}
-      {isSupported && ttsState !== 'idle' && (
-        <div
-          style={{
-            backgroundColor: tokens.surface,
-            borderColor: tokens.border,
-            color: tokens.deepAccent,
-          }}
-          className="p-3.5 rounded-2xl border flex items-center justify-between text-xs shadow-xs animate-in slide-in-from-top-2"
-        >
-          <div className="flex items-center gap-2.5">
-            <span
-              style={{ backgroundColor: tokens.primaryMint }}
-              className={`w-2.5 h-2.5 rounded-full ${
-                ttsState === 'playing' ? 'animate-ping' : ''
-              }`}
-            />
-            <span className="font-bold">
-              {ttsState === 'playing'
-                ? (t('article.audioNarrating') || 'يتم السرد الآن…')
-                : t('article.audioPauseTooltip')}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={handleToggleSpeech}
-              style={{
-                backgroundColor: tokens.card,
-                color: tokens.deepAccent,
-              }}
-              className="p-1.5 rounded-xl shadow-xs cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
-              aria-label={ttsState === 'playing' ? t('article.audioPause') : t('article.audioResume')}
-            >
-              {ttsState === 'playing' ? <Pause size={16} /> : <Play size={16} />}
-            </button>
-
-            <button
-              type="button"
-              onClick={stop}
-              style={{
-                backgroundColor: tokens.card,
-                color: isDark ? '#FF9A9A' : '#A63333',
-              }}
-              className="p-1.5 rounded-xl shadow-xs cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
-              aria-label={t('article.audioStop')}
-            >
-              <RotateCcw size={16} />
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Web Speech Audio Reader Bar (UI Language + Play/Pause/Stop + Speed) */}
+      <SpeechReaderBar
+        state={ttsState}
+        speed={speechSpeed}
+        speechLang={speechLang}
+        isSupported={isSupported}
+        onPlayPause={handleToggleSpeech}
+        onStop={stop}
+        onChangeSpeed={setSpeechSpeed}
+      />
 
       {/* 2. Hero Image Framed */}
       <div
@@ -1166,11 +1102,24 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
             <span>{t('article.readingProgressValue', { percent: Math.round(readingProgress) })}</span>
           </span>
 
-          {Array.isArray(rawEntry.tags) && rawEntry.tags.length > 0 && rawEntry.tags[0] && (
-            <Tag variant={getTagVariant(rawEntry.tags[0])} size="sm">
-              {localizeTag(rawEntry.tags[0], lang)}
-            </Tag>
-          )}
+          {(Array.isArray(rawEntry.tags) && rawEntry.tags.length > 0
+            ? rawEntry.tags
+            : catalogItem?.tags ?? []
+          ).map((tagKey) => (
+            <button
+              key={tagKey}
+              type="button"
+              data-testid={`article-tag-${tagKey}`}
+              onClick={() => onOpenTag?.(tagKey)}
+              title={t('article.clickTagHint')}
+              aria-label={`${getTagLabel(tagKey, lang)} — ${t('article.clickTagHint')}`}
+              className="cursor-pointer hover:opacity-85 active:scale-95 transition-transform inline-flex items-center min-h-[36px]"
+            >
+              <Tag variant={getTagVariant(tagKey)} size="sm">
+                #{getTagLabel(tagKey, lang)}
+              </Tag>
+            </button>
+          ))}
         </div>
 
         {/* Traits chips row after typeLabel pill */}
@@ -1288,7 +1237,7 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
         {safeBody.length > 0 ? (
           <div
             style={{ color: tokens.textPrimary }}
-            className="space-y-4 font-['Cairo',sans-serif]"
+            className="space-y-4 reader-body-text font-['Cairo',sans-serif]"
           >
             {safeBody.map((paragraph, index) => (
               <p key={index} className={`text-start ${bodyTextSizeClass}`}>
@@ -1504,7 +1453,7 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                           ) : (
                             <div
                               style={{ color: tokens.textPrimary }}
-                              className={`space-y-3 font-['Cairo',sans-serif] text-start whitespace-pre-line ${bodyTextSizeClass}`}
+                              className={`space-y-3 reader-body-text font-['Cairo',sans-serif] text-start whitespace-pre-line ${bodyTextSizeClass}`}
                             >
                               {chText.includes('[إعادة تخيل أدبي]') ? (
                                 <>
@@ -1663,7 +1612,7 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                           color: tokens.textPrimary,
                           borderInlineStartColor: isLiteral ? tokens.primaryMint : tokens.coolBlueAccent,
                         }}
-                        className="ps-3.5 border-s-2 font-['Amiri',serif] text-[17px] sm:text-[18px] leading-[1.95] text-start font-normal"
+                        className={`ps-3.5 border-s-2 reader-body-text font-['Amiri',serif] ${bodyTextSizeClass} text-start font-normal`}
                       >
                         {qText}
                       </blockquote>
@@ -1801,58 +1750,8 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
               )}
             </div>
 
-            {/* Two cards side by side */}
-            {((deepStory.gameHooks && deepStory.gameHooks.length > 0) ||
-              (deepStory.writingHooks && deepStory.writingHooks.length > 0)) && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-              {/* Game developers */}
-              <Card
-                variant="white"
-                elevation="card"
-                padded={false}
-                className="rounded-[20px] px-4 py-5 space-y-3"
-              >
-                <div
-                  style={{ borderColor: tokens.borderSubtle }}
-                  className="flex items-center gap-2 pb-2.5 border-b"
-                >
-                  <div
-                    style={{
-                      backgroundColor: tokens.coolBlueTint,
-                      color: hookStrokeColor,
-                    }}
-                    className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
-                  >
-                    <Gamepad2 size={18} strokeWidth={1.9} style={{ color: hookStrokeColor }} />
-                  </div>
-                  <h4
-                    style={{ color: tokens.deepAccent }}
-                    className="font-['Aref_Ruqaa',serif] text-lg font-bold"
-                  >
-                    {t('article.gameHooks') || 'لصنّاع الألعاب'}
-                  </h4>
-                </div>
-
-                <ul className="space-y-2 text-xs sm:text-[13px] leading-relaxed">
-                  {(deepStory.gameHooks || []).map((hook, i) => (
-                    <li
-                      key={i}
-                      style={{ color: tokens.textPrimary }}
-                      className="flex items-start gap-2"
-                    >
-                      <Gamepad2
-                        size={18}
-                        strokeWidth={1.9}
-                        style={{ color: hookStrokeColor }}
-                        className="shrink-0 mt-0.5"
-                      />
-                      <span>{hook}</span>
-                    </li>
-                  ))}
-                </ul>
-              </Card>
-
-              {/* لكتّاب القصص */}
+            {/* Story writers card */}
+            {deepStory.writingHooks && deepStory.writingHooks.length > 0 && (
               <Card
                 variant="white"
                 elevation="card"
@@ -1876,12 +1775,12 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                     style={{ color: tokens.deepAccent }}
                     className="font-['Aref_Ruqaa',serif] text-lg font-bold"
                   >
-                    {t('article.writingHooks') || 'لكتّاب القصص'}
+                    {t('article.writingHooks')}
                   </h4>
                 </div>
 
                 <ul className="space-y-2 text-xs sm:text-[13px] leading-relaxed">
-                  {(deepStory.writingHooks || []).map((hook, i) => (
+                  {deepStory.writingHooks.map((hook, i) => (
                     <li
                       key={i}
                       style={{ color: tokens.textPrimary }}
@@ -1898,67 +1797,32 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                   ))}
                 </ul>
               </Card>
-            </div>
             )}
 
-            {/* خطافات حكاية (storyHooks) & أدوار لعبية (gameRoles) */}
-            {(deepStory.storyHooks || deepStory.gameRoles) && (
+            {/* Story writing seeds (storyHooks) */}
+            {deepStory.storyHooks && deepStory.storyHooks.length > 0 && (
               <div
                 style={{
                   backgroundColor: tokens.card,
                   borderColor: tokens.border,
                 }}
-                className="px-4 py-5 rounded-2xl border shadow-xs space-y-3.5"
+                className="px-4 py-5 rounded-2xl border shadow-xs space-y-2"
               >
-                {/* storyHooks */}
-                {deepStory.storyHooks && deepStory.storyHooks.length > 0 && (
-                  <div className="space-y-2">
-                    <span
-                      style={{ color: tokens.deepAccent }}
-                      className="text-xs font-bold flex items-center gap-1.5"
-                    >
-                      <Scroll size={14} style={{ color: tokens.primaryMint }} />
-                      <span>{t('article.storyHooksLabel')}:</span>
-                    </span>
-                    <ul className="space-y-1.5 text-xs sm:text-[13px] leading-relaxed">
-                      {deepStory.storyHooks.map((hook, i) => (
-                        <li key={i} style={{ color: tokens.textPrimary }} className="flex items-start gap-2">
-                          <span style={{ color: tokens.primaryMint }} className="shrink-0 mt-0.5 font-bold">✦</span>
-                          <span>{hook}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {/* gameRoles */}
-                {deepStory.gameRoles && deepStory.gameRoles.length > 0 && (
-                  <div className="space-y-2 pt-1 border-t" style={{ borderColor: tokens.borderSubtle }}>
-                    <span
-                      style={{ color: tokens.deepAccent }}
-                      className="text-xs font-bold flex items-center gap-1.5"
-                    >
-                      <Gamepad2 size={18} strokeWidth={1.9} style={{ color: hookStrokeColor }} />
-                      <span>{t('article.gameRoles')}:</span>
-                    </span>
-                    <div className="flex flex-wrap gap-1.5">
-                      {deepStory.gameRoles.map((role, i) => (
-                        <span
-                          key={i}
-                          style={{
-                            backgroundColor: tokens.coolBlueTint,
-                            color: tokens.coolBlueAccent,
-                            borderColor: tokens.border,
-                          }}
-                          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border"
-                        >
-                          <Gamepad2 size={18} strokeWidth={1.9} style={{ color: hookStrokeColor }} />
-                          <span>{role}</span>
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                <span
+                  style={{ color: tokens.deepAccent }}
+                  className="text-xs font-bold flex items-center gap-1.5"
+                >
+                  <Scroll size={14} style={{ color: tokens.primaryMint }} />
+                  <span>{t('article.storyHooksLabel')}:</span>
+                </span>
+                <ul className="space-y-1.5 text-xs sm:text-[13px] leading-relaxed">
+                  {deepStory.storyHooks.map((hook, i) => (
+                    <li key={i} style={{ color: tokens.textPrimary }} className="flex items-start gap-2">
+                      <span style={{ color: tokens.primaryMint }} className="shrink-0 mt-0.5 font-bold">✦</span>
+                      <span>{hook}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
             )}
 
@@ -2006,60 +1870,6 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
                 </div>
               </div>
             )}
-
-            {/* Player Decision */}
-            {deepStory.decision && (
-              <div
-                style={{
-                  backgroundColor: isDark ? 'rgba(74, 144, 217, 0.16)' : '#E8F1FB',
-                  borderColor: tokens.coolBlueAccent,
-                }}
-                className="p-4 sm:p-5 rounded-2xl border-2 shadow-sm space-y-2.5 relative"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <div
-                    style={{ color: tokens.coolBlueAccent }}
-                    className="flex items-center gap-2 font-['Aref_Ruqaa',serif] text-base font-bold"
-                  >
-                    <Scale size={18} />
-                    <span>{t('article.decision')}</span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => handleCopyDecision(deepStory.decision!)}
-                    style={{
-                      backgroundColor: tokens.card,
-                      borderColor: tokens.border,
-                      color: tokens.coolBlueAccent,
-                    }}
-                    className="p-1.5 rounded-xl border flex items-center gap-1 text-xs font-bold hover:opacity-80 transition-opacity cursor-pointer px-2.5 py-1 min-h-[36px]"
-                    title={t('common.copy')}
-                  >
-                    <Copy size={14} />
-                    <span>{t('common.copy')}</span>
-                  </button>
-                </div>
-                <p style={{ color: tokens.textPrimary }} className="text-sm sm:text-base font-bold leading-relaxed">
-                  {deepStory.decision}
-                </p>
-              </div>
-            )}
-
-            {/* Button: Convert to Quest */}
-            <div className="pt-1 flex flex-wrap gap-2.5">
-              <button
-                type="button"
-                onClick={handleCopyQuest}
-                style={{
-                  backgroundColor: tokens.coolBlueAccent,
-                  color: isDark ? tokens.background : '#FFFFFF',
-                }}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-bold shadow-md hover:opacity-90 active:scale-95 transition-all cursor-pointer min-h-[44px]"
-              >
-                <Gamepad2 size={16} />
-                <span>{t('article.convertQuest')}</span>
-              </button>
-            </div>
           </div>
         </section>
       )}
@@ -2280,6 +2090,82 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
         </div>
       </div>
 
+      {/* 7.5. Linked Creatures / Beings Directory */}
+      {linkedCreatures.length > 0 && (
+        <section
+          data-testid="article-linked-creatures"
+          aria-label={t('article.linkedCreatures')}
+          className="space-y-3 pt-1"
+        >
+          <div className="flex items-center justify-between gap-2">
+            <h3
+              style={{ color: tokens.textPrimary }}
+              className="font-['Aref_Ruqaa',serif] text-lg font-bold flex items-center gap-2"
+            >
+              <Sparkles size={18} style={{ color: tokens.deepAccent }} />
+              <span>{t('article.linkedCreatures')}</span>
+            </h3>
+            <span style={{ color: tokens.textSecondary }} className="text-[11px]">
+              {t('article.linkedCreaturesSub')}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            {linkedCreatures.map((creature) => (
+              <button
+                key={creature.id}
+                type="button"
+                data-testid={`article-creature-${creature.id}`}
+                onClick={() => onOpenCreature?.(creature.id)}
+                style={{
+                  backgroundColor: tokens.card,
+                  borderColor: tokens.border,
+                }}
+                className="flex items-center gap-3 p-3 rounded-2xl border shadow-xs hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer text-start min-h-[64px]"
+              >
+                <div
+                  style={{
+                    backgroundColor: tokens.surface,
+                    borderColor: tokens.borderSubtle,
+                  }}
+                  className="w-12 h-12 rounded-xl overflow-hidden shrink-0 border"
+                >
+                  <img
+                    src={resolveHeroImageUrl(creature.image) || creature.image}
+                    alt={creature.name[lang] || creature.name.ar}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
+                <div className="flex-1 min-w-0 space-y-0.5">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span
+                      style={{ color: tokens.textPrimary }}
+                      className="font-['Aref_Ruqaa',serif] text-sm font-bold truncate"
+                    >
+                      {creature.name[lang] || creature.name.ar}
+                    </span>
+                    <span
+                      style={{
+                        backgroundColor: tokens.coolBlueTint,
+                        color: tokens.coolBlueAccent,
+                      }}
+                      className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                    >
+                      {t(`creatures.${creature.kind}`)}
+                    </span>
+                  </div>
+                  <p style={{ color: tokens.textSecondary }} className="text-[11px] truncate">
+                    {creature.epithet[lang] || creature.epithet.ar}
+                  </p>
+                </div>
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* 8. Related Entities */}
       {safeRelatedIds.length > 0 && (
         <div className="space-y-3 pt-1">
@@ -2359,19 +2245,6 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
       <div className="pt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
         <button
           type="button"
-          onClick={handleOpenInspireModal}
-          style={{
-            backgroundColor: tokens.coolBlueAccent,
-            color: isDark ? tokens.background : '#FFFFFF',
-          }}
-          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full text-sm font-bold shadow-md hover:opacity-95 transition-all cursor-pointer min-h-[48px]"
-        >
-          <Sparkles size={18} />
-          <span>{t('article.inspireMe')}</span>
-        </button>
-
-        <button
-          type="button"
           onClick={onBack}
           style={{
             backgroundColor: tokens.surface,
@@ -2384,11 +2257,13 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
         </button>
       </div>
 
-      {/* Inspire Modal Dialog */}
-      {inspireModalOpen && selectedHook && (
+      {/* Modal: Reader Font Size & Arabic / English Typefaces */}
+      {isFontPickerOpen && (
         <div
-          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200"
-          onClick={() => setInspireModalOpen(false)}
+          data-testid="article-font-picker-modal"
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200"
+          dir={dir}
+          onClick={() => setIsFontPickerOpen(false)}
         >
           <div
             onClick={(e) => e.stopPropagation()}
@@ -2396,120 +2271,156 @@ export const ArticleScreen: React.FC<ArticleScreenProps> = ({
               backgroundColor: tokens.card,
               borderColor: tokens.border,
             }}
-            className="w-full max-w-lg rounded-[24px] p-5 sm:p-6 shadow-2xl border space-y-4 animate-in zoom-in-95 duration-200 text-start"
-            dir={dir}
-            role="dialog"
-            aria-modal="true"
-            aria-label={t('article.inspireMeTitle')}
+            className="w-full max-w-md max-h-[88vh] overflow-y-auto rounded-t-[28px] sm:rounded-[26px] p-5 sm:p-6 shadow-2xl border space-y-5 animate-in slide-in-from-bottom-4 text-start"
           >
             <div
               style={{ borderColor: tokens.borderSubtle }}
               className="flex items-center justify-between pb-3 border-b"
             >
-              <div className="flex items-center gap-2.5">
-                <div
-                  style={{
-                    backgroundColor: tokens.coolBlueTint,
-                    color: tokens.coolBlueAccent,
-                  }}
-                  className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+              <div className="flex items-center gap-2">
+                <Type size={18} style={{ color: tokens.deepAccent }} />
+                <h3
+                  style={{ color: tokens.deepAccent }}
+                  className="font-['Aref_Ruqaa',serif] text-xl font-bold"
                 >
-                  <Sparkles size={20} />
-                </div>
-                <div>
-                  <h3
-                    style={{ color: tokens.deepAccent }}
-                    className="font-['Aref_Ruqaa',serif] text-xl font-bold"
-                  >
-                    {t('article.inspireMe')}
-                  </h3>
-                  <p style={{ color: tokens.textSecondary }} className="text-xs">
-                    {t('article.inspireMeSub', { name: entry.name })}
-                  </p>
-                </div>
+                  {t('profile.fontSize')}
+                </h3>
               </div>
-
               <button
                 type="button"
-                onClick={() => setInspireModalOpen(false)}
+                onClick={() => setIsFontPickerOpen(false)}
                 style={{ color: tokens.textSecondary }}
-                className="p-2 rounded-xl hover:opacity-80 cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
                 aria-label={t('common.close')}
+                className="p-2 rounded-xl hover:opacity-80 cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
               >
-                <X size={20} />
+                <X size={18} />
               </button>
             </div>
 
-            {/* Hook Card */}
-            <div
-              style={{
-                backgroundColor: tokens.surface,
-                borderColor: tokens.border,
-              }}
-              className="p-4 rounded-2xl border space-y-3"
-            >
+            {/* 5 Font Sizes Strip */}
+            <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span
-                  style={{
-                    backgroundColor: selectedHook.type === 'game' ? tokens.coolBlueTint : (isDark ? 'rgba(127, 209, 174, 0.2)' : 'rgba(127, 209, 174, 0.25)'),
-                    color: selectedHook.type === 'game' ? tokens.coolBlueAccent : (isDark ? tokens.deepAccent : '#0E5C4D'),
-                  }}
-                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold"
-                >
-                  {selectedHook.type === 'game' ? (
-                    <Gamepad2 size={18} strokeWidth={1.9} style={{ color: hookStrokeColor }} />
-                  ) : (
-                    <PenLine size={18} strokeWidth={1.9} style={{ color: hookStrokeColor }} />
-                  )}
-                  <span>{selectedHook.label}</span>
+                <span style={{ color: tokens.deepAccent }} className="text-xs font-bold">
+                  {t('article.fontSizeBadge')}
+                </span>
+                <span style={{ color: tokens.textSecondary }} className="text-xs font-mono font-bold">
+                  {FONT_SIZE_META[fontSize]?.mobilePx ?? 17}px
                 </span>
               </div>
-
-              <p
-                style={{ color: tokens.textPrimary }}
-                className="font-['Amiri',serif] text-[17px] sm:text-[18px] leading-[1.95] text-start"
-              >
-                «{selectedHook.text}»
-              </p>
+              <div className="grid grid-cols-5 gap-1.5">
+                {FONT_SIZE_ORDER.map((sizeId) => {
+                  const active = fontSize === sizeId;
+                  return (
+                    <button
+                      key={sizeId}
+                      type="button"
+                      data-testid={`article-font-step-${sizeId}`}
+                      onClick={() => {
+                        setFontSizeState(sizeId);
+                        storage.setFontSize(sizeId);
+                      }}
+                      style={{
+                        backgroundColor: active ? tokens.primaryMint : tokens.surface,
+                        borderColor: active ? tokens.deepAccent : tokens.borderSubtle,
+                        color: active ? '#0E5C4D' : tokens.textPrimary,
+                      }}
+                      className="py-2 rounded-xl border text-center font-mono text-xs font-bold cursor-pointer min-h-[44px] flex items-center justify-center transition-all"
+                    >
+                      {FONT_SIZE_META[sizeId].mobilePx}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
-            {/* Action buttons */}
-            <div className="flex items-center justify-between gap-3 pt-1">
-              <button
-                type="button"
-                onClick={handleReshuffleHook}
-                style={{
-                  backgroundColor: tokens.surface,
-                  borderColor: tokens.border,
-                  color: tokens.textSecondary,
-                }}
-                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full border text-xs font-bold hover:opacity-80 transition-colors cursor-pointer min-h-[44px]"
-              >
-                <RotateCcw size={15} />
-                <span>{t('article.reshuffle')}</span>
-              </button>
+            {/* Arabic Fonts (Cairo + 2 Added Reading Fonts) */}
+            <div className="space-y-2 pt-2 border-t" style={{ borderColor: tokens.borderSubtle }}>
+              <h4 style={{ color: tokens.deepAccent }} className="text-xs font-bold">
+                {t('profile.arabicFontTitle')}
+              </h4>
+              <div className="space-y-2">
+                {ARABIC_FONT_OPTIONS.map((opt) => {
+                  const selected = arabicFont === opt.id;
+                  return (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      data-testid={`article-ar-font-${opt.id}`}
+                      onClick={() => {
+                        setArabicFontState(opt.id);
+                        storage.setArabicFont(opt.id);
+                      }}
+                      style={{
+                        backgroundColor: selected ? tokens.surface : tokens.card,
+                        borderColor: selected ? tokens.deepAccent : tokens.borderSubtle,
+                      }}
+                      className="w-full p-3 rounded-2xl border text-start transition-all flex items-center justify-between gap-3 cursor-pointer min-h-[54px]"
+                    >
+                      <div className="flex-1 min-w-0 space-y-1">
+                        <div className="text-xs font-bold" style={{ color: tokens.textPrimary }}>
+                          {t(`profile.arabicFonts.${opt.id}.name`)}
+                        </div>
+                        <div
+                          dir="rtl"
+                          style={{
+                            color: tokens.textSecondary,
+                            fontFamily: opt.cssFamily,
+                          }}
+                          className="text-sm leading-relaxed text-right"
+                        >
+                          {opt.sampleText}
+                        </div>
+                      </div>
+                      {selected && <Check size={16} style={{ color: tokens.deepAccent }} className="shrink-0" />}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 
-              <button
-                type="button"
-                onClick={handleCopyHook}
-                style={{
-                  backgroundColor: tokens.primaryMint,
-                  color: '#0E5C4D',
-                }}
-                className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full text-xs font-bold shadow-xs hover:opacity-90 transition-all cursor-pointer min-h-[44px]"
-              >
-                {copiedHook ? (
-                  <>
-                    <Check size={16} />
-                    <span>{t('common.copied')}</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy size={16} />
-                    <span>{t('common.copy')}</span>
-                  </>
-                )}
-              </button>
+            {/* 3 English Fonts */}
+            <div className="space-y-2 pt-2 border-t" style={{ borderColor: tokens.borderSubtle }}>
+              <h4 style={{ color: tokens.deepAccent }} className="text-xs font-bold">
+                {t('profile.englishFontTitle')}
+              </h4>
+              <div className="space-y-2">
+                {ENGLISH_FONT_OPTIONS.map((opt) => {
+                  const selected = englishFont === opt.id;
+                  return (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      data-testid={`article-en-font-${opt.id}`}
+                      onClick={() => {
+                        setEnglishFontState(opt.id);
+                        storage.setEnglishFont(opt.id);
+                      }}
+                      style={{
+                        backgroundColor: selected ? tokens.surface : tokens.card,
+                        borderColor: selected ? tokens.deepAccent : tokens.borderSubtle,
+                      }}
+                      className="w-full p-3 rounded-2xl border text-start transition-all flex items-center justify-between gap-3 cursor-pointer min-h-[54px]"
+                    >
+                      <div className="flex-1 min-w-0 space-y-1">
+                        <div className="text-xs font-bold" style={{ color: tokens.textPrimary }}>
+                          {t(`profile.englishFonts.${opt.id}.name`)}
+                        </div>
+                        <div
+                          dir="ltr"
+                          style={{
+                            color: tokens.textSecondary,
+                            fontFamily: opt.cssFamily,
+                          }}
+                          className="text-xs leading-relaxed text-left"
+                        >
+                          {opt.sampleText}
+                        </div>
+                      </div>
+                      {selected && <Check size={16} style={{ color: tokens.deepAccent }} className="shrink-0" />}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>

@@ -108,7 +108,12 @@ const normalizedLongFormMyths: MythEntry[] = (longFormEntriesJson as unknown as 
     latinName: entry.latinName,
     category: entry.categoryKey || 'personalities',
     typeLabel: entry.entryType || entry.typeLabel,
-    heroImage: entry.heroImage.startsWith('/') ? entry.heroImage : `/${entry.heroImage}`,
+    heroImage:
+      typeof entry?.heroImage === 'string' && entry.heroImage.trim()
+        ? entry.heroImage.startsWith('/')
+          ? entry.heroImage
+          : `/${entry.heroImage}`
+        : '',
     summary: entry.summary,
     body: entry.body || [],
     sources: entry.sources || [],

@@ -49,12 +49,37 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     console.error('[ErrorBoundary] Caught error:', error, errorInfo);
+    const msg = error?.message || String(error || 'React rendering error');
     const combinedStack = [error?.stack, errorInfo?.componentStack].filter(Boolean).join('\n');
     recordError({
-      message: error?.message || String(error || 'React rendering error'),
+      message: msg,
       stack: combinedStack || undefined,
       source: 'errorBoundary',
     });
+
+    const isStaleChunkOrHookMismatch =
+      /Cannot read properties of null \(reading '(?:useState|useEffect|useRef|useMemo|useCallback|useContext|useReducer)'\)|Invalid hook call|Failed to fetch dynamically imported module|Importing a module script failed/i.test(
+        msg
+      );
+
+    if (isStaleChunkOrHookMismatch && typeof window !== 'undefined') {
+      try {
+        const lastReload = Number(sessionStorage.getItem('mustakshif_chunk_reload_ts') || '0');
+        if (!Number.isFinite(lastReload) || Date.now() - lastReload > 15000) {
+          sessionStorage.setItem('mustakshif_chunk_reload_ts', String(Date.now()));
+          const win = window;
+          if (typeof win.caches !== 'undefined') {
+            win.caches.delete('mustakshif-runtime-v1').catch(() => {}).finally(() => {
+              win.location.reload();
+            });
+            return;
+          }
+          win.location.reload();
+        }
+      } catch {
+        // Ignore storage errors and show ErrorBoundary fallback
+      }
+    }
   }
 
   handleReset = (): void => {

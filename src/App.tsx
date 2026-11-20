@@ -16,10 +16,12 @@ import { Tag, TagVariant } from './components/primitives/Tag';
 import { IconButton } from './components/primitives/IconButton';
 import { MYTH_ENTRIES, getAllEntries, getEntriesByCategory, getEntryById } from './data/seed';
 import { MythEntry, MythCategory, CATEGORY_LABELS } from './data/types';
+import { AzamaEntry } from './data/azamaTypes';
 import { storage, FontSize } from './data/storage';
 import { ThemeProvider, useTheme } from './theme/ThemeContext';
 import { I18nProvider, useI18n } from './i18n/i18n';
 import { getLocalizedEntry, localizeTag } from './content';
+import { applyTypographyToDocument, FONT_SETTINGS_EVENT } from './utils/typography';
 
 import { HomeScreen } from './screens/HomeScreen';
 import { OnboardingScreen } from './screens/OnboardingScreen';
@@ -29,6 +31,9 @@ import { logAnalyticsEvent } from './lib/firebase';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
 
 const ArticleScreen = lazy(() => import('./screens/ArticleScreen'));
+const AzamaDetailScreen = lazy(() =>
+  import('./screens/AzamaDetailScreen').then((m) => ({ default: m.AzamaDetailScreen }))
+);
 const CivilizationsScreen = lazy(() =>
   import('./screens/CivilizationsScreen').then((m) => ({ default: m.CivilizationsScreen }))
 );
@@ -38,6 +43,12 @@ const ProfileScreen = lazy(() => import('./screens/ProfileScreen'));
 const MethodologyScreen = lazy(() => import('./screens/MethodologyScreen'));
 const SubscriptionScreen = lazy(() => import('./screens/SubscriptionScreen'));
 const DebugScreen = lazy(() => import('./screens/DebugScreen'));
+const TagScreen = lazy(() =>
+  import('./screens/TagScreen').then((m) => ({ default: m.TagScreen }))
+);
+const CreaturesScreen = lazy(() =>
+  import('./screens/CreaturesScreen').then((m) => ({ default: m.CreaturesScreen }))
+);
 
 function isDebugLocation(): boolean {
   if (typeof window === 'undefined') return false;
@@ -72,29 +83,48 @@ function AppContent() {
   const [selectedEntry, setSelectedEntry] = useState<MythEntry | null>(null);
   const [targetChapterIndex, setTargetChapterIndex] = useState<number | undefined>(undefined);
   const [entryStack, setEntryStack] = useState<MythEntry[]>([]);
+  const [selectedAzamaEntry, setSelectedAzamaEntry] = useState<AzamaEntry | null>(null);
+  const [azamaStack, setAzamaStack] = useState<AzamaEntry[]>([]);
+  const [civSegmentOverride, setCivSegmentOverride] = useState<{
+    segment: 'list' | 'timeline' | 'azama';
+    nonce: number;
+  } | null>(null);
   const [categoryFilterModal, setCategoryFilterModal] = useState<MythCategory | null>(null);
   const [selectedCivId, setSelectedCivId] = useState<string | null>(null);
   const [showMethodology, setShowMethodology] = useState<boolean>(false);
   const [showSubscription, setShowSubscription] = useState<boolean>(false);
   const [showDebug, setShowDebug] = useState<boolean>(() => isDebugLocation());
+  const [activeTagKey, setActiveTagKey] = useState<string | null>(null);
+  const [showCreatures, setShowCreatures] = useState<boolean>(false);
+  const [selectedCreatureId, setSelectedCreatureId] = useState<string | null>(null);
   const [isPremiumActive, setIsPremiumActive] = useState<boolean>(() => storage.hasPremiumMonthly());
   const logoTapCountRef = useRef<number>(0);
   const logoTapTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
+    applyTypographyToDocument({
+      fontSize: storage.getFontSize(),
+      arabicFont: storage.getArabicFont(),
+      englishFont: storage.getEnglishFont(),
+    });
     const syncEntitlement = () => {
       setIsPremiumActive(storage.hasPremiumMonthly());
     };
     const syncDebugRoute = () => {
       setShowDebug(isDebugLocation());
     };
+    const syncFontSettings = () => {
+      setFontSize(storage.getFontSize());
+    };
     window.addEventListener('mustakshif:entitlement-changed', syncEntitlement);
     window.addEventListener('popstate', syncDebugRoute);
     window.addEventListener('hashchange', syncDebugRoute);
+    window.addEventListener(FONT_SETTINGS_EVENT, syncFontSettings);
     return () => {
       window.removeEventListener('mustakshif:entitlement-changed', syncEntitlement);
       window.removeEventListener('popstate', syncDebugRoute);
       window.removeEventListener('hashchange', syncDebugRoute);
+      window.removeEventListener(FONT_SETTINGS_EVENT, syncFontSettings);
       if (logoTapTimerRef.current != null) {
         window.clearTimeout(logoTapTimerRef.current);
       }
@@ -126,6 +156,9 @@ function AppContent() {
 
   const handleOpenEntry = (entry: MythEntry, chapterIndex?: number) => {
     if (!entry) return;
+    setActiveTagKey(null);
+    setShowCreatures(false);
+    setSelectedCreatureId(null);
     if (entry.isPremium && !isPremiumActive) {
       logAnalyticsEvent('locked_entry_tap', { entry_id: entry.id });
     }
@@ -136,6 +169,26 @@ function AppContent() {
     setEntryStack([entry]);
     setSelectedEntry(entry);
     setTargetChapterIndex(chapterIndex);
+  };
+
+  const handleOpenTag = (tagKey: string) => {
+    if (!tagKey) return;
+    setShowCreatures(false);
+    setSelectedCreatureId(null);
+    setActiveTagKey(tagKey);
+  };
+
+  const handleOpenCreatures = (creatureId?: string) => {
+    setActiveTagKey(null);
+    setSelectedCreatureId(creatureId ?? null);
+    setShowCreatures(true);
+  };
+
+  const handleOpenStoryById = (storyId: string) => {
+    const resolved = getEntryById(storyId);
+    if (resolved) {
+      handleOpenEntry(resolved);
+    }
   };
 
   const handleSelectRelated = (rel: MythEntry) => {
@@ -169,6 +222,40 @@ function AppContent() {
     } else {
       setEntryStack([]);
       setSelectedEntry(null);
+    }
+  };
+
+  const handleOpenAzamaEntry = (entry: AzamaEntry) => {
+    if (!entry) return;
+    setAzamaStack([entry]);
+    setSelectedAzamaEntry(entry);
+  };
+
+  const handleSelectRelatedAzama = (rel: AzamaEntry) => {
+    if (!rel) return;
+    setAzamaStack((prev) => {
+      const list = prev ?? [];
+      if (list.length > 0 && list[list.length - 1]?.id === rel.id) {
+        return list;
+      }
+      const existingIdx = list.findIndex((item) => item.id === rel.id);
+      if (existingIdx !== -1) {
+        return list.slice(0, existingIdx + 1);
+      }
+      return [...list, rel];
+    });
+    setSelectedAzamaEntry(rel);
+  };
+
+  const handleBackFromAzama = () => {
+    if (azamaStack.length > 1) {
+      const nextStack = azamaStack.slice(0, -1);
+      const prevEntry = nextStack[nextStack.length - 1];
+      setAzamaStack(nextStack);
+      setSelectedAzamaEntry(prevEntry);
+    } else {
+      setAzamaStack([]);
+      setSelectedAzamaEntry(null);
     }
   };
 
@@ -259,16 +346,38 @@ function AppContent() {
         activeTab={activeTab}
         onTabChange={(tab) => {
           setSelectedEntry(null);
+          setEntryStack([]);
+          setTargetChapterIndex(undefined);
+          setSelectedAzamaEntry(null);
+          setAzamaStack([]);
           setSelectedCivId(null);
+          setCivSegmentOverride(null);
           setCategoryFilterModal(null);
           setShowMethodology(false);
           setShowSubscription(false);
+          setActiveTagKey(null);
+          setShowCreatures(false);
+          setSelectedCreatureId(null);
           setActiveTab(tab);
         }}
-        hideTabBar={Boolean(selectedEntry || showMethodology || showSubscription)}
-        hideHeader={Boolean(selectedEntry || showMethodology || showSubscription)}
+        hideTabBar={Boolean(
+          selectedEntry ||
+            selectedAzamaEntry ||
+            showMethodology ||
+            showSubscription ||
+            activeTagKey ||
+            showCreatures
+        )}
+        hideHeader={Boolean(
+          selectedEntry ||
+            selectedAzamaEntry ||
+            showMethodology ||
+            showSubscription ||
+            activeTagKey ||
+            showCreatures
+        )}
         onLogoTap={handleLogoTap}
-        headerTitle={localizedSelected?.name || t('app.title')}
+        headerTitle={selectedAzamaEntry?.title || localizedSelected?.name || t('app.title')}
         headerSubtitle={localizedSelected?.typeLabel || t('app.subtitle')}
         headerTrailing={
           <div className="flex items-center gap-1.5">
@@ -424,6 +533,26 @@ function AppContent() {
           <ErrorBoundary>
             <MethodologyScreen onBack={() => setShowMethodology(false)} />
           </ErrorBoundary>
+        ) : activeTagKey ? (
+          <ErrorBoundary>
+            <TagScreen
+              tagKey={activeTagKey}
+              onBack={() => setActiveTagKey(null)}
+              onSelectStoryById={handleOpenStoryById}
+            />
+          </ErrorBoundary>
+        ) : showCreatures ? (
+          <ErrorBoundary>
+            <CreaturesScreen
+              initialCreatureId={selectedCreatureId}
+              onBack={() => {
+                setShowCreatures(false);
+                setSelectedCreatureId(null);
+              }}
+              onSelectStoryById={handleOpenStoryById}
+              onSelectEntry={(entry) => handleOpenEntry(entry)}
+            />
+          </ErrorBoundary>
         ) : selectedEntry ? (
           /* When an article is selected, display ArticleScreen with loop-safe stack */
           <ErrorBoundary>
@@ -437,6 +566,7 @@ function AppContent() {
               onSelectCivilization={(civId) => {
                 setSelectedEntry(null);
                 setSelectedCivId(civId);
+                setCivSegmentOverride({ segment: 'list', nonce: Date.now() });
                 setActiveTab('civilizations');
               }}
               onOpenMethodology={() => setShowMethodology(true)}
@@ -446,6 +576,16 @@ function AppContent() {
                 setSelectedEntry(null);
                 setShowSubscription(true);
               }}
+              onOpenTag={handleOpenTag}
+              onOpenCreature={handleOpenCreatures}
+            />
+          </ErrorBoundary>
+        ) : selectedAzamaEntry ? (
+          <ErrorBoundary>
+            <AzamaDetailScreen
+              entry={selectedAzamaEntry}
+              onBack={handleBackFromAzama}
+              onSelectRelated={handleSelectRelatedAzama}
             />
           </ErrorBoundary>
         ) : (
@@ -461,14 +601,23 @@ function AppContent() {
                   onToggleSave={toggleSave}
                   onSelectCivilization={(civId) => {
                     setSelectedCivId(civId);
+                    setCivSegmentOverride({ segment: 'list', nonce: Date.now() });
                     setActiveTab('civilizations');
                   }}
                   onExploreCivilizations={() => {
                     setSelectedCivId(null);
+                    setCivSegmentOverride({ segment: 'list', nonce: Date.now() });
+                    setActiveTab('civilizations');
+                  }}
+                  onOpenAzama={() => {
+                    setSelectedCivId(null);
+                    setCivSegmentOverride({ segment: 'azama', nonce: Date.now() });
                     setActiveTab('civilizations');
                   }}
                   isPremiumActive={isPremiumActive}
                   onOpenSubscription={() => setShowSubscription(true)}
+                  onOpenTag={handleOpenTag}
+                  onOpenCreatures={() => handleOpenCreatures()}
                 />
               </ErrorBoundary>
             )}
@@ -486,6 +635,9 @@ function AppContent() {
                     }
                   }}
                   onOpenMethodology={() => setShowMethodology(true)}
+                  initialSegment={civSegmentOverride?.segment}
+                  segmentTriggerNonce={civSegmentOverride?.nonce}
+                  onSelectAzamaEntry={handleOpenAzamaEntry}
                 />
               </ErrorBoundary>
             )}
@@ -498,6 +650,7 @@ function AppContent() {
                   onSelectCivilization={(civId) => {
                     setSelectedEntry(null);
                     setSelectedCivId(civId);
+                    setCivSegmentOverride({ segment: 'list', nonce: Date.now() });
                     setActiveTab('civilizations');
                   }}
                 />

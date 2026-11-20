@@ -3,14 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  * 
  * Mustakshif Studio Screen (استوديو المبدعين)
- * Aggregates game hooks and story writing prompts from classical Arab folklore.
+ * Aggregates story writing prompts and classical quotes from Arab folklore.
  * Features category and theme filtering, starred favorites, copy, and export.
  */
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import {
   Sparkles,
-  Gamepad2,
   PenTool,
   Star,
   Copy,
@@ -112,6 +111,15 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
   // Toast feedback state
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [copiedHookId, setCopiedHookId] = useState<string | null>(null);
+  const copyHookTimerRef = useRef<number | null>(null);
+  const copyQuoteTimerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (copyHookTimerRef.current !== null) clearTimeout(copyHookTimerRef.current);
+      if (copyQuoteTimerRef.current !== null) clearTimeout(copyQuoteTimerRef.current);
+    };
+  }, []);
 
   // Story idea generator state
   const [generatedPrompt, setGeneratedPrompt] = useState<string | null>(null);
@@ -127,7 +135,6 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
       if (!ds) return;
       if (Array.isArray(ds.writingHooks)) hookPool.push(...ds.writingHooks);
       if (Array.isArray(ds.storyHooks)) hookPool.push(...ds.storyHooks);
-      if (Array.isArray(ds.gameHooks)) hookPool.push(...ds.gameHooks);
     });
     const randomHook = hookPool.length > 0
       ? hookPool[Math.floor(Math.random() * hookPool.length)]
@@ -169,12 +176,6 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
   const filteredHooks = useMemo(
     () => filterHooks(allHooks, selectedCategory, selectedTheme),
     [allHooks, selectedCategory, selectedTheme]
-  );
-
-  // Separate into Game Hooks and Writing Hooks
-  const gameHooks = useMemo(
-    () => filteredHooks.filter((h) => h.type === 'game'),
-    [filteredHooks]
   );
 
   const writingHooks = useMemo(
@@ -221,10 +222,14 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
     const textToCopy = `${hook?.text ?? ''} — ${hook?.mythName ?? ''}`;
     const copied = await copyTextSafely(textToCopy);
     if (copied) {
+      if (copyHookTimerRef.current !== null) {
+        clearTimeout(copyHookTimerRef.current);
+      }
       setCopiedHookId(hook.id);
       setToastMessage(t('studio.copiedToast'));
-      setTimeout(() => {
+      copyHookTimerRef.current = window.setTimeout(() => {
         setCopiedHookId((prev) => (prev === hook.id ? null : prev));
+        copyHookTimerRef.current = null;
       }, 2000);
     } else {
       setToastMessage(t('common.copyError'));
@@ -236,10 +241,14 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
     const textToCopy = formatQuoteForCopy(quote);
     const copied = await copyTextSafely(textToCopy);
     if (copied) {
+      if (copyQuoteTimerRef.current !== null) {
+        clearTimeout(copyQuoteTimerRef.current);
+      }
       setCopiedQuoteId(quote.id);
       setToastMessage(t('studio.quotesCopiedToast'));
-      setTimeout(() => {
+      copyQuoteTimerRef.current = window.setTimeout(() => {
         setCopiedQuoteId((prev) => (prev === quote.id ? null : prev));
+        copyQuoteTimerRef.current = null;
       }, 2000);
     } else {
       setToastMessage(t('common.copyError'));
@@ -300,7 +309,7 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
   };
 
   const isFilterActive = selectedCategory !== 'all' || selectedTheme !== 'all';
-  const hasNoResults = gameHooks.length === 0 && writingHooks.length === 0;
+  const hasNoResults = writingHooks.length === 0;
 
   return (
     <div className="space-y-6 animate-in fade-in duration-200" dir={dir}>
@@ -602,127 +611,7 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({ onSelectEntry }) => 
         </div>
       ) : (
         <div className="space-y-7">
-          {/* Section 1: أفكار للألعاب (Game Hooks) */}
-          {gameHooks.length > 0 && (
-            <section className="space-y-3">
-              <div className="flex items-center justify-between px-1">
-                <div className="flex items-center gap-2">
-                  <div
-                    style={{
-                      backgroundColor: isDark ? 'rgba(127, 209, 174, 0.2)' : 'rgba(13, 92, 70, 0.1)',
-                      color: tokens.deepAccent,
-                    }}
-                    className="w-7 h-7 rounded-xl flex items-center justify-center shrink-0"
-                  >
-                    <Gamepad2 size={16} />
-                  </div>
-                  <h3
-                    style={{ color: tokens.textPrimary }}
-                    className="font-['Aref_Ruqaa',serif] text-lg font-bold"
-                  >
-                    {t('article.gameHooks')}
-                  </h3>
-                </div>
-                <span
-                  style={{
-                    backgroundColor: tokens.card,
-                    borderColor: tokens.border,
-                    color: tokens.textSecondary,
-                  }}
-                  className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold border"
-                >
-                  {gameHooks.length}
-                </span>
-              </div>
-
-              <div className="space-y-3">
-                {gameHooks.map((hook) => {
-                  const isStarred = (starredHookIds ?? []).includes(hook.id);
-                  const isCopied = copiedHookId === hook.id;
-
-                  return (
-                    <div
-                      key={hook.id}
-                      style={{
-                        backgroundColor: tokens.card,
-                        borderColor: isStarred ? tokens.deepAccent : tokens.border,
-                      }}
-                      className={`p-4 rounded-2xl border transition-all shadow-xs space-y-3 ${
-                        isStarred ? 'ring-1 ring-[#7FD1AE]/40' : ''
-                      }`}
-                    >
-                      {/* Hook text */}
-                      <p
-                        style={{ color: tokens.textPrimary }}
-                        className="text-xs leading-relaxed font-medium"
-                      >
-                        {hook?.text ?? ''}
-                      </p>
-
-                      {/* Card Bottom Meta & Actions */}
-                      <div
-                        style={{ borderColor: tokens.borderSubtle }}
-                        className="pt-2 border-t flex items-center justify-between gap-2"
-                      >
-                        {/* Tappable source myth name */}
-                        <button
-                          type="button"
-                          onClick={() => handleNavigateToMyth(hook.mythId)}
-                          style={{
-                            backgroundColor: isDark
-                              ? 'rgba(127, 209, 174, 0.15)'
-                              : 'rgba(13, 92, 70, 0.08)',
-                            color: tokens.deepAccent,
-                          }}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[11px] font-bold hover:opacity-80 transition-all cursor-pointer min-h-[32px]"
-                          title={t('article.readStory')}
-                        >
-                          <BookOpen size={12} />
-                          <span>{hook?.mythName ?? ''}</span>
-                          <ChevronLeft size={12} className={dir === 'ltr' ? 'rotate-180' : ''} />
-                        </button>
-
-                        {/* Action buttons: Star & Copy */}
-                        <div className="flex items-center gap-1">
-                          <button
-                            type="button"
-                            onClick={() => handleToggleStar(hook.id)}
-                            aria-label={isStarred ? t('article.bookmarkRemove') : t('article.bookmarkAdd')}
-                            style={{
-                              color: isStarred ? tokens.coolBlueAccent : tokens.textSecondary,
-                              backgroundColor: isStarred
-                                ? (isDark ? 'rgba(127, 178, 232, 0.2)' : 'rgba(74, 144, 217, 0.14)')
-                                : 'transparent',
-                            }}
-                            className="p-2 rounded-xl transition-all hover:scale-105 active:scale-95 cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center"
-                          >
-                            <Star size={16} className={isStarred ? 'fill-current' : ''} />
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => handleCopyHook(hook)}
-                            aria-label={t('studio.copyBtn')}
-                            style={{
-                              color: isCopied ? tokens.deepAccent : tokens.textSecondary,
-                              backgroundColor: isCopied
-                                ? (isDark ? 'rgba(127, 209, 174, 0.2)' : 'rgba(127, 209, 174, 0.15)')
-                                : 'transparent',
-                            }}
-                            className="p-2 rounded-xl transition-all hover:scale-105 active:scale-95 cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center"
-                          >
-                            {isCopied ? <Check size={16} /> : <Copy size={16} />}
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
-          )}
-
-          {/* Section 2: بذور للقصص (Writing Hooks) */}
+          {/* بذور للقصص (Writing Hooks) */}
           {writingHooks.length > 0 && (
             <section className="space-y-3">
               <div className="flex items-center justify-between px-1">

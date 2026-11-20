@@ -227,10 +227,14 @@ body.dark-teal,
   text-align: left;
 }
 
-/* Language-specific typography */
+/* Language-specific & user-selectable reader typography */
 html[lang="ar"] body,
 html[lang="ar"] .font-\[\'Cairo\'\,sans-serif\] {
-  font-family: 'Cairo', 'Noto Naskh Arabic', 'Tajawal', system-ui, sans-serif;
+  font-family: var(--font-reader-ar, 'Cairo', 'Noto Naskh Arabic', 'Tajawal', system-ui, sans-serif);
+}
+
+html[lang="ar"] .reader-body-text {
+  font-family: var(--font-reader-ar, 'Cairo', 'Noto Naskh Arabic', 'Tajawal', system-ui, sans-serif) !important;
 }
 
 html[lang="th"] body,
@@ -241,9 +245,14 @@ html[lang="th"] [class*="font-['Tajawal'"] {
   font-family: 'Noto Sans Thai', 'Cairo', system-ui, sans-serif !important;
 }
 
-html[lang="en"] [class*="font-['Aref_Ruqaa'"],
-html[lang="id"] [class*="font-['Aref_Ruqaa'"] {
-  font-family: 'Cairo', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+html[lang="en"] body,
+html[lang="en"] .font-\[\'Cairo\'\,sans-serif\]:not([lang="ar"]),
+html[lang="en"] [class*="font-['Aref_Ruqaa'"]:not([lang="ar"]),
+html[lang="en"] [class*="font-['Amiri'"]:not([lang="ar"]),
+html[lang="en"] .reader-body-text:not([lang="ar"]),
+html[lang="id"] [class*="font-['Aref_Ruqaa'"]:not([lang="ar"]),
+html[lang="id"] .reader-body-text:not([lang="ar"]) {
+  font-family: var(--font-reader-en, 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif) !important;
 }
 
 /* Note: Geographic map canvas is never mirrored in LTR so East/West remain accurate */
@@ -257,5 +266,17 @@ html[lang="id"] [class*="font-['Aref_Ruqaa'"] {
 
 [dir="ltr"] .rtl-chevron-forward {
   transform: scaleX(-1);
+}
+
+/* Leaflet map container overrides for RTL safety and crisp marker rendering */
+.leaflet-container {
+  direction: ltr;
+  font-family: var(--font-body);
+  z-index: 10;
+}
+
+.mustakshif-leaflet-pin {
+  background: transparent;
+  border: none;
 }
 

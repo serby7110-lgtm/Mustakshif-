@@ -46,7 +46,14 @@ import {
 } from 'lucide-react';
 
 import { Card } from '../components/primitives/Card';
-import { ThemeMode, FontSize, storage } from '../data/storage';
+import { ThemeMode, FontSize, ArabicFontId, EnglishFontId, storage } from '../data/storage';
+import {
+  ARABIC_FONT_OPTIONS,
+  ENGLISH_FONT_OPTIONS,
+  FONT_SIZE_META,
+  FONT_SIZE_ORDER,
+  FONT_SETTINGS_EVENT,
+} from '../utils/typography';
 import { useTheme } from '../theme/ThemeContext';
 import { MythEntry, myths as unifiedMyths } from '../data/types';
 import {
@@ -77,6 +84,8 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
   onToggleTheme: propOnToggleTheme,
   fontSize = 'md',
   onChangeFontSize,
+  savedCount,
+  historyCount,
   onReplayOnboarding,
   onOpenMethodology,
   isPremiumActive,
@@ -90,21 +99,32 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
   const [isContactScreenOpen, setIsContactScreenOpen] = useState(false);
   const [sentMessagesCount, setSentMessagesCount] = useState<number>(() => storage.getSentMessagesCount());
   const [isFontModalOpen, setIsFontModalOpen] = useState(false);
+  const [arabicFont, setArabicFont] = useState<ArabicFontId>(() => storage.getArabicFont());
+  const [englishFont, setEnglishFont] = useState<EnglishFontId>(() => storage.getEnglishFont());
   const [isMethodologyOpen, setIsMethodologyOpen] = useState(false);
   const [isLangSheetOpen, setIsLangSheetOpen] = useState(false);
 
+  useEffect(() => {
+    const syncFonts = () => {
+      setArabicFont(storage.getArabicFont());
+      setEnglishFont(storage.getEnglishFont());
+    };
+    window.addEventListener(FONT_SETTINGS_EVENT, syncFonts);
+    return () => window.removeEventListener(FONT_SETTINGS_EVENT, syncFonts);
+  }, []);
+
   const CURRENT_LANG_BADGES: Record<string, { flag: string; label: string; text: string }> = {
-    ar: { flag: '🇹🇳', label: 'عربي', text: 'العربية الفصحى (واجهة كاملة RTL)' },
-    en: { flag: '🇬🇧', label: 'English', text: 'English (LTR Interface)' },
-    id: { flag: '🇮🇩', label: 'Indonesia', text: 'Bahasa Indonesia (LTR)' },
-    th: { flag: '🇹🇭', label: 'ไทย', text: 'ไทย (LTR)' },
+    ar: { flag: 'AR', label: 'عربي', text: 'العربية الفصحى (واجهة كاملة RTL)' },
+    en: { flag: 'EN', label: 'English', text: 'English (LTR Interface)' },
+    id: { flag: 'ID', label: 'Indonesia', text: 'Bahasa Indonesia (LTR)' },
+    th: { flag: 'TH', label: 'ไทย', text: 'ไทย (LTR)' },
   };
 
   const LANG_SHEET_OPTIONS: { lang: Language; label: string; flag: string; dir: 'rtl' | 'ltr' }[] = [
-    { lang: 'ar', label: 'العربية', flag: '🇹🇳', dir: 'rtl' },
-    { lang: 'en', label: 'English', flag: '🇬🇧', dir: 'ltr' },
-    { lang: 'id', label: 'Bahasa Indonesia', flag: '🇮🇩', dir: 'ltr' },
-    { lang: 'th', label: 'ไทย', flag: '🇹🇭', dir: 'ltr' },
+    { lang: 'ar', label: 'العربية', flag: 'AR', dir: 'rtl' },
+    { lang: 'en', label: 'English', flag: 'EN', dir: 'ltr' },
+    { lang: 'id', label: 'Bahasa Indonesia', flag: 'ID', dir: 'ltr' },
+    { lang: 'th', label: 'ไทย', flag: 'TH', dir: 'ltr' },
   ];
 
   const LANG_CHANGE_TOAST: Record<Language, string> = {
@@ -121,15 +141,38 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
 
   const handleToggle = propOnToggleTheme || toggleTheme;
 
-  // Retrieve storage state
+  // Retrieve and keep storage state in sync
   const allMyths = useMemo(() => unifiedMyths ?? [], []);
-  const progressMap = useMemo(() => storage.getAllMythProgress() ?? {}, []);
-  const readChapters = useMemo(() => storage.getReadChapters() ?? [], []);
-  const bookmarks = useMemo(() => storage.getBookmarks() ?? [], []);
-  const starredHooks = useMemo(() => storage.getFavoriteHooks() ?? [], []);
-  const mapSheetsCount = useMemo(() => storage.getMapSheetsCount() ?? 0, []);
-  const darkMinutes = useMemo(() => storage.getDarkReadingMinutes() ?? 0, []);
-  const favoriteQuotes = useMemo(() => storage.getFavoriteQuotes() ?? [], []);
+  const [progressMap, setProgressMap] = useState<Record<string, number>>(
+    () => storage.getAllMythProgress() ?? {}
+  );
+  const [readChapters, setReadChapters] = useState<string[]>(() => storage.getReadChapters() ?? []);
+  const [bookmarks, setBookmarks] = useState<string[]>(() => storage.getBookmarks() ?? []);
+  const [starredHooks, setStarredHooks] = useState<string[]>(() => storage.getFavoriteHooks() ?? []);
+  const [mapSheetsCount, setMapSheetsCount] = useState<number>(() => storage.getMapSheetsCount() ?? 0);
+  const [darkMinutes, setDarkMinutes] = useState<number>(() => storage.getDarkReadingMinutes() ?? 0);
+  const [favoriteQuotes, setFavoriteQuotes] = useState<string[]>(
+    () => storage.getFavoriteQuotes() ?? []
+  );
+
+  useEffect(() => {
+    const syncStorageStats = () => {
+      setProgressMap(storage.getAllMythProgress() ?? {});
+      setReadChapters(storage.getReadChapters() ?? []);
+      setBookmarks(storage.getBookmarks() ?? []);
+      setStarredHooks(storage.getFavoriteHooks() ?? []);
+      setMapSheetsCount(storage.getMapSheetsCount() ?? 0);
+      setDarkMinutes(storage.getDarkReadingMinutes() ?? 0);
+      setFavoriteQuotes(storage.getFavoriteQuotes() ?? []);
+    };
+    syncStorageStats();
+    window.addEventListener('focus', syncStorageStats);
+    window.addEventListener('storage', syncStorageStats);
+    return () => {
+      window.removeEventListener('focus', syncStorageStats);
+      window.removeEventListener('storage', syncStorageStats);
+    };
+  }, [savedCount, historyCount]);
 
   // Compute stats for Stats card
   const stats = useMemo(
@@ -210,8 +253,8 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
 
   useEffect(() => {
     if (!toastMessage) return;
-    const t = setTimeout(() => setToastMessage(null), 3000);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setToastMessage(null), 3000);
+    return () => clearTimeout(timer);
   }, [toastMessage]);
 
   const handleExportBookmarks = () => {
@@ -244,10 +287,17 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
   };
 
   const fontSizeLabels: Record<FontSize, string> = {
+    xs: t('profile.fontXs'),
     sm: t('profile.fontSm'),
     md: t('profile.fontMd'),
     lg: t('profile.fontLg'),
+    xl: t('profile.fontXl'),
   };
+
+  const activeFontSummary =
+    lang === 'ar'
+      ? `${fontSizeLabels[fontSize] ?? fontSizeLabels.md} • ${t(`profile.arabicFonts.${arabicFont}.name`)}`
+      : `${fontSizeLabels[fontSize] ?? fontSizeLabels.md} • ${t(`profile.englishFonts.${englishFont}.name`)}`;
 
   // Helper to render badge icon
   const renderBadgeIcon = (badge: BadgeItem) => {
@@ -359,7 +409,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                 className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full border shadow-2xs"
                 title={activeLanguage.label}
               >
-                <span className="text-sm leading-none">{activeLanguage.flag}</span>
+                <span className="text-[10px] font-mono font-bold leading-none">{activeLanguage.flag}</span>
                 <span>{activeLanguage.label}</span>
               </span>
 
@@ -894,9 +944,9 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                 </h4>
                 <p
                   style={{ color: tokens.textSecondary }}
-                  className="text-xs mt-0.5"
+                  className="text-xs mt-0.5 truncate max-w-[230px]"
                 >
-                  {fontSizeLabels[fontSize] ?? fontSizeLabels.md}
+                  {activeFontSummary}
                 </p>
               </div>
             </div>
@@ -953,7 +1003,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                 }}
                 className="text-xs font-bold px-2.5 py-1 rounded-xl flex items-center gap-1.5 border shadow-2xs"
               >
-                <span>{CURRENT_LANG_BADGES[lang]?.flag || '🇹🇳'}</span>
+                <span className="font-mono text-[10px] font-bold">{CURRENT_LANG_BADGES[lang]?.flag || 'AR'}</span>
                 <span>{t('profile.langBadgeLabel') || CURRENT_LANG_BADGES[lang]?.label || 'عربي'}</span>
               </span>
               <ChevronLeft size={16} style={{ color: tokens.textSecondary }} className={dir === 'ltr' ? 'rotate-180' : ''} />
@@ -1295,15 +1345,20 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
         </div>
       )}
 
-      {/* Modal: Font Size */}
+      {/* Modal: Font Size & Typeface */}
       {isFontModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4" dir={dir}>
+        <div
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4"
+          dir={dir}
+          onClick={() => setIsFontModalOpen(false)}
+        >
           <div
+            onClick={(e) => e.stopPropagation()}
             style={{
               backgroundColor: tokens.card,
               borderColor: tokens.border,
             }}
-            className="w-full max-w-md rounded-[26px] p-6 shadow-2xl border space-y-4 animate-in zoom-in-95 text-start"
+            className="w-full max-w-md max-h-[88vh] overflow-y-auto rounded-[26px] p-6 shadow-2xl border space-y-5 animate-in zoom-in-95 text-start"
           >
             <div
               style={{ borderColor: tokens.borderSubtle }}
@@ -1326,39 +1381,150 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
               </button>
             </div>
 
+            {/* Section 1: 5 Font Sizes */}
             <div className="space-y-2">
-              {(
-                [
-                  { id: 'sm', label: t('profile.fontSm') },
-                  { id: 'md', label: t('profile.fontMd') },
-                  { id: 'lg', label: t('profile.fontLg') },
-                ] as const
-              ).map((option) => (
-                <button
-                  key={option.id}
-                  type="button"
-                  onClick={() => {
-                    onChangeFontSize?.(option.id);
-                    setIsFontModalOpen(false);
-                  }}
-                  style={{
-                    backgroundColor: fontSize === option.id ? tokens.surface : tokens.card,
-                    borderColor: fontSize === option.id ? tokens.deepAccent : tokens.borderSubtle,
-                  }}
-                  className="w-full p-3.5 rounded-2xl border text-start transition-all flex items-center justify-between cursor-pointer min-h-[52px]"
-                >
-                  <h4
-                    style={{ color: tokens.textPrimary }}
-                    className="font-bold text-sm font-['Cairo',sans-serif]"
+              <div className="flex items-center justify-between">
+                <span style={{ color: tokens.deepAccent }} className="text-xs font-bold">
+                  {t('article.fontSizeBadge')}
+                </span>
+                <span style={{ color: tokens.textSecondary }} className="text-xs font-mono">
+                  {FONT_SIZE_META[fontSize]?.mobilePx ?? 17}px
+                </span>
+              </div>
+              <div className="space-y-2">
+                {FONT_SIZE_ORDER.map((sizeId) => (
+                  <button
+                    key={sizeId}
+                    type="button"
+                    data-testid={`profile-font-size-${sizeId}`}
+                    onClick={() => {
+                      storage.setFontSize(sizeId);
+                      onChangeFontSize?.(sizeId);
+                    }}
+                    style={{
+                      backgroundColor: fontSize === sizeId ? tokens.surface : tokens.card,
+                      borderColor: fontSize === sizeId ? tokens.deepAccent : tokens.borderSubtle,
+                    }}
+                    className="w-full px-3.5 py-2.5 rounded-2xl border text-start transition-all flex items-center justify-between cursor-pointer min-h-[48px]"
                   >
-                    {option.label}
-                  </h4>
-                  {fontSize === option.id && (
-                    <Check size={18} style={{ color: tokens.deepAccent }} />
-                  )}
-                </button>
-              ))}
+                    <span
+                      style={{
+                        color: tokens.textPrimary,
+                        fontSize: `${FONT_SIZE_META[sizeId].mobilePx}px`,
+                      }}
+                      className="font-bold leading-snug"
+                    >
+                      {fontSizeLabels[sizeId]}
+                    </span>
+                    {fontSize === sizeId && (
+                      <Check size={18} style={{ color: tokens.deepAccent }} className="shrink-0" />
+                    )}
+                  </button>
+                ))}
+              </div>
             </div>
+
+            {/* Section 2: Arabic Fonts (Cairo + 2 Added Heritage Fonts) */}
+            <div className="space-y-2 pt-2 border-t" style={{ borderColor: tokens.borderSubtle }}>
+              <h4 style={{ color: tokens.deepAccent }} className="text-xs font-bold">
+                {t('profile.arabicFontTitle')}
+              </h4>
+              <div className="space-y-2">
+                {ARABIC_FONT_OPTIONS.map((opt) => {
+                  const selected = arabicFont === opt.id;
+                  return (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      data-testid={`profile-ar-font-${opt.id}`}
+                      onClick={() => {
+                        setArabicFont(opt.id);
+                        storage.setArabicFont(opt.id);
+                      }}
+                      style={{
+                        backgroundColor: selected ? tokens.surface : tokens.card,
+                        borderColor: selected ? tokens.deepAccent : tokens.borderSubtle,
+                      }}
+                      className="w-full p-3.5 rounded-2xl border text-start transition-all flex items-center justify-between gap-3 cursor-pointer min-h-[56px]"
+                    >
+                      <div className="flex-1 min-w-0 space-y-1">
+                        <div className="text-xs font-bold" style={{ color: tokens.textPrimary }}>
+                          {t(`profile.arabicFonts.${opt.id}.name`)}
+                        </div>
+                        <div
+                          dir="rtl"
+                          style={{
+                            color: tokens.textSecondary,
+                            fontFamily: opt.cssFamily,
+                          }}
+                          className="text-sm leading-relaxed text-right"
+                        >
+                          {opt.sampleText}
+                        </div>
+                      </div>
+                      {selected && <Check size={18} style={{ color: tokens.deepAccent }} className="shrink-0" />}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Section 3: 3 English Fonts */}
+            <div className="space-y-2 pt-2 border-t" style={{ borderColor: tokens.borderSubtle }}>
+              <h4 style={{ color: tokens.deepAccent }} className="text-xs font-bold">
+                {t('profile.englishFontTitle')}
+              </h4>
+              <div className="space-y-2">
+                {ENGLISH_FONT_OPTIONS.map((opt) => {
+                  const selected = englishFont === opt.id;
+                  return (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      data-testid={`profile-en-font-${opt.id}`}
+                      onClick={() => {
+                        setEnglishFont(opt.id);
+                        storage.setEnglishFont(opt.id);
+                      }}
+                      style={{
+                        backgroundColor: selected ? tokens.surface : tokens.card,
+                        borderColor: selected ? tokens.deepAccent : tokens.borderSubtle,
+                      }}
+                      className="w-full p-3.5 rounded-2xl border text-start transition-all flex items-center justify-between gap-3 cursor-pointer min-h-[56px]"
+                    >
+                      <div className="flex-1 min-w-0 space-y-1">
+                        <div className="text-xs font-bold" style={{ color: tokens.textPrimary }}>
+                          {t(`profile.englishFonts.${opt.id}.name`)}
+                        </div>
+                        <div
+                          dir="ltr"
+                          style={{
+                            color: tokens.textSecondary,
+                            fontFamily: opt.cssFamily,
+                          }}
+                          className="text-xs leading-relaxed text-left"
+                        >
+                          {opt.sampleText}
+                        </div>
+                      </div>
+                      {selected && <Check size={18} style={{ color: tokens.deepAccent }} className="shrink-0" />}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setIsFontModalOpen(false)}
+              style={{
+                backgroundColor: tokens.deepAccent,
+                color: isDark ? tokens.background : '#FFFFFF',
+              }}
+              className="w-full py-3 rounded-2xl text-xs font-bold shadow-md cursor-pointer min-h-[44px]"
+            >
+              {t('common.close')}
+            </button>
           </div>
         </div>
       )}
@@ -1451,7 +1617,16 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                     }`}
                   >
                     <div className="flex items-center gap-3.5">
-                      <span className="text-2xl leading-none">{item.flag}</span>
+                      <span
+                        style={{
+                          backgroundColor: tokens.card,
+                          borderColor: tokens.border,
+                          color: tokens.deepAccent,
+                        }}
+                        className="w-10 h-10 rounded-xl border font-mono text-xs font-bold flex items-center justify-center shrink-0"
+                      >
+                        {item.flag}
+                      </span>
                       <div className="text-start">
                         <h4
                           style={{

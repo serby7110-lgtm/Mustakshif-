@@ -51,13 +51,43 @@ self.addEventListener("install", (event) => {
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(
+    (async () => {
+      const keys = await caches.keys();
+      await Promise.all(
         keys
           .filter((k) => k !== CACHE && k !== RUNTIME_CACHE)
           .map((k) => caches.delete(k))
-      )
-    )
+      );
+      try {
+        const runtimeCache = await caches.open(RUNTIME_CACHE);
+        const cachedRequests = await runtimeCache.keys();
+        for (const req of cachedRequests) {
+          const reqUrl = new URL(req.url);
+          const isDevPath =
+            reqUrl.pathname.startsWith("/@") ||
+            reqUrl.pathname.startsWith("/src/") ||
+            reqUrl.pathname.startsWith("/node_modules/") ||
+            reqUrl.searchParams.has("v") ||
+            reqUrl.searchParams.has("t") ||
+            reqUrl.searchParams.has("import");
+          if (isDevPath) {
+            await runtimeCache.delete(req);
+            continue;
+          }
+          if (reqUrl.pathname === "/") {
+            const matched = await runtimeCache.match(req);
+            if (matched) {
+              const htmlText = await matched.clone().text().catch(() => "");
+              if (htmlText.includes("/src/main.tsx") || htmlText.includes("/@vite/client")) {
+                await runtimeCache.delete(req);
+              }
+            }
+          }
+        }
+      } catch {
+        // Ignore runtime cache cleanup failure
+      }
+    })()
   );
   self.clients.claim();
 });
@@ -74,19 +104,32 @@ async function handleNavigationRequest(event) {
   try {
     const preloadResp = await event.preloadResponse;
     if (preloadResp && preloadResp.ok) {
-      const runtimeCache = await caches.open(RUNTIME_CACHE);
-      runtimeCache.put(event.request, preloadResp.clone()).catch(() => {});
+      const preloadText = await preloadResp.clone().text().catch(() => "");
+      if (!preloadText.includes("/src/main.tsx") && !preloadText.includes("/@vite/client")) {
+        const runtimeCache = await caches.open(RUNTIME_CACHE);
+        runtimeCache.put(event.request, preloadResp.clone()).catch(() => {});
+      }
       return preloadResp;
     }
 
     const networkResp = await fetch(event.request);
     if (networkResp && networkResp.ok) {
-      const runtimeCache = await caches.open(RUNTIME_CACHE);
-      runtimeCache.put(event.request, networkResp.clone()).catch(() => {});
-      const reqUrl = new URL(event.request.url);
-      if (reqUrl.pathname === "/") {
-        runtimeCache.put("/", networkResp.clone()).catch(() => {});
-      }
+      const respClone = networkResp.clone();
+      respClone
+        .text()
+        .then(async (htmlText) => {
+          // Do not cache Vite dev HTML documents containing /src/main.tsx or /@vite/client
+          if (htmlText.includes("/src/main.tsx") || htmlText.includes("/@vite/client")) {
+            return;
+          }
+          const runtimeCache = await caches.open(RUNTIME_CACHE);
+          await runtimeCache.put(event.request, networkResp.clone()).catch(() => {});
+          const reqUrl = new URL(event.request.url);
+          if (reqUrl.pathname === "/") {
+            await runtimeCache.put("/", networkResp.clone()).catch(() => {});
+          }
+        })
+        .catch(() => {});
     }
     return networkResp;
   } catch {
@@ -130,13 +173,30 @@ self.addEventListener("fetch", (event) => {
   const { request } = event;
   if (request.method !== "GET") return;
 
+  const url = new URL(request.url);
+  const isSameOrigin = url.origin === self.location.origin;
+
+  // Never intercept Vite dev server source modules, pre-bundled deps, or HMR endpoints
+  if (
+    isSameOrigin &&
+    (url.pathname.startsWith("/@vite/") ||
+      url.pathname.startsWith("/@react-refresh") ||
+      url.pathname.startsWith("/@fs/") ||
+      url.pathname.startsWith("/@id/") ||
+      url.pathname.startsWith("/src/") ||
+      url.pathname.startsWith("/node_modules/") ||
+      url.searchParams.has("v") ||
+      url.searchParams.has("t") ||
+      url.searchParams.has("import"))
+  ) {
+    return;
+  }
+
   if (request.mode === "navigate") {
     event.respondWith(handleNavigationRequest(event));
     return;
   }
 
-  const url = new URL(request.url);
-  const isSameOrigin = url.origin === self.location.origin;
   const isGoogleFont =
     url.hostname === "fonts.googleapis.com" || url.hostname === "fonts.gstatic.com";
 

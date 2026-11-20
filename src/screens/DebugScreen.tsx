@@ -6,7 +6,7 @@
  * Accessible via `/debug`, `#/debug`, or 5 taps on the app logo.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ArrowRight,
   Bug,
@@ -41,9 +41,18 @@ export const DebugScreen: React.FC<DebugScreenProps> = ({ onBack }) => {
   const { t, dir, lang } = useI18n();
   const [logs, setLogs] = useState<ErrorLogEntry[]>(() => getErrorLogs());
   const [toast, setToast] = useState<string | null>(null);
+  const toastTimerRef = useRef<number | null>(null);
 
   const refreshLogs = useCallback(() => {
     setLogs(getErrorLogs());
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (toastTimerRef.current !== null) {
+        clearTimeout(toastTimerRef.current);
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -59,9 +68,13 @@ export const DebugScreen: React.FC<DebugScreenProps> = ({ onBack }) => {
   }, [refreshLogs]);
 
   const showNotice = (msg: string) => {
+    if (toastTimerRef.current !== null) {
+      clearTimeout(toastTimerRef.current);
+    }
     setToast(msg);
-    window.setTimeout(() => {
+    toastTimerRef.current = window.setTimeout(() => {
       setToast((curr) => (curr === msg ? null : curr));
+      toastTimerRef.current = null;
     }, 2600);
   };
 

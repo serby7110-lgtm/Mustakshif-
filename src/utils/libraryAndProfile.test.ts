@@ -72,6 +72,18 @@ describe('libraryAndProfile utilities', () => {
     assert.equal(getReadingStatus('ghul', progressMap), 'reading');
     assert.equal(getReadingStatus('allat', progressMap), 'completed');
     assert.equal(getReadingStatus('irm', progressMap), 'unread');
+
+    // Only strips leading 'al-' prefix, never internal occurrences
+    assert.equal(
+      getReadingStatus('al-ghul', { ghul: 100 }),
+      'completed'
+    );
+    assert.equal(
+      getReadingStatus('baal-myth', { 'baal-myth': 50, bamyth: 100 }),
+      'reading'
+    );
+    assert.equal(getReadingStatus('', progressMap), 'unread');
+    assert.equal(getReadingStatus(undefined as unknown as string, progressMap), 'unread');
   });
 
   test('sortMyths sorts alphabetically and by mostRead', () => {

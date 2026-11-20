@@ -99,20 +99,15 @@ describe('studioHooks utilities', () => {
     assert.equal(irm?.category, 'places');
   });
 
-  test('getAggregatedHooks extracts all game and writing hooks correctly', () => {
+  test('getAggregatedHooks extracts only writing hooks and excludes gameHooks', () => {
     const hooks = getAggregatedHooks(mockStories, mockMyths);
-    assert.equal(hooks.length, 6);
+    assert.equal(hooks.length, 3);
+    assert.ok(hooks.every((h) => h.type === 'writing'));
 
-    const gameHooks = hooks.filter((h) => h.type === 'game');
-    const writingHooks = hooks.filter((h) => h.type === 'writing');
-
-    assert.equal(gameHooks.length, 3);
-    assert.equal(writingHooks.length, 3);
-
-    const firstHook = gameHooks[0];
+    const firstHook = hooks[0];
     assert.equal(firstHook.mythName, 'الغول');
     assert.equal(firstHook.mythCategory, 'creatures');
-    assert.ok(firstHook.text.includes('ميكانيكا الشك'));
+    assert.ok(firstHook.text.includes('راوٍ غير موثوق'));
   });
 
   test('extractAllThemes gathers unique union of themes', () => {
@@ -129,21 +124,21 @@ describe('studioHooks utilities', () => {
 
     // Filter by category creatures
     const creaturesOnly = filterHooks(allHooks, 'creatures', 'all');
-    assert.equal(creaturesOnly.length, 3);
+    assert.equal(creaturesOnly.length, 1);
     assert.ok(creaturesOnly.every((h) => h.mythCategory === 'creatures'));
 
     // Filter by places
     const placesOnly = filterHooks(allHooks, 'places', 'all');
-    assert.equal(placesOnly.length, 3);
+    assert.equal(placesOnly.length, 2);
     assert.ok(placesOnly.every((h) => h.mythCategory === 'places'));
 
     // Filter by shared theme 'الخوف من المجهول' (exists in both ghul and irm)
     const fearTheme = filterHooks(allHooks, 'all', 'الخوف من المجهول');
-    assert.equal(fearTheme.length, 6);
+    assert.equal(fearTheme.length, 3);
 
     // Filter by theme only in irm
     const prideTheme = filterHooks(allHooks, 'all', 'الكبرياء قبل السقوط');
-    assert.equal(prideTheme.length, 3);
+    assert.equal(prideTheme.length, 2);
     assert.ok(prideTheme.every((h) => h.mythName.includes('إرم')));
 
     // No matching combination
@@ -153,11 +148,11 @@ describe('studioHooks utilities', () => {
 
   test('formatHooksForExport generates plain-text list with hook + myth name', () => {
     const allHooks = getAggregatedHooks(mockStories, mockMyths);
-    const selected = [allHooks[0], allHooks[3]]; // one from ghul, one from irm
+    const selected = [allHooks[0], allHooks[1]]; // one from ghul, one from irm
 
     const exportText = formatHooksForExport(selected);
-    assert.ok(exportText.includes('ميكانيكا الشك: أي مرافق قد يكون غولاً — الغول'));
-    assert.ok(exportText.includes('بناء واستكشاف: مدينة تتغير هندستها مع الرمال — مدينة إرم ذات العماد'));
+    assert.ok(exportText.includes('راوٍ غير موثوق: الناجي الوحيد يُشكّ أنه غول — الغول'));
+    assert.ok(exportText.includes('المكتشف الأعمى: خريطة لا تُقرأ إلا باللمس — مدينة إرم ذات العماد'));
   });
 
   test('getAggregatedQuotes extracts quotes and resolves myth names', () => {

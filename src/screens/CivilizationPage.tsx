@@ -200,12 +200,14 @@ export const CivilizationPage: React.FC<CivilizationPageProps> = ({
           <span>{t('common.back')}</span>
         </button>
 
-        <span
-          style={{ color: tokens.textSecondary }}
-          className="text-xs font-mono opacity-80"
-        >
-          {civilization.latinName}
-        </span>
+        {civilization.latinName && (
+          <span
+            style={{ color: tokens.textSecondary }}
+            className="text-xs font-mono opacity-80"
+          >
+            {civilization.latinName}
+          </span>
+        )}
       </div>
 
       {/* 1) Header: name huge (display font), pills for era + region */}
@@ -415,7 +417,7 @@ export const CivilizationPage: React.FC<CivilizationPageProps> = ({
               <div className="space-y-1">
                 <div className="flex items-center gap-1.5 text-xs font-bold" style={{ color: tokens.deepAccent }}>
                   <Users size={14} />
-                  <span>{t('civ.economy')}</span>
+                  <span>{t('civ.society')}</span>
                 </div>
                 <p style={{ color: tokens.textPrimary }} className="text-sm font-['Cairo',sans-serif] leading-relaxed">
                   {civilization.society}
@@ -730,44 +732,44 @@ export const CivilizationPage: React.FC<CivilizationPageProps> = ({
               {civilization.legacy}
             </p>
           </div>
-
-          {/* Creator Export: Two buttons in a row */}
-          <div className="flex flex-row items-center gap-2.5 pt-1">
-            <button
-              type="button"
-              onClick={handleCopyJson}
-              style={{
-                backgroundColor: isDark ? 'rgba(74, 144, 217, 0.08)' : 'rgba(74, 144, 217, 0.06)',
-                borderColor: tokens.coolBlueAccent,
-                color: tokens.coolBlueAccent,
-                minHeight: '44px',
-              }}
-              className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border text-xs sm:text-sm font-bold transition-all duration-150 cursor-pointer min-h-[44px] hover:opacity-85 active:scale-98 font-['Cairo',sans-serif]"
-              title={t('article.copyJson')}
-            >
-              <FileCode size={16} />
-              <span>{t('article.copyJson')}</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={handleCopyNarrative}
-              style={{
-                backgroundColor: isDark ? 'rgba(74, 144, 217, 0.08)' : 'rgba(74, 144, 217, 0.06)',
-                borderColor: tokens.coolBlueAccent,
-                color: tokens.coolBlueAccent,
-                minHeight: '44px',
-              }}
-              className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border text-xs sm:text-sm font-bold transition-all duration-150 cursor-pointer min-h-[44px] hover:opacity-85 active:scale-98 font-['Cairo',sans-serif]"
-              title={t('civ.copyNarrative')}
-            >
-              <FileText size={16} />
-              {/* انسخ كنص سردي */}
-              <span>{t('civ.copyNarrative')}</span>
-            </button>
-          </div>
         </section>
       )}
+
+      {/* Creator Export: Two buttons in a row */}
+      <div className="flex flex-row items-center gap-2.5 pt-1">
+        <button
+          type="button"
+          onClick={handleCopyJson}
+          style={{
+            backgroundColor: isDark ? 'rgba(74, 144, 217, 0.08)' : 'rgba(74, 144, 217, 0.06)',
+            borderColor: tokens.coolBlueAccent,
+            color: tokens.coolBlueAccent,
+            minHeight: '44px',
+          }}
+          className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border text-xs sm:text-sm font-bold transition-all duration-150 cursor-pointer min-h-[44px] hover:opacity-85 active:scale-98 font-['Cairo',sans-serif]"
+          title={t('article.copyJson')}
+        >
+          <FileCode size={16} />
+          <span>{t('article.copyJson')}</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={handleCopyNarrative}
+          style={{
+            backgroundColor: isDark ? 'rgba(74, 144, 217, 0.08)' : 'rgba(74, 144, 217, 0.06)',
+            borderColor: tokens.coolBlueAccent,
+            color: tokens.coolBlueAccent,
+            minHeight: '44px',
+          }}
+          className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border text-xs sm:text-sm font-bold transition-all duration-150 cursor-pointer min-h-[44px] hover:opacity-85 active:scale-98 font-['Cairo',sans-serif]"
+          title={t('civ.copyNarrative')}
+        >
+          <FileText size={16} />
+          {/* انسخ كنص سردي */}
+          <span>{t('civ.copyNarrative')}</span>
+        </button>
+      </div>
 
       {/* 11) "صلة بالأساطير": chips linking relatedMyths ids to the Article screen */}
       {safeRelatedMyths.length > 0 && (

@@ -6,7 +6,7 @@
  * Discovers a random myth entry with an interactive card-flip transition.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Dices, Sparkles } from 'lucide-react';
 import { MythEntry } from '../../data/types';
 import { getAllEntries } from '../../data/seed';
@@ -25,19 +25,31 @@ export const SurpriseMeButton: React.FC<SurpriseMeButtonProps> = ({
   const { tokens, isDark } = useTheme();
   const { t, dir } = useI18n();
   const [isFlipping, setIsFlipping] = useState(false);
+  const flipTimerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (flipTimerRef.current !== null && typeof window !== 'undefined') {
+        window.clearTimeout(flipTimerRef.current);
+      }
+    };
+  }, []);
 
   const handleSurprise = () => {
     if (isFlipping) return;
-    setIsFlipping(true);
 
-    const entries = getAllEntries();
-    if (!entries || entries.length === 0) return;
+    const entries = (getAllEntries() ?? []).filter(Boolean);
+    if (entries.length === 0) return;
 
     const randomIndex = Math.floor(Math.random() * entries.length);
     const selected = entries[randomIndex];
+    if (!selected) return;
+
+    setIsFlipping(true);
 
     // Card-flip transition timing
-    setTimeout(() => {
+    flipTimerRef.current = window.setTimeout(() => {
+      flipTimerRef.current = null;
       setIsFlipping(false);
       onSelectEntry(selected);
     }, 450);

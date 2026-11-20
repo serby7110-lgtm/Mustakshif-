@@ -44,7 +44,12 @@ export function toLibraryMythEntry(entry: LongFormEntryData): MythEntry {
     latinName: entry.latinName,
     category: entry.categoryKey || 'personalities',
     typeLabel: entry.entryType,
-    heroImage: entry.heroImage.startsWith('/') ? entry.heroImage : `/${entry.heroImage}`,
+    heroImage:
+      typeof entry?.heroImage === 'string' && entry.heroImage.trim()
+        ? entry.heroImage.startsWith('/')
+          ? entry.heroImage
+          : `/${entry.heroImage}`
+        : '',
     summary: entry.summary,
     body: entry.body || [],
     sources: entry.sources || [],
@@ -65,11 +70,12 @@ export function toLibraryMythEntry(entry: LongFormEntryData): MythEntry {
 }
 
 export function isChapterUnlocked(
-  entry: LongFormEntryData,
+  entry: LongFormEntryData | null | undefined,
   chapterIndex: number,
   hasPremiumMonthly: boolean
 ): boolean {
+  if (!entry || !Array.isArray(entry.chapters)) return false;
   const ch = entry.chapters[chapterIndex];
   if (!ch) return false;
-  return ch.index === 0 || ch.isFree || !entry.isPremium || hasPremiumMonthly;
+  return ch.index === 0 || Boolean(ch.isFree) || !entry.isPremium || hasPremiumMonthly;
 }

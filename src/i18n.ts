@@ -21,10 +21,10 @@ export interface AppLanguageOption {
 }
 
 export const APP_LANGUAGES: AppLanguageOption[] = [
-  { code: 'ar', lang: 'ar', label: 'العربية', nativeName: 'العربية', flag: '🇹🇳', dir: 'rtl' },
-  { code: 'en', lang: 'en', label: 'English', nativeName: 'English', flag: '🇬🇧', dir: 'ltr' },
-  { code: 'id', lang: 'id', label: 'Bahasa Indonesia', nativeName: 'Bahasa Indonesia', flag: '🇮🇩', dir: 'ltr' },
-  { code: 'th', lang: 'th', label: 'ไทย', nativeName: 'ไทย', flag: '🇹🇭', dir: 'ltr' },
+  { code: 'ar', lang: 'ar', label: 'العربية', nativeName: 'العربية', flag: 'AR', dir: 'rtl' },
+  { code: 'en', lang: 'en', label: 'English', nativeName: 'English', flag: 'EN', dir: 'ltr' },
+  { code: 'id', lang: 'id', label: 'Bahasa Indonesia', nativeName: 'Bahasa Indonesia', flag: 'ID', dir: 'ltr' },
+  { code: 'th', lang: 'th', label: 'ไทย', nativeName: 'ไทย', flag: 'TH', dir: 'ltr' },
 ];
 
 export function normalizeLang(raw?: string | null): AppLang {

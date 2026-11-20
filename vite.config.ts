@@ -7,9 +7,32 @@ export default defineConfig(() => {
   return {
     plugins: [react({ include: /\.(jsx|js|tsx|ts)$/ }), tailwindcss()],
     resolve: {
+      dedupe: [
+        'react',
+        'react-dom',
+        'react/jsx-runtime',
+        'react/jsx-dev-runtime',
+        'react-i18next',
+        'i18next',
+        'lucide-react',
+      ],
       alias: {
         '@': path.resolve(import.meta.dirname ?? '.', '.'),
       },
+    },
+    optimizeDeps: {
+      include: [
+        'react',
+        'react-dom',
+        'react-dom/client',
+        'react/jsx-runtime',
+        'react/jsx-dev-runtime',
+        'react-i18next',
+        'i18next',
+        'i18next-browser-languagedetector',
+        'lucide-react',
+        'motion',
+      ],
     },
     server: {
       // HMR is disabled in AI Studio via DISABLE_HMR env var.

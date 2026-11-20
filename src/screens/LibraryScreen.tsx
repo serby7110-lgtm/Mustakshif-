@@ -24,13 +24,16 @@ import {
   Clock,
   BookMarked,
   Wand2,
+  Bookmark,
 } from 'lucide-react';
 
 import { Card } from '../components/primitives/Card';
 import { StudioScreen } from './StudioScreen';
 import { MythEntry } from '../data/types';
-import mythsData from '../data/myths.json';
+import { getAllEntries } from '../data/seed';
 import { LONG_FORM_ENTRIES, toLibraryMythEntry } from '../data/longForm';
+import { CONTENT_CATALOG } from '../content/catalog';
+import type { ContentType } from '../content/catalogTypes';
 import { hasDeepStory } from '../data/storyTypes';
 import { getEstimatedReadingTime, formatReadingTime } from '../utils/readingTime';
 import { normalizeArabic } from '../utils/arabicSearch';
@@ -61,6 +64,8 @@ export interface LibraryScreenProps {
 
 export const LibraryScreen: React.FC<LibraryScreenProps> = ({
   onSelectEntry,
+  savedIds,
+  historyIds,
   isPremiumActive,
 }) => {
   const { t, lang, dir } = useI18n();
@@ -89,15 +94,26 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
   // Reading status filter: 'all' | 'unread' | 'reading' | 'completed'
   const [statusFilter, setStatusFilter] = useState<ReadingStatusFilter>('all');
 
+  // Favorites filter & content type filter
+  const [onlyFavorites, setOnlyFavorites] = useState(false);
+  const [contentTypeFilter, setContentTypeFilter] = useState<ContentType | 'all'>('all');
+
   // Local reading progress map
   const [progressMap, setProgressMap] = useState<Record<string, number>>(() =>
     storage.getAllMythProgress()
   );
 
-  // Sync progress on component mount/focus
+  // Sync progress on component mount, navigation state changes, and window focus
   useEffect(() => {
-    setProgressMap(storage.getAllMythProgress());
-  }, []);
+    const syncProgress = () => setProgressMap(storage.getAllMythProgress());
+    syncProgress();
+    window.addEventListener('focus', syncProgress);
+    window.addEventListener('storage', syncProgress);
+    return () => {
+      window.removeEventListener('focus', syncProgress);
+      window.removeEventListener('storage', syncProgress);
+    };
+  }, [savedIds, historyIds]);
 
   // Update view mode with storage persistence
   const handleToggleViewMode = (mode: ViewMode) => {
@@ -105,14 +121,22 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
     storage.setLibraryViewMode(mode);
   };
 
-  // All raw entries from myths.json merged with long-form entries
+  // All raw entries merged from seed.ts (including 5 public-domain stories) & long-form entries
   const rawAllMyths = useMemo(() => {
-    const base = Array.isArray(mythsData) ? (mythsData as unknown as MythEntry[]) : [];
+    const base = getAllEntries();
     const seen = new Set(base.map((m) => m?.id).filter((id): id is string => Boolean(id)));
     const longFormExtras = (Array.isArray(LONG_FORM_ENTRIES) ? LONG_FORM_ENTRIES : [])
       .filter((lf) => lf?.id && !seen.has(lf.id))
       .map(toLibraryMythEntry);
     return [...base.filter(Boolean), ...longFormExtras];
+  }, []);
+
+  const contentTypeById = useMemo(() => {
+    const map = new Map<string, ContentType>();
+    for (const item of CONTENT_CATALOG) {
+      map.set(item.id, item.type);
+    }
+    return map;
   }, []);
 
   const rawById = useMemo(() => {
@@ -173,10 +197,18 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
     });
   }, [allMyths, rawById, debouncedSearchQuery]);
 
-  // Status filtering
+  // Status + Favorites + Content Type filtering
   const statusFilteredMyths = useMemo(() => {
-    return filterMythsByReadingStatus(searchFilteredMyths, statusFilter, progressMap);
-  }, [searchFilteredMyths, statusFilter, progressMap]);
+    let result = filterMythsByReadingStatus(searchFilteredMyths, statusFilter, progressMap);
+    if (onlyFavorites) {
+      const favSet = new Set(savedIds ?? []);
+      result = result.filter((m) => favSet.has(m.id));
+    }
+    if (contentTypeFilter !== 'all') {
+      result = result.filter((m) => (contentTypeById.get(m.id) ?? 'myth') === contentTypeFilter);
+    }
+    return result;
+  }, [searchFilteredMyths, statusFilter, progressMap, onlyFavorites, savedIds, contentTypeFilter, contentTypeById]);
 
   // Sorting
   const finalSortedMyths = useMemo(() => {
@@ -186,15 +218,18 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
   // Reset pagination to first 20 items whenever filter/sort/search changes
   useEffect(() => {
     setVisibleCount(PAGE_SIZE);
-  }, [debouncedSearchQuery, statusFilter, sortBy]);
+  }, [debouncedSearchQuery, statusFilter, sortBy, onlyFavorites, contentTypeFilter]);
 
-  // Auto load next 20 items on window scroll
+  // Auto load next 20 items on <main> or window scroll
   useEffect(() => {
+    const mainEl = document.querySelector('main');
     const handleScroll = () => {
-      if (
-        window.innerHeight + window.scrollY >=
-        document.documentElement.scrollHeight - 300
-      ) {
+      const mainScrolls = mainEl && mainEl.scrollHeight > mainEl.clientHeight + 2;
+      const reachedBottom = mainScrolls
+        ? mainEl.scrollTop + mainEl.clientHeight >= mainEl.scrollHeight - 300
+        : window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 300;
+
+      if (reachedBottom) {
         setVisibleCount((prev) => {
           if (prev >= finalSortedMyths.length) return prev;
           return Math.min(prev + PAGE_SIZE, finalSortedMyths.length);
@@ -202,8 +237,16 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
       }
     };
 
+    if (mainEl) {
+      mainEl.addEventListener('scroll', handleScroll, { passive: true });
+    }
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      if (mainEl) {
+        mainEl.removeEventListener('scroll', handleScroll);
+      }
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, [finalSortedMyths.length]);
 
   // Paginated visible slice of myths
@@ -409,6 +452,45 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
             <span>{t('library.statusCompleted')}</span>
             <span className="text-[10px] ms-1 opacity-80">({statusCounts.completed})</span>
           </button>
+
+          <button
+            type="button"
+            data-testid="library-favorites-filter"
+            onClick={() => setOnlyFavorites((v) => !v)}
+            style={{
+              backgroundColor: onlyFavorites ? tokens.primaryMint : tokens.card,
+              color: onlyFavorites ? '#0E5C4D' : tokens.textSecondary,
+              borderColor: onlyFavorites ? tokens.primaryMint : tokens.border,
+            }}
+            className="shrink-0 px-3 py-1.5 rounded-2xl text-xs font-bold border transition-all cursor-pointer hover:opacity-90 active:scale-95 flex items-center gap-1"
+          >
+            <Bookmark size={12} className={onlyFavorites ? 'fill-current' : ''} />
+            <span>{t('library.favoritesFilter')}</span>
+            <span className="text-[10px] ms-1 opacity-80">({(savedIds ?? []).length})</span>
+          </button>
+        </div>
+
+        {/* Content Type Filter Chips (الكل | قصة | أسطورة | كوسمولوجيا | فلكلور) */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar -mx-1 px-1">
+          {(['all', 'story', 'myth', 'cosmology', 'folklore'] as const).map((tp) => {
+            const active = contentTypeFilter === tp;
+            return (
+              <button
+                key={tp}
+                type="button"
+                data-testid={`library-type-filter-${tp}`}
+                onClick={() => setContentTypeFilter(tp)}
+                style={{
+                  backgroundColor: active ? tokens.coolBlueTint : tokens.card,
+                  color: active ? tokens.coolBlueAccent : tokens.textSecondary,
+                  borderColor: active ? tokens.coolBlueAccent : tokens.borderSubtle,
+                }}
+                className="shrink-0 px-3 py-1 rounded-full text-[11px] font-bold border transition-all cursor-pointer min-h-[32px]"
+              >
+                {t(`contentTypes.${tp}`)}
+              </button>
+            );
+          })}
         </div>
 
         {/* Sort & View Mode Row */}
@@ -502,6 +584,8 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
             onClick={() => {
               setSearchQuery('');
               setStatusFilter('all');
+              setOnlyFavorites(false);
+              setContentTypeFilter('all');
             }}
             style={{
               backgroundColor: tokens.deepAccent,
